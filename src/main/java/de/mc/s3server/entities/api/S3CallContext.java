@@ -15,6 +15,7 @@ public interface S3CallContext {
 
     S3RequestParams getParams();
 
+
     void setResponseHeader(S3ResponseHeader responseHeader);
 
     SecurityContext getSecurityContext();

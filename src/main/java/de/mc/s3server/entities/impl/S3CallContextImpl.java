@@ -43,7 +43,7 @@ public class S3CallContextImpl implements S3CallContext {
 
     @Override
     public S3RequestParams getParams() {
-        return null;
+        return params;
     }
 
     public SecurityContext getSecurityContext() {

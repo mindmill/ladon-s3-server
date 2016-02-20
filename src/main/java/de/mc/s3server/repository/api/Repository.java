@@ -32,6 +32,8 @@ public interface Repository {
 
     S3Object getObject(S3CallContext callContext, String bucketName, String objectKey);
 
+    List<S3Object> listBucket(S3CallContext callContext, String bucketName);
+
     void deleteObject(S3CallContext callContext, String bucketName, String objectKey);
 
     S3Metadata getObjectMetadata(S3CallContext callContext, String bucketName, String objectKey);

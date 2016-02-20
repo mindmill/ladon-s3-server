@@ -6,13 +6,13 @@ package de.mc.s3server.repository.impl;
 
 import de.mc.s3server.entities.api.*;
 import de.mc.s3server.entities.impl.S3BucketImpl;
+import de.mc.s3server.entities.impl.S3MetadataImpl;
+import de.mc.s3server.entities.impl.S3ObjectImpl;
+import de.mc.s3server.entities.impl.S3UserImpl;
 import de.mc.s3server.repository.api.Repository;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Ralf Ulrich on 17.02.16.
@@ -21,15 +21,22 @@ import java.util.Map;
 public class TestRepository implements Repository {
 
     private Map<String, List<S3Bucket>> buckets = new HashMap<>();
+    private Map<String, List<S3Object>> objects = new HashMap<>();
 
     public TestRepository() {
         List<S3Bucket> testBuckets = new ArrayList<>();
         testBuckets.add(new S3BucketImpl("testbucket"));
         testBuckets.add(new S3BucketImpl("testbucket2"));
         testBuckets.add(new S3BucketImpl("testbucket3"));
-
-
         buckets.put("max", testBuckets);
+
+        List<S3Object> testObjects = new ArrayList<>();
+        testObjects.add(new S3ObjectImpl("/file1.txt", new Date(), "testbucket", 1000L, new S3UserImpl("max", "Max Mustershit"), new S3MetadataImpl(), null));
+        testObjects.add(new S3ObjectImpl("/file2.txt", new Date(), "testbucket", 1000L, new S3UserImpl("max", "Max Mustershit"), new S3MetadataImpl(), null));
+        testObjects.add(new S3ObjectImpl("/file3.txt", new Date(), "testbucket", 1000L, new S3UserImpl("max", "Max Mustershit"), new S3MetadataImpl(), null));
+        objects.put("testbucket", testObjects);
+
+
     }
 
     @Override
@@ -75,6 +82,12 @@ public class TestRepository implements Repository {
     @Override
     public S3Object getObject(S3CallContext callContext, String bucketName, String objectKey) {
         return null;
+    }
+
+
+    @Override
+    public List<S3Object> listBucket(S3CallContext callContext, String bucketName) {
+        return objects.getOrDefault(bucketName, new ArrayList<>());
     }
 
     @Override
