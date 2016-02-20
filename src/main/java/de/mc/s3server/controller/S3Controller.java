@@ -36,7 +36,7 @@ public class S3Controller {
      * @param callContext
      * @return
      */
-    @RequestMapping(value = "/", method = RequestMethod.GET, produces = MediaType.APPLICATION_XML_VALUE)
+    @RequestMapping(value = {"" , "/"} , method = RequestMethod.GET, produces = MediaType.APPLICATION_XML_VALUE)
     public ListAllMyBucketsResult listAllMyBucketsResult(S3CallContext callContext) {
         return ResponseWrapper.listAllMyBucketsResult(new S3UserImpl("maxid", "max"), repository.listAllBuckets(callContext));
     }
