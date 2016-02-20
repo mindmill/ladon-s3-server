@@ -10,6 +10,7 @@ package de.mc.s3server.exceptions;
 public class BadDigestException extends S3ServerException {
 
     public BadDigestException() {
+        super("The Content-MD5 you specified did not match what we received.");
     }
 
     public BadDigestException(String message) {

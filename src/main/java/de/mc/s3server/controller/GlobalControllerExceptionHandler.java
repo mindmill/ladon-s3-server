@@ -4,10 +4,12 @@
 
 package de.mc.s3server.controller;
 
+import de.mc.s3server.controller.response.entities.Error;
 import de.mc.s3server.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
@@ -27,7 +29,9 @@ public class GlobalControllerExceptionHandler {
             NotSignedUpException.class,
             RequestTimeTooSkewedException.class,
             SignatureDoesNotMatchException.class})
-    public void handleForbidden() {
+    @ResponseBody
+    public Error handleForbidden(S3ServerException e) {
+        return new Error(e);
     }
 
 
@@ -39,7 +43,9 @@ public class GlobalControllerExceptionHandler {
             InvalidBucketStateException.class,
             OperationAbortedException.class,
             RestoreAlreadyInProgressException.class})
-    public void handleConflict() {
+    @ResponseBody
+    public Error handleConflict(S3ServerException e) {
+        return new Error(e);
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
@@ -87,24 +93,31 @@ public class GlobalControllerExceptionHandler {
             UnresolvableGrantByEmailAddressException.class,
             UserKeyMustBeSpecifiedException.class
     })
-    public void handleBadRequest() {
+    @ResponseBody
+    public Error handleBadRequest(S3ServerException e) {
+        return new Error(e);
     }
 
 
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(InternalErrorException.class)
-    public void handleInternalError() {
+    @ResponseBody
+    public Error handleInternalError(S3ServerException e) {
+        return new Error(e);
     }
 
 
     @ResponseStatus(value = HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
     @ExceptionHandler(InvalidRangeException.class)
-    public void handleInvalidRange() {
+    public Error handleInvalidRange(S3ServerException e) {
+        return new Error(e);
     }
 
     @ResponseStatus(value = HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(MethodNotAllowedException.class)
-    public void handleMethodNotAllowed() {
+    @ResponseBody
+    public Error handleMethodNotAllowed(S3ServerException e) {
+        return new Error(e);
     }
 
     @ResponseStatus(value = HttpStatus.LENGTH_REQUIRED)
@@ -121,37 +134,50 @@ public class GlobalControllerExceptionHandler {
             NoSuchVersionException.class,
             NoSuchBucketPolicyException.class
     })
-    public void handleNotFound() {
+    @ResponseBody
+    public Error handleNotFound(S3ServerException e) {
+        return new Error(e);
     }
 
     @ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED)
     @ExceptionHandler(NotImplementedException.class)
-    public void handleNotImplemented() {
+    @ResponseBody
+    public Error handleNotImplemented(S3ServerException e) {
+        return new Error(e);
     }
 
     @ResponseStatus(value = HttpStatus.PERMANENT_REDIRECT)
     @ExceptionHandler(PermanentRedirectException.class)
-    public void handlePermanentRedirect() {
+    public Error handlePermanentRedirect(S3ServerException e) {
+        return new Error(e);
     }
 
     @ResponseStatus(value = HttpStatus.TEMPORARY_REDIRECT)
     @ExceptionHandler(RedirectException.class)
-    public void handleTempRedirect() {
+    @ResponseBody
+    public Error handleTempRedirect(S3ServerException e) {
+        return new Error(e);
     }
 
     @ResponseStatus(value = HttpStatus.PRECONDITION_FAILED)
     @ExceptionHandler(PreconditionFailedException.class)
-    public void handlePreconditionFailed() {
+    @ResponseBody
+    public Error handlePreconditionFailed(S3ServerException e) {
+        return new Error(e);
     }
 
     @ResponseStatus(value = HttpStatus.SERVICE_UNAVAILABLE)
     @ExceptionHandler(ServiceUnavailableException.class)
-    public void handleServiceUnavailable() {
+    @ResponseBody
+    public Error handleServiceUnavailable(S3ServerException e) {
+        return new Error(e);
     }
 
     @ResponseStatus(value = HttpStatus.TOO_MANY_REQUESTS)
     @ExceptionHandler(SlowDownException.class)
-    public void handleTooManyRequests() {
+    @ResponseBody
+    public Error handleTooManyRequests(S3ServerException e) {
+        return new Error(e);
     }
 
 
