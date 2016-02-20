@@ -5,9 +5,9 @@
 package de.mc.s3server.common;
 
 /**
- * Created by max on 17.02.16.
+ * Created by Ralf Ulrich on 17.02.16.
  */
-public interface S3Header {
+public interface S3HeaderConstants {
 
     /**
      * Length of the message (without the headers) according to RFC

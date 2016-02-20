@@ -4,8 +4,14 @@
 
 package de.mc.s3server.entities.api;
 
+import org.springframework.security.core.context.SecurityContext;
+
 /**
- * Created by max on 17.02.16.
+ * Created by Ralf Ulrich on 17.02.16.
  */
 public interface S3CallContext {
+
+    S3RequestHeader getHeader();
+
+    SecurityContext getSecurityContext();
 }

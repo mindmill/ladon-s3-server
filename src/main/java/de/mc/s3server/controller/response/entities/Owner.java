@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Created by max on 17.02.16.
+ * Created by Ralf Ulrich on 17.02.16.
  */
 @XmlRootElement(name = "Owner")
 public class Owner {

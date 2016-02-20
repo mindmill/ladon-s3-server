@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by max on 17.02.16.
+ * Created by Ralf Ulrich on 17.02.16.
  */
 @org.springframework.stereotype.Repository
 public class TestRepository implements Repository {

@@ -5,7 +5,7 @@
 package de.mc.s3server.exceptions;
 
 /**
- * Created by max on 17.02.16.
+ * Created by Ralf Ulrich on 17.02.16.
  */
 public class ObjectAlreadyExsistsException extends RuntimeException {
 }

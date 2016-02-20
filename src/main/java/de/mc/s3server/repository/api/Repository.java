@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
- * Created by max on 17.02.16.
+ * Created by Ralf Ulrich on 17.02.16.
  */
 public interface Repository {
 

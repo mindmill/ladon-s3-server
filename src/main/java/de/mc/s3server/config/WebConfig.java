@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import java.util.List;
 
 /**
- * Created by max on 14.02.16.
+ * Created by Ralf Ulrich on 14.02.16.
  */
 @Configuration
 public class WebConfig extends WebMvcConfigurerAdapter {

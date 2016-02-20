@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 
 /**
- * Created by max on 17.02.16.
+ * Created by Ralf Ulrich on 17.02.16.
  */
 @XmlRootElement(name = "Bucket")
 public class Bucket {

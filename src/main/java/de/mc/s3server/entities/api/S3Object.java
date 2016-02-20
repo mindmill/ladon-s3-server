@@ -7,7 +7,7 @@ package de.mc.s3server.entities.api;
 import java.io.InputStream;
 
 /**
- * Created by max on 17.02.16.
+ * Created by Ralf Ulrich on 17.02.16.
  */
 public interface S3Object {
 

@@ -7,7 +7,7 @@ package de.mc.s3server.entities.impl;
 import de.mc.s3server.entities.api.S3User;
 
 /**
- * Created by max on 17.02.16.
+ * Created by Ralf Ulrich on 17.02.16.
  */
 public class S3UserImpl implements S3User {
 

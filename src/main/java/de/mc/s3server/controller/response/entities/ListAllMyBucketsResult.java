@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 /**
- * Created by max on 17.02.16.
+ * Created by Ralf Ulrich on 17.02.16.
  */
 @XmlRootElement(name = "ListAllMyBucketsResult")
 public class ListAllMyBucketsResult {
