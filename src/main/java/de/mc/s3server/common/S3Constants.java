@@ -7,7 +7,7 @@ package de.mc.s3server.common;
 /**
  * Created by Ralf Ulrich on 17.02.16.
  */
-public interface S3HeaderConstants {
+public interface S3Constants {
 
     /**
      * Length of the message (without the headers) according to RFC
@@ -166,5 +166,47 @@ public interface S3HeaderConstants {
         open, close
     }
 
+    /**
+     * A delimiter is a character you use to group keys.
+     * All keys that contain the same string between the prefix , if specified, and
+     * the first occurrence of the delimiter after the prefix are grouped under a single
+     * result element, CommonPrefixes . If you don't specify the prefix parameter,
+     * then the substring starts at the beginning of the key. The keys that are grouped
+     * under CommonPrefixes result element are not returned elsewhere in the re-
+     * sponse.
+     */
+    String DELIMITER = "delimiter";
+
+
+    /**
+     * Requests Amazon S3 to encode the response and specifies the encoding method to use.
+     * An object key can contain any Unicode character; however, XML 1.0 parser
+     * cannot parse some characters, such as characters with an ASCII value from
+     * 0 to 10. For characters that are not supported in XML 1.0, you can add this
+     * parameter to request that Amazon S3 encode the keys in the response.
+     */
+    String ENCODING_TYPE = "encoding-type";
+
+    /**
+     * Specifies the key to start with when listing objects in a bucket. Amazon S3
+     * returns object keys in alphabetical order, starting with key after the marker in
+     * order.
+     */
+    String MARKER = "marker";
+
+    /**
+     * Sets the maximum number of keys returned in the response body. You can
+     * add this to your request if you want to retrieve fewer than the default 1000
+     * keys.
+     */
+    String MAX_KEYS = "max-keys";
+
+    /**
+     * Limits the response to keys that begin with the specified prefix. You can use
+     * prefixes to separate a bucket into different groupings of keys. (You can think
+     * of using prefix to make groups in the same way you'd use a folder in a file
+     * system.)
+     */
+    String PREFIX = "prefix";
 
 }

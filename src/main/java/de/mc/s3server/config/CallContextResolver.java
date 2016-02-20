@@ -14,6 +14,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by Ralf Ulrich on 14.02.16.
@@ -26,6 +27,6 @@ public class CallContextResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
-        return new S3CallContextImpl(SecurityContextHolder.getContext(), nativeWebRequest.getNativeRequest(HttpServletRequest.class));
+        return new S3CallContextImpl(SecurityContextHolder.getContext(), nativeWebRequest.getNativeRequest(HttpServletRequest.class), nativeWebRequest.getNativeResponse(HttpServletResponse.class), nativeWebRequest.getParameterMap());
     }
 }

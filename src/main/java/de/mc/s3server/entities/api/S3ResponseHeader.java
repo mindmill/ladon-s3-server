@@ -4,7 +4,7 @@
 
 package de.mc.s3server.entities.api;
 
-import de.mc.s3server.common.S3HeaderConstants;
+import de.mc.s3server.common.S3Constants;
 import org.springframework.util.MimeType;
 
 import java.util.Date;
@@ -37,7 +37,7 @@ public interface S3ResponseHeader {
      *
      * @param connection specifies whether the connection to the server is open or closed.
      */
-    void setConnection(S3HeaderConstants.Connection connection);
+    void setConnection(S3Constants.Connection connection);
 
 
     /**

@@ -8,7 +8,7 @@ import de.mc.s3server.entities.api.S3RequestHeader;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static de.mc.s3server.common.S3HeaderConstants.*;
+import static de.mc.s3server.common.S3Constants.*;
 
 /**
  * Created by Ralf Ulrich on 20.02.16.
