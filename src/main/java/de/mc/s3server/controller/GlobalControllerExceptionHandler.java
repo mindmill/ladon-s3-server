@@ -109,6 +109,7 @@ public class GlobalControllerExceptionHandler {
 
     @ResponseStatus(value = HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
     @ExceptionHandler(InvalidRangeException.class)
+    @ResponseBody
     public Error handleInvalidRange(S3ServerException e) {
         return new Error(e);
     }
