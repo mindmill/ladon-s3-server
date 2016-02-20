@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Ralf Ulrich on 17.02.16.
  */
-public class RepositoryMapper {
+public class ResponseWrapper {
 
     public static ListAllMyBucketsResult listAllMyBucketsResult(S3User user, List<S3Bucket> buckets) {
         ListAllMyBucketsResult result = new ListAllMyBucketsResult(new Owner(user.getUserID(), user.getUserName()));
