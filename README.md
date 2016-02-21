@@ -1,4 +1,4 @@
-## !this project needs more testing and is not production ready yet
+!early project stage
 # Java S3 Server API
 ( with Spring Boot )
 
