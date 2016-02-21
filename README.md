@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/mindmill/s3-java-server.svg?branch=master)](https://travis-ci.org/mindmill/s3-java-server)
+
 !early project stage
 # Java S3 Server API
 Build your own S3 Server and keep your data safe! 
