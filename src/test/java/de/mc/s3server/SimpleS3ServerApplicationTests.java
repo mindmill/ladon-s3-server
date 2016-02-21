@@ -36,7 +36,7 @@ public class SimpleS3ServerApplicationTests {
     }
 
 
-    @Test
+    //@Test
     public void testListBuckets() {
         AmazonS3Client client = getClient();
         System.out.println(client.listBuckets());
