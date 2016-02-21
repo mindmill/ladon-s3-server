@@ -6,7 +6,6 @@ package de.mc.s3server.entities.impl;
 
 import de.mc.s3server.entities.api.*;
 import de.mc.s3server.exceptions.InternalErrorException;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.util.StreamUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,14 +20,13 @@ import java.util.UUID;
  */
 public class S3CallContextImpl implements S3CallContext {
 
-    private SecurityContext securityContext;
+
     private HttpServletResponse response;
     private S3RequestHeader header;
     private S3RequestParams params;
     private String requestId = UUID.randomUUID().toString();
 
-    public S3CallContextImpl(SecurityContext securityContext, HttpServletRequest request, HttpServletResponse response, Map<String, String[]> params) {
-        this.securityContext = securityContext;
+    public S3CallContextImpl(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> params) {
         this.header = new S3RequestHeaderImpl(request);
         this.params = new S3RequestParamsImpl(params);
         this.response = response;
@@ -43,9 +41,10 @@ public class S3CallContextImpl implements S3CallContext {
     public S3RequestId getRequestId() {
         return () -> requestId;
     }
+
     @Override
     public void setContent(InputStream inputStream) {
-        try(InputStream in = inputStream) {
+        try (InputStream in = inputStream) {
             StreamUtils.copy(in, response.getOutputStream());
             response.flushBuffer();
         } catch (IOException e) {
@@ -63,7 +62,4 @@ public class S3CallContextImpl implements S3CallContext {
         return params;
     }
 
-    public SecurityContext getSecurityContext() {
-        return securityContext;
-    }
 }

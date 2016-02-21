@@ -4,8 +4,6 @@
 
 package de.mc.s3server.entities.api;
 
-import org.springframework.security.core.context.SecurityContext;
-
 import java.io.InputStream;
 
 /**
@@ -23,5 +21,4 @@ public interface S3CallContext {
 
     void setResponseHeader(S3ResponseHeader responseHeader);
 
-    SecurityContext getSecurityContext();
 }

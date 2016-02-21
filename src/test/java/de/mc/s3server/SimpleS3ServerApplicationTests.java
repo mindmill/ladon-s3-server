@@ -9,6 +9,7 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.S3ClientOptions;
+import com.amazonaws.services.s3.model.Bucket;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.IntegrationTest;
@@ -16,26 +17,30 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.util.List;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = SimpleS3ServerApplication.class)
 @WebAppConfiguration
 @IntegrationTest("server.port:8080")
 public class SimpleS3ServerApplicationTests {
 
-	@Test
-	public void contextLoads() {
+    @Test
+    public void contextLoads() {
 
-	}
+    }
 
 
-	@Test
-	public void testListBuckets() {
+    @Test
+    public void testListBuckets() {
         AmazonS3Client client = getClient();
-        System.out.println( client.listBuckets());
+        System.out.println(client.listBuckets());
 
- 	}
-
-
+        List<Bucket> buckets = client.listBuckets();
+        buckets.forEach(b ->
+                System.out.println(client.listObjects(b.getName()))
+        );
+    }
 
 
     public AmazonS3Client getClient() {

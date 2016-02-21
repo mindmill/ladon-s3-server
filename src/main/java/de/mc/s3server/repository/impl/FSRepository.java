@@ -12,7 +12,6 @@ import org.springframework.util.MimeType;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileOwnerAttributeView;
@@ -57,10 +56,7 @@ public class FSRepository implements S3Repository {
 
     }
 
-    @Override
-    public S3Bucket getBucket(S3CallContext callContext, String bucketName) {
-        return null;
-    }
+
 
     @Override
     public void deleteBucket(S3CallContext callContext, String bucketName) {
@@ -98,10 +94,6 @@ public class FSRepository implements S3Repository {
 
     }
 
-    @Override
-    public void putContent(S3CallContext callContext, String bucketNAme, String objectKey, InputStream contentStream) {
-
-    }
 
     @Override
     public S3Object getObject(S3CallContext callContext, String bucketName, String objectKey) {
@@ -195,25 +187,7 @@ public class FSRepository implements S3Repository {
         return null;
     }
 
-    @Override
-    public void setBucketACL(S3CallContext callContext, String buckeName, S3ACL bucketACL) {
 
-    }
-
-    @Override
-    public S3ACL getBucketACL(S3CallContext callContext, String bucketName) {
-        return null;
-    }
-
-    @Override
-    public void setObjectACL(S3CallContext callContext, String bucketName, String objectKey) {
-
-    }
-
-    @Override
-    public S3ACL getObjectACL(S3CallContext callContext, String bucketName, String objectKey) {
-        return null;
-    }
 
 
 }
