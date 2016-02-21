@@ -4,15 +4,13 @@
 
 package de.mc.s3server.entities.impl;
 
-import de.mc.s3server.entities.api.S3CallContext;
-import de.mc.s3server.entities.api.S3RequestHeader;
-import de.mc.s3server.entities.api.S3RequestParams;
-import de.mc.s3server.entities.api.S3ResponseHeader;
+import de.mc.s3server.entities.api.*;
 import org.springframework.security.core.context.SecurityContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by Ralf Ulrich on 17.02.16.
@@ -23,6 +21,7 @@ public class S3CallContextImpl implements S3CallContext {
     private HttpServletResponse response;
     private S3RequestHeader header;
     private S3RequestParams params;
+    private String requestId = UUID.randomUUID().toString();
 
     public S3CallContextImpl(SecurityContext securityContext, HttpServletRequest request, HttpServletResponse response, Map<String, String[]> params) {
         this.securityContext = securityContext;
@@ -34,6 +33,11 @@ public class S3CallContextImpl implements S3CallContext {
     @Override
     public void setResponseHeader(S3ResponseHeader responseHeader) {
         S3ResponseHeaderImpl.appendHeaderToResponse(response, (S3ResponseHeaderImpl) responseHeader);
+    }
+
+    @Override
+    public S3RequestId getRequestId() {
+        return () -> requestId;
     }
 
     @Override

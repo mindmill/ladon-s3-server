@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class MethodNotAllowedException extends S3ServerException {
-    public MethodNotAllowedException() {
-        super("The specified method is not allowed against this resource.");
+    public MethodNotAllowedException(String resource, S3RequestId requestId) {
+        super("The specified method is not allowed against this resource.", resource, requestId);
     }
 
-    public MethodNotAllowedException(String message) {
-        super(message);
-    }
 
-    public MethodNotAllowedException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public MethodNotAllowedException(Throwable cause) {
-        super(cause);
-    }
-
-    public MethodNotAllowedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

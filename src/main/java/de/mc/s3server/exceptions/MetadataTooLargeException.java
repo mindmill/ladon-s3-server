@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class MetadataTooLargeException extends S3ServerException {
-    public MetadataTooLargeException() {
-        super("Your metadata headers exceed the maximum allowed metadata size.");
+    public MetadataTooLargeException(String resource, S3RequestId requestId) {
+        super("Your metadata headers exceed the maximum allowed metadata size.", resource, requestId);
     }
 
-    public MetadataTooLargeException(String message) {
-        super(message);
-    }
 
-    public MetadataTooLargeException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public MetadataTooLargeException(Throwable cause) {
-        super(cause);
-    }
-
-    public MetadataTooLargeException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

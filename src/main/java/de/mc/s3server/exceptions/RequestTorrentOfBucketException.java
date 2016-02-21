@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
-public class RequestTorrentOfBucketException extends S3ServerException{
-    public RequestTorrentOfBucketException() {
-        super("Buckets don't have torrent files.");
+public class RequestTorrentOfBucketException extends S3ServerException {
+    public RequestTorrentOfBucketException(String resource, S3RequestId requestId) {
+        super("Buckets don't have torrent files.", resource, requestId);
     }
 
-    public RequestTorrentOfBucketException(String message) {
-        super(message);
-    }
 
-    public RequestTorrentOfBucketException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public RequestTorrentOfBucketException(Throwable cause) {
-        super(cause);
-    }
-
-    public RequestTorrentOfBucketException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

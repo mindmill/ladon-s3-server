@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
-public class NoSuchBucketException extends S3ServerException{
-    public NoSuchBucketException() {
-        super("The specified bucket does not exist.");
+public class NoSuchBucketException extends S3ServerException {
+    public NoSuchBucketException(String resource, S3RequestId requestId) {
+        super("The specified bucket does not exist.", resource, requestId);
     }
 
-    public NoSuchBucketException(String message) {
-        super(message);
-    }
 
-    public NoSuchBucketException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public NoSuchBucketException(Throwable cause) {
-        super(cause);
-    }
-
-    public NoSuchBucketException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

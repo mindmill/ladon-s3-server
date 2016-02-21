@@ -4,28 +4,16 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class InvalidURIException extends S3ServerException {
 
-    public InvalidURIException() {
-        super("Couldn't parse the specified URI.");
+    public InvalidURIException(String resource, S3RequestId requestId) {
+        super("Couldn't parse the specified URI.", resource, requestId);
     }
 
-    public InvalidURIException(String message) {
-        super(message);
-    }
 
-    public InvalidURIException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidURIException(Throwable cause) {
-        super(cause);
-    }
-
-    public InvalidURIException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

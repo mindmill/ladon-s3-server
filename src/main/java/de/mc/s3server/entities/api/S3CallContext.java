@@ -15,6 +15,7 @@ public interface S3CallContext {
 
     S3RequestParams getParams();
 
+    S3RequestId getRequestId();
 
     void setResponseHeader(S3ResponseHeader responseHeader);
 

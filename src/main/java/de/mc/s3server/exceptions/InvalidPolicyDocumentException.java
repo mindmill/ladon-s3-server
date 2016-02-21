@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class InvalidPolicyDocumentException extends S3ServerException {
-    public InvalidPolicyDocumentException() {
-        super("The content of the form does not meet the conditions specified in the policy document.");
+    public InvalidPolicyDocumentException(String resource, S3RequestId requestId) {
+        super("The content of the form does not meet the conditions specified in the policy document.", resource, requestId);
     }
 
-    public InvalidPolicyDocumentException(String message) {
-        super(message);
-    }
 
-    public InvalidPolicyDocumentException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidPolicyDocumentException(Throwable cause) {
-        super(cause);
-    }
-
-    public InvalidPolicyDocumentException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

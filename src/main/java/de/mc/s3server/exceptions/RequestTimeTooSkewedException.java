@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class RequestTimeTooSkewedException extends S3ServerException {
-    public RequestTimeTooSkewedException() {
-        super("The difference between the request time and the server's time is too large.");
+    public RequestTimeTooSkewedException(String resource, S3RequestId requestId) {
+        super("The difference between the request time and the server's time is too large.", resource, requestId);
     }
 
-    public RequestTimeTooSkewedException(String message) {
-        super(message);
-    }
 
-    public RequestTimeTooSkewedException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public RequestTimeTooSkewedException(Throwable cause) {
-        super(cause);
-    }
-
-    public RequestTimeTooSkewedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

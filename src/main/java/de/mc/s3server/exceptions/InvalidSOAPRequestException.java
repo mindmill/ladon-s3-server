@@ -4,27 +4,14 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class InvalidSOAPRequestException extends S3ServerException {
-    public InvalidSOAPRequestException() {
-        super("The SOAP request body is invalid.");
+    public InvalidSOAPRequestException(String resource, S3RequestId requestId) {
+        super("The SOAP request body is invalid.", resource, requestId);
     }
 
-    public InvalidSOAPRequestException(String message) {
-        super(message);
-    }
-
-    public InvalidSOAPRequestException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidSOAPRequestException(Throwable cause) {
-        super(cause);
-    }
-
-    public InvalidSOAPRequestException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

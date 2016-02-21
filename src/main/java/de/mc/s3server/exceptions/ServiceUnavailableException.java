@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class ServiceUnavailableException extends S3ServerException {
-    public ServiceUnavailableException() {
-        super("Reduce your request rate.");
+    public ServiceUnavailableException(String resource, S3RequestId requestId) {
+        super("Reduce your request rate.", resource, requestId);
     }
 
-    public ServiceUnavailableException(String message) {
-        super(message);
-    }
 
-    public ServiceUnavailableException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ServiceUnavailableException(Throwable cause) {
-        super(cause);
-    }
-
-    public ServiceUnavailableException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

@@ -4,28 +4,16 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by max on 20.02.16.
  */
-public class BucketAlreadyOwnedByYouException extends BucketAlreadyExistsException {
+public class BucketAlreadyOwnedByYouException extends S3ServerException {
 
-    public BucketAlreadyOwnedByYouException() {
-        super("Your previous request to create the named bucket succeeded and you already own it.");
+    public BucketAlreadyOwnedByYouException(String resource, S3RequestId requestId) {
+        super("Your previous request to create the named bucket succeeded and you already own it.", resource, requestId);
     }
 
-    public BucketAlreadyOwnedByYouException(String message) {
-        super(message);
-    }
 
-    public BucketAlreadyOwnedByYouException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public BucketAlreadyOwnedByYouException(Throwable cause) {
-        super(cause);
-    }
-
-    public BucketAlreadyOwnedByYouException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

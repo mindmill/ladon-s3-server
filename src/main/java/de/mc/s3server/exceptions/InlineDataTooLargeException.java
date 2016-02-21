@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
-public class InlineDataTooLargeException extends S3ServerException{
-    public InlineDataTooLargeException() {
-        super("Inline data exceeds the maximum allowed size.");
+public class InlineDataTooLargeException extends S3ServerException {
+    public InlineDataTooLargeException(String resource, S3RequestId requestId) {
+        super("Inline data exceeds the maximum allowed size.", resource, requestId);
     }
 
-    public InlineDataTooLargeException(String message) {
-        super(message);
-    }
 
-    public InlineDataTooLargeException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InlineDataTooLargeException(Throwable cause) {
-        super(cause);
-    }
-
-    public InlineDataTooLargeException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

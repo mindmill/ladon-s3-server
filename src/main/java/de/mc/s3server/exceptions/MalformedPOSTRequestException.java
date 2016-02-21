@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by max on 20.02.16.
  */
-public class MalformedPOSTRequestException extends S3ServerException{
-    public MalformedPOSTRequestException() {
-        super("The body of your POST request is not well-formed multipart/form-data.");
+public class MalformedPOSTRequestException extends S3ServerException {
+    public MalformedPOSTRequestException(String resource, S3RequestId requestId) {
+        super("The body of your POST request is not well-formed multipart/form-data.", resource, requestId);
     }
 
-    public MalformedPOSTRequestException(String message) {
-        super(message);
-    }
 
-    public MalformedPOSTRequestException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public MalformedPOSTRequestException(Throwable cause) {
-        super(cause);
-    }
-
-    public MalformedPOSTRequestException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

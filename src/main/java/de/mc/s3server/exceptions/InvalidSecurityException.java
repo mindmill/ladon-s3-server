@@ -4,27 +4,14 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class InvalidSecurityException extends S3ServerException {
-    public InvalidSecurityException() {
-        super("The provided security credentials are not valid.");
+    public InvalidSecurityException(String resource, S3RequestId requestId) {
+        super("The provided security credentials are not valid.", resource, requestId);
     }
 
-    public InvalidSecurityException(String message) {
-        super(message);
-    }
-
-    public InvalidSecurityException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidSecurityException(Throwable cause) {
-        super(cause);
-    }
-
-    public InvalidSecurityException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

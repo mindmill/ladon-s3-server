@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class KeyTooLongException extends S3ServerException {
-    public KeyTooLongException() {
-        super("Your key is too long.");
+    public KeyTooLongException(String resource, S3RequestId requestId) {
+        super("Your key is too long.", resource, requestId);
     }
 
-    public KeyTooLongException(String message) {
-        super(message);
-    }
 
-    public KeyTooLongException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public KeyTooLongException(Throwable cause) {
-        super(cause);
-    }
-
-    public KeyTooLongException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

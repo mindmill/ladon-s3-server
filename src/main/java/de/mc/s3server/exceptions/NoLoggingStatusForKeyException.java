@@ -4,28 +4,16 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class NoLoggingStatusForKeyException extends S3ServerException {
-    public NoLoggingStatusForKeyException() {
+    public NoLoggingStatusForKeyException(String resource, S3RequestId requestId) {
         super("There is no such thing as a logging\n" +
-                "status subresource for a key.");
+                "status subresource for a key.", resource, requestId);
     }
 
-    public NoLoggingStatusForKeyException(String message) {
-        super(message);
-    }
 
-    public NoLoggingStatusForKeyException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public NoLoggingStatusForKeyException(Throwable cause) {
-        super(cause);
-    }
-
-    public NoLoggingStatusForKeyException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

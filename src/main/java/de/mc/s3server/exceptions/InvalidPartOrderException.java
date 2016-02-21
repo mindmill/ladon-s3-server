@@ -4,28 +4,16 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class InvalidPartOrderException extends S3ServerException {
-    public InvalidPartOrderException() {
+    public InvalidPartOrderException(String resource, S3RequestId requestId) {
         super("The list of parts was not in ascending order." +
-                "Parts list must specified in order by part number.");
+                "Parts list must specified in order by part number.", resource, requestId);
     }
 
-    public InvalidPartOrderException(String message) {
-        super(message);
-    }
 
-    public InvalidPartOrderException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidPartOrderException(Throwable cause) {
-        super(cause);
-    }
-
-    public InvalidPartOrderException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

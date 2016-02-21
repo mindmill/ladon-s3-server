@@ -4,28 +4,16 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
-public class InternalErrorException extends RuntimeException {
+public class InternalErrorException extends S3ServerException {
 
-    public InternalErrorException() {
-        super("We encountered an internal error. Please try again.");
+    public InternalErrorException(String resource, S3RequestId requestId) {
+        super("We encountered an internal error. Please try again.", resource, requestId);
     }
 
-    public InternalErrorException(String message) {
-        super(message);
-    }
 
-    public InternalErrorException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InternalErrorException(Throwable cause) {
-        super(cause);
-    }
-
-    public InternalErrorException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

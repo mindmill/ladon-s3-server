@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class InvalidEncryptionAlgorithmErrorException extends S3ServerException {
-    public InvalidEncryptionAlgorithmErrorException() {
-        super("The encryption request you specified is not valid. The valid value is AES256");
+    public InvalidEncryptionAlgorithmErrorException(String resource, S3RequestId requestId) {
+        super("The encryption request you specified is not valid. The valid value is AES256", resource, requestId);
     }
 
-    public InvalidEncryptionAlgorithmErrorException(String message) {
-        super(message);
-    }
 
-    public InvalidEncryptionAlgorithmErrorException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidEncryptionAlgorithmErrorException(Throwable cause) {
-        super(cause);
-    }
-
-    public InvalidEncryptionAlgorithmErrorException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

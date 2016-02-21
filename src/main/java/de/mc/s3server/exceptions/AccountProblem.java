@@ -4,28 +4,20 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
-public class AccountProblem extends AccessDeniedException{
+public class AccountProblem extends AccessDeniedException {
 
-    public AccountProblem() {
-        super("There is a problem with your AWS account that prevents the operation from completing successfully.");
+    public AccountProblem(String resource, S3RequestId requestId) {
+        super("There is a problem with your AWS account that prevents the operation from completing successfully.", resource, requestId);
     }
 
-    public AccountProblem(String message) {
-        super(message);
+    public AccountProblem(String message, String resource, S3RequestId requestId) {
+        super(message, resource, requestId);
     }
 
-    public AccountProblem(String message, Throwable cause) {
-        super(message, cause);
-    }
 
-    public AccountProblem(Throwable cause) {
-        super(cause);
-    }
-
-    public AccountProblem(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

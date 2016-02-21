@@ -4,29 +4,17 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class InvalidPartException extends S3ServerException {
-    public InvalidPartException() {
+    public InvalidPartException(String resource, S3RequestId requestId) {
         super("One or more of the specified parts could not be found. " +
                 "The part might not have been uploaded, " +
-                "or the specified entity tag might not have matched the part's entity tag.");
+                "or the specified entity tag might not have matched the part's entity tag.", resource, requestId);
     }
 
-    public InvalidPartException(String message) {
-        super(message);
-    }
 
-    public InvalidPartException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidPartException(Throwable cause) {
-        super(cause);
-    }
-
-    public InvalidPartException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

@@ -4,28 +4,16 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class EntityTooSmallException extends S3ServerException {
 
-    public EntityTooSmallException() {
-        super("Your proposed upload is smaller than the minimum allowed object size.");
+    public EntityTooSmallException(String resource, S3RequestId requestId) {
+        super("Your proposed upload is smaller than the minimum allowed object size.", resource, requestId);
     }
 
-    public EntityTooSmallException(String message) {
-        super(message);
-    }
 
-    public EntityTooSmallException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public EntityTooSmallException(Throwable cause) {
-        super(cause);
-    }
-
-    public EntityTooSmallException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

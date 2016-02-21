@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class CredentialsNotSupportedException extends S3ServerException {
-    public CredentialsNotSupportedException() {
-        super("This request does not support credentials");
+    public CredentialsNotSupportedException(String resource, S3RequestId requestId) {
+        super("This request does not support credentials", resource, requestId);
     }
 
-    public CredentialsNotSupportedException(String message) {
-        super(message);
-    }
 
-    public CredentialsNotSupportedException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public CredentialsNotSupportedException(Throwable cause) {
-        super(cause);
-    }
-
-    public CredentialsNotSupportedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

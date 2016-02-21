@@ -4,28 +4,16 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 17.02.16.
  */
 public class InvalidBucketName extends S3ServerException {
 
-    public InvalidBucketName() {
-        super("The specified bucket is not valid.");
+    public InvalidBucketName(String resource, S3RequestId requestId) {
+        super("The specified bucket is not valid.", resource, requestId);
     }
 
-    public InvalidBucketName(String message) {
-        super(message);
-    }
 
-    public InvalidBucketName(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidBucketName(Throwable cause) {
-        super(cause);
-    }
-
-    public InvalidBucketName(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

@@ -4,28 +4,20 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class AmbiguousGrantByEmailAddressException extends S3ServerException {
 
-    public AmbiguousGrantByEmailAddressException() {
-        super("The email address you provided is associated with more than one account.");
+    public AmbiguousGrantByEmailAddressException(String resource, S3RequestId requestId) {
+        super("The email address you provided is associated with more than one account.", resource, requestId);
     }
 
-    public AmbiguousGrantByEmailAddressException(String message) {
-        super(message);
+    public AmbiguousGrantByEmailAddressException(String message, String resource, S3RequestId requestId) {
+        super(message, resource, requestId);
     }
 
-    public AmbiguousGrantByEmailAddressException(String message, Throwable cause) {
-        super(message, cause);
-    }
 
-    public AmbiguousGrantByEmailAddressException(Throwable cause) {
-        super(cause);
-    }
-
-    public AmbiguousGrantByEmailAddressException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

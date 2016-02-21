@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class InvalidTokenException extends S3ServerException {
-    public InvalidTokenException() {
-        super("The provided token is malformed or otherwise invalid.");
+    public InvalidTokenException(String resource, S3RequestId requestId) {
+        super("The provided token is malformed or otherwise invalid.", resource, requestId);
     }
 
-    public InvalidTokenException(String message) {
-        super(message);
-    }
 
-    public InvalidTokenException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidTokenException(Throwable cause) {
-        super(cause);
-    }
-
-    public InvalidTokenException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

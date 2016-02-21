@@ -36,7 +36,7 @@ public class S3Controller {
      * @param callContext
      * @return
      */
-    @RequestMapping(value = {"" , "/"} , method = RequestMethod.GET, produces = MediaType.APPLICATION_XML_VALUE)
+    @RequestMapping(value = {"", "/"}, method = RequestMethod.GET, produces = MediaType.APPLICATION_XML_VALUE)
     public ListAllMyBucketsResult listAllMyBucketsResult(S3CallContext callContext) {
         return ResponseWrapper.listAllMyBucketsResult(new S3UserImpl("maxid", "max"), repository.listAllBuckets(callContext));
     }
@@ -63,13 +63,13 @@ public class S3Controller {
      * To use this implementation of the operation, you must have READ access to the bucket.
      *
      * @param callContext S3CallContext
-     * @param bucketName name of the bucket
+     * @param bucketName  name of the bucket
      * @return a list of objects ( up to 1000 )
      */
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "/{bucketName}", method = RequestMethod.GET, produces = MediaType.APPLICATION_XML_VALUE)
     public ListBucketResult listBucketsResult(S3CallContext callContext, @PathVariable("bucketName") String bucketName) {
-        return ResponseWrapper.listBucketResult(callContext,bucketName,repository.listBucket(callContext,bucketName),false);
+        return ResponseWrapper.listBucketResult(callContext, repository.listBucket(callContext, bucketName));
     }
 
 

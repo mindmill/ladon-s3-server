@@ -4,28 +4,16 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
-public class InvalidLocationConstraintException extends S3ServerException{
+public class InvalidLocationConstraintException extends S3ServerException {
 
-    public InvalidLocationConstraintException() {
-        super("The specified location constraint is not valid");
+    public InvalidLocationConstraintException(String resource, S3RequestId requestId) {
+        super("The specified location constraint is not valid", resource, requestId);
     }
 
-    public InvalidLocationConstraintException(String message) {
-        super(message);
-    }
 
-    public InvalidLocationConstraintException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidLocationConstraintException(Throwable cause) {
-        super(cause);
-    }
-
-    public InvalidLocationConstraintException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

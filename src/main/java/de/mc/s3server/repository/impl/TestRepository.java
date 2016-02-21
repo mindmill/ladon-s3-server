@@ -5,10 +5,7 @@
 package de.mc.s3server.repository.impl;
 
 import de.mc.s3server.entities.api.*;
-import de.mc.s3server.entities.impl.S3BucketImpl;
-import de.mc.s3server.entities.impl.S3MetadataImpl;
-import de.mc.s3server.entities.impl.S3ObjectImpl;
-import de.mc.s3server.entities.impl.S3UserImpl;
+import de.mc.s3server.entities.impl.*;
 import de.mc.s3server.exceptions.NoSuchBucketException;
 import de.mc.s3server.repository.api.Repository;
 
@@ -87,9 +84,12 @@ public class TestRepository implements Repository {
 
 
     @Override
-    public List<S3Object> listBucket(S3CallContext callContext, String bucketName) {
-        if(!"testbucket".equals(bucketName))throw new NoSuchBucketException();
-        return objects.getOrDefault(bucketName, new ArrayList<>());
+    public S3ListBucketResult listBucket(S3CallContext callContext, String bucketName) {
+        if (!"testbucket".equals(bucketName)) {
+            throw new NoSuchBucketException(bucketName,callContext.getRequestId());
+
+        }
+        return new S3ListBucketResultImpl(false, bucketName, objects.getOrDefault(bucketName, new ArrayList<>()));
     }
 
     @Override

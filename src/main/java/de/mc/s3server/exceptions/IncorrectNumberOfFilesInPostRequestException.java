@@ -4,28 +4,16 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
-public class IncorrectNumberOfFilesInPostRequestException extends S3ServerException{
+public class IncorrectNumberOfFilesInPostRequestException extends S3ServerException {
 
-    public IncorrectNumberOfFilesInPostRequestException() {
-        super("POST requires exactly one file upload per request");
+    public IncorrectNumberOfFilesInPostRequestException(String resource, S3RequestId requestId) {
+        super("POST requires exactly one file upload per request", resource, requestId);
     }
 
-    public IncorrectNumberOfFilesInPostRequestException(String message) {
-        super(message);
-    }
 
-    public IncorrectNumberOfFilesInPostRequestException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public IncorrectNumberOfFilesInPostRequestException(Throwable cause) {
-        super(cause);
-    }
-
-    public IncorrectNumberOfFilesInPostRequestException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

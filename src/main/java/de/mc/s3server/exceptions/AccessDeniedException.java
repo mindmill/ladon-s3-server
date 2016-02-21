@@ -4,28 +4,19 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class AccessDeniedException extends S3ServerException {
 
-    public AccessDeniedException() {
-        super("Access Denied");
+    public AccessDeniedException(String resource, S3RequestId requestId) {
+        super("Access Denied", resource, requestId);
     }
 
-    public AccessDeniedException(String message) {
-        super(message);
+    public AccessDeniedException(String message, String resource, S3RequestId requestId) {
+        super(message, resource, requestId);
     }
 
-    public AccessDeniedException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public AccessDeniedException(Throwable cause) {
-        super(cause);
-    }
-
-    protected AccessDeniedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

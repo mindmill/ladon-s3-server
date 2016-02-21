@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class NoSuchVersionException extends S3ServerException {
-    public NoSuchVersionException() {
-        super("No version with this id exists.");
+    public NoSuchVersionException(String resource, S3RequestId requestId) {
+        super("No version with this id exists.", resource, requestId);
     }
 
-    public NoSuchVersionException(String message) {
-        super(message);
-    }
 
-    public NoSuchVersionException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public NoSuchVersionException(Throwable cause) {
-        super(cause);
-    }
-
-    public NoSuchVersionException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

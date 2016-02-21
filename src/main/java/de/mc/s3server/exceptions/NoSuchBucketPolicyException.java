@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
 public class NoSuchBucketPolicyException extends S3ServerException {
-    public NoSuchBucketPolicyException() {
-        super("The specified bucket does not have a bucket policy");
+    public NoSuchBucketPolicyException(String resource, S3RequestId requestId) {
+        super("The specified bucket does not have a bucket policy", resource, requestId);
     }
 
-    public NoSuchBucketPolicyException(String message) {
-        super(message);
-    }
 
-    public NoSuchBucketPolicyException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public NoSuchBucketPolicyException(Throwable cause) {
-        super(cause);
-    }
-
-    public NoSuchBucketPolicyException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

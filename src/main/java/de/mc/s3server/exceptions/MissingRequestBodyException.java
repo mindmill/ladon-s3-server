@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
-public class MissingRequestBodyException extends S3ServerException{
-    public MissingRequestBodyException() {
-        super("Request body is empty.");
+public class MissingRequestBodyException extends S3ServerException {
+    public MissingRequestBodyException(String resource, S3RequestId requestId) {
+        super("Request body is empty.", resource, requestId);
     }
 
-    public MissingRequestBodyException(String message) {
-        super(message);
-    }
 
-    public MissingRequestBodyException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public MissingRequestBodyException(Throwable cause) {
-        super(cause);
-    }
-
-    public MissingRequestBodyException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

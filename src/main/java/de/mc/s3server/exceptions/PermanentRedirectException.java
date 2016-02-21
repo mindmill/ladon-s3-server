@@ -4,28 +4,16 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
-public class PermanentRedirectException extends S3ServerException{
-    public PermanentRedirectException() {
+public class PermanentRedirectException extends S3ServerException {
+    public PermanentRedirectException(String resource, S3RequestId requestId) {
         super("The bucket you are attempting to access must be addressed using the specified endpoint." +
-                " Send all future requests to this endpoint.");
+                " Send all future requests to this endpoint.", resource, requestId);
     }
 
-    public PermanentRedirectException(String message) {
-        super(message);
-    }
 
-    public PermanentRedirectException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public PermanentRedirectException(Throwable cause) {
-        super(cause);
-    }
-
-    public PermanentRedirectException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

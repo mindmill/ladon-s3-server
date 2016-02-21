@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
-public class TooManyBucketsException extends S3ServerException{
-    public TooManyBucketsException() {
-        super("You have attempt to create more buckets than allowed.");
+public class TooManyBucketsException extends S3ServerException {
+    public TooManyBucketsException(String resource, S3RequestId requestId) {
+        super("You have attempt to create more buckets than allowed.", resource, requestId);
     }
 
-    public TooManyBucketsException(String message) {
-        super(message);
-    }
 
-    public TooManyBucketsException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public TooManyBucketsException(Throwable cause) {
-        super(cause);
-    }
-
-    public TooManyBucketsException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

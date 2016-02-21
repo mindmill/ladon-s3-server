@@ -4,27 +4,15 @@
 
 package de.mc.s3server.exceptions;
 
+import de.mc.s3server.entities.api.S3RequestId;
+
 /**
  * Created by Ralf Ulrich on 20.02.16.
  */
-public class PreconditionFailedException extends  S3ServerException {
-    public PreconditionFailedException() {
-        super("At least one of the preconditions you specified did not hold.");
+public class PreconditionFailedException extends S3ServerException {
+    public PreconditionFailedException(String resource, S3RequestId requestId) {
+        super("At least one of the preconditions you specified did not hold.", resource, requestId);
     }
 
-    public PreconditionFailedException(String message) {
-        super(message);
-    }
 
-    public PreconditionFailedException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public PreconditionFailedException(Throwable cause) {
-        super(cause);
-    }
-
-    public PreconditionFailedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }
