@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * Created by Ralf Ulrich on 17.02.16.
  */
-@org.springframework.stereotype.Repository
+//@org.springframework.stereotype.Repository
 public class TestRepository implements Repository {
 
     private Map<String, List<S3Bucket>> buckets = new HashMap<>();
@@ -23,9 +23,9 @@ public class TestRepository implements Repository {
 
     public TestRepository() {
         List<S3Bucket> testBuckets = new ArrayList<>();
-        testBuckets.add(new S3BucketImpl("testbucket"));
-        testBuckets.add(new S3BucketImpl("testbucket2"));
-        testBuckets.add(new S3BucketImpl("testbucket3"));
+        testBuckets.add(new S3BucketImpl("testbucket", new Date()));
+        testBuckets.add(new S3BucketImpl("testbucket2",new Date()));
+        testBuckets.add(new S3BucketImpl("testbucket3",new Date()));
         buckets.put("max", testBuckets);
 
         List<S3Object> testObjects = new ArrayList<>();

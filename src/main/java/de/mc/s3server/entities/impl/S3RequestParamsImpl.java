@@ -59,7 +59,7 @@ public class S3RequestParamsImpl implements S3RequestParams {
 
     @Override
     public Integer getMaxKeys() {
-        return maxKeys;
+        return maxKeys == null ? 1000 : maxKeys > 1000 ? 1000 : maxKeys;
     }
 
     @Override

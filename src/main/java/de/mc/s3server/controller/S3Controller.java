@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  * Created by Ralf Ulrich on 17.02.16.
  */
 @RestController
-@RequestMapping("${s3.api.base.url}")
+@RequestMapping("${s3server.api.base.url}")
 public class S3Controller {
 
     private Repository repository;

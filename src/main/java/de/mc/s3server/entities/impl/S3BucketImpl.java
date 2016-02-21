@@ -19,9 +19,9 @@ public class S3BucketImpl implements S3Bucket {
     public S3BucketImpl() {
     }
 
-    public S3BucketImpl(String bucketName) {
+    public S3BucketImpl(String bucketName, Date creationDate) {
         this.bucketName = bucketName;
-        this.creationDate = new Date();
+        this.creationDate = creationDate;
     }
 
     @Override

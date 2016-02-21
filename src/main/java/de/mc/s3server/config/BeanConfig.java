@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BeanConfig {
 
-    @Value("${s3.api.base.url}")
+    @Value("${s3server.api.base.url}")
     private String apiPath;
 
 //    @Bean
