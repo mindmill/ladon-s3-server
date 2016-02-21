@@ -6,9 +6,12 @@ import de.mc.s3server.exceptions.*;
 import de.mc.s3server.repository.api.S3Repository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.MimeType;
+import org.springframework.util.StreamUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileOwnerAttributeView;
@@ -90,8 +93,23 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public void createObject(S3CallContext callContext, String bucketName, S3Object object) {
+    public void createObject(S3CallContext callContext, String bucketName, S3Object s3Object) {
+        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
+        if (!bucket.toFile().exists())
+            throw new NoSuchBucketException(bucketName, callContext.getRequestId());
+        Path obj = Paths.get(bucket.toString(), s3Object.getKey());
+        File objectFile = obj.toFile();
 
+        try (InputStream in = s3Object.getContent()) {
+            if (!objectFile.exists()) {
+                Files.createDirectories(obj.getParent());
+                Files.createFile(obj);
+            }
+            OutputStream out = Files.newOutputStream(obj);
+            StreamUtils.copy(in, out);
+        } catch (IOException e) {
+            throw new InternalErrorException(s3Object.getKey(), callContext.getRequestId());
+        }
     }
 
     @Override

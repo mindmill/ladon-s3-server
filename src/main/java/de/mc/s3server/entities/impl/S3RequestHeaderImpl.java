@@ -31,8 +31,9 @@ public class S3RequestHeaderImpl implements S3RequestHeader {
     }
 
     @Override
-    public String getContentLength() {
-        return getHeader(CONTENT_LENGTH);
+    public Long getContentLength() {
+        String length = getHeader(CONTENT_LENGTH);
+        return length != null ? Long.parseLong(length) : null;
     }
 
     @Override

@@ -15,7 +15,7 @@ public interface S3RequestHeader {
      * 2616. This header is required for PUTs and operations that load
      * XML, such as logging and ACLs.
      */
-    String getContentLength();
+    Long getContentLength();
 
     /**
      * The content type of the resource in case the request content in the
