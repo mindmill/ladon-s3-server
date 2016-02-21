@@ -1,6 +1,6 @@
 !early project stage
 # Java S3 Server API
-( with Spring Boot )
+Build your own S3 Server and keep your data safe! 
 
 ### Installation:
 The Java S3 Server is built using Java 8 and Maven
