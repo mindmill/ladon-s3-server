@@ -21,7 +21,9 @@ import org.springframework.web.servlet.HandlerMapping;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Created by Ralf Ulrich on 17.02.16.
+ * Main Controller of the s3server
+ *
+ * @author Ralf Ulrich on 17.02.16.
  */
 @RestController
 @RequestMapping("${s3server.api.base.url}")
@@ -37,8 +39,8 @@ public class S3Controller {
     /**
      * List all my buckets
      *
-     * @param callContext
-     * @return
+     * @param callContext S3CallContext
+     * @return List of all my buckets
      */
     @RequestMapping(value = {"", "/"}, method = RequestMethod.GET, produces = MediaType.APPLICATION_XML_VALUE)
     public ListAllMyBucketsResult listAllMyBucketsResult(S3CallContext callContext) {
@@ -59,6 +61,19 @@ public class S3Controller {
         repository.deleteBucket(callContext, bucketName);
     }
 
+
+    /**
+     * This implementation of the PUT operation creates a new bucket. Not every string is an acceptable bucket name.
+     *
+     * @param callContext S3CallContext
+     * @param bucketName  the bucket to create
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(value = "/{bucketName}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_XML_VALUE)
+    public void createBucket(S3CallContext callContext, @PathVariable("bucketName") String bucketName) {
+        repository.createBucket(callContext, bucketName);
+    }
+
     /**
      * This implementation of the GET operation returns some or all (up to 1000) of the objects in a bucket. You
      * can use the request parameters as selection criteria to return a subset of the objects in a bucket. A 200
@@ -77,7 +92,19 @@ public class S3Controller {
     }
 
 
-
+    /**
+     * This implementation of the GET operation retrieves objects from Amazon S3. To use GET , you must have
+     * READ access to the object.
+     * <p>
+     * An Amazon S3 bucket has no directory hierarchy such as you would find in a typical computer file system.
+     * You can, however, create a logical hierarchy by using object key names that imply a folder structure. For
+     * example, instead of naming an object sample.jpg , you can name it
+     * photos/2006/February/sample.jpg .
+     *
+     * @param callContext S3CallContext
+     * @param bucketName  name of the bucket
+     * @param request     the HttpRequest
+     */
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "/{bucketName}/**", method = RequestMethod.GET, produces = {MediaType.APPLICATION_XML_VALUE})
     public void getObject(S3CallContext callContext, @PathVariable("bucketName") String bucketName, HttpServletRequest request) {
@@ -90,9 +117,24 @@ public class S3Controller {
         callContext.setContent(s3Object.getContent());
     }
 
+    /**
+     * @param callContext
+     * @param bucketName
+     * @param request
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RequestMapping(value = "/{bucketName}/**", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_XML_VALUE})
+    public void deleteObject(S3CallContext callContext, @PathVariable("bucketName") String bucketName, HttpServletRequest request) {
+        String objectKey = getObjectKey(request, bucketName);
+        repository.deleteObject(callContext, bucketName, objectKey);
+    }
+
+    /*
+     * get rest of the path after the bucketname
+     */
     private String getObjectKey(HttpServletRequest request, String bucketName) {
-        String fullPath  = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-        int bucketIndex  = fullPath.indexOf(bucketName);
+        String fullPath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+        int bucketIndex = fullPath.indexOf(bucketName);
         return fullPath.substring(bucketIndex + bucketName.length() + 1);
     }
 

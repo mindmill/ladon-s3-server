@@ -7,7 +7,7 @@ package de.mc.s3server.exceptions;
 import de.mc.s3server.entities.api.S3RequestId;
 
 /**
- * Created by Ralf Ulrich on 20.02.16.
+ * @author Ralf Ulrich on 20.02.16.
  */
 public class MalformedXMLException extends S3ServerException {
     public MalformedXMLException(String resource, S3RequestId requestId) {

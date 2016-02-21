@@ -5,7 +5,9 @@
 package de.mc.s3server.common;
 
 /**
- * Created by Ralf Ulrich on 17.02.16.
+ * Constants
+ *
+ * @author Ralf Ulrich on 17.02.16.
  */
 public interface S3Constants {
 

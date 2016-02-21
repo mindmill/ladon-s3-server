@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.util.Date;
 
 /**
- * Created by Ralf Ulrich on 21.02.16.
+ * @author Ralf Ulrich on 21.02.16.
  */
 public class S3ObjectImpl implements S3Object {
 

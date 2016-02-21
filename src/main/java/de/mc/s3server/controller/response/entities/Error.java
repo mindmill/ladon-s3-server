@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * Simple error response
  *
- * Created by Ralf Ulrich on 20.02.16.
+ * @author Ralf Ulrich on 20.02.16.
  */
 @XmlRootElement(name = "Error")
 public class Error {

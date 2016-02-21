@@ -9,7 +9,7 @@ import de.mc.s3server.entities.api.S3Metadata;
 import java.util.HashMap;
 
 /**
- * Created by Ralf Ulrich on 21.02.16.
+ * @author Ralf Ulrich on 21.02.16.
  */
 public class S3MetadataImpl extends HashMap<String, String> implements S3Metadata {
     @Override

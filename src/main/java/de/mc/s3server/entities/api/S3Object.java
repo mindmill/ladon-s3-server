@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.util.Date;
 
 /**
- * Created by Ralf Ulrich on 17.02.16.
+ * @author Ralf Ulrich on 17.02.16.
  */
 public interface S3Object {
 

@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Date;
 
 /**
- * Created by Ralf Ulrich on 20.02.16.
+ * @author Ralf Ulrich on 20.02.16.
  */
 @XmlRootElement(name = "Contents")
 public class Contents {

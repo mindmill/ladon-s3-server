@@ -5,13 +5,15 @@
 package de.mc.s3server;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+
+/**
+ * Main Application class
+ *
+ * @author Ralf Ulrich
+ */
 @SpringBootApplication
-@EnableAutoConfiguration(exclude = {
-        org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration.class
-})
 public class SimpleS3ServerApplication {
 
     public static void main(String[] args) {

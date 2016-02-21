@@ -10,7 +10,7 @@ import de.mc.s3server.entities.api.S3Object;
 import java.util.List;
 
 /**
- * Created by Ralf Ulrich on 21.02.16.
+ * @author Ralf Ulrich on 21.02.16.
  */
 public class S3ListBucketResultImpl implements S3ListBucketResult {
 

@@ -10,7 +10,7 @@ import de.mc.s3server.entities.api.S3User;
 import java.util.Date;
 
 /**
- * Created by Ralf Ulrich on 17.02.16.
+ * @author Ralf Ulrich on 17.02.16.
  */
 public class S3BucketImpl implements S3Bucket {
 

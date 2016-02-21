@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Created by Ralf Ulrich on 17.02.16.
+ * @author Ralf Ulrich on 17.02.16.
  */
 public class S3CallContextImpl implements S3CallContext {
 

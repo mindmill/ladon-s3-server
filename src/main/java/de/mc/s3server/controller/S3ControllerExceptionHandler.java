@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Created by Ralf Ulrich on 20.02.16.
+ * General s3server exception to response code mapping
+ *
+ * @author Ralf Ulrich on 20.02.16.
  */
 @ControllerAdvice
-public class GlobalControllerExceptionHandler {
+public class S3ControllerExceptionHandler {
 
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     @ExceptionHandler({

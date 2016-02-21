@@ -7,7 +7,7 @@ package de.mc.s3server.entities.api;
 import java.util.List;
 
 /**
- * Created by Ralf Ulrich on 21.02.16.
+ * @author Ralf Ulrich on 21.02.16.
  */
 public interface S3ListBucketResult {
 

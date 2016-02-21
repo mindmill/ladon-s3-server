@@ -19,6 +19,11 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.List;
 
+/**
+ * Example Integration Test
+ *
+ * @author Ralf Ulrich
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = SimpleS3ServerApplication.class)
 @WebAppConfiguration
@@ -35,6 +40,9 @@ public class SimpleS3ServerApplicationTests {
     public void testListBuckets() {
         AmazonS3Client client = getClient();
         System.out.println(client.listBuckets());
+
+        client.deleteBucket("test");
+        client.createBucket("test");
 
         List<Bucket> buckets = client.listBuckets();
         buckets.forEach(b ->

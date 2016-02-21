@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Created by Ralf Ulrich on 17.02.16.
+ * @author Ralf Ulrich on 17.02.16.
  */
 public class ResponseWrapper {
 

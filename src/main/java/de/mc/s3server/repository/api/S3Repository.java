@@ -9,13 +9,15 @@ import de.mc.s3server.entities.api.*;
 import java.util.List;
 
 /**
- * Created by Ralf Ulrich on 17.02.16.
+ * This is the abstraction interface to implement your own repository
+ *
+ * @author Ralf Ulrich on 17.02.16.
  */
 public interface S3Repository {
 
     List<S3Bucket> listAllBuckets(S3CallContext callContext);
 
-    void createBucket(S3CallContext callContext, S3Bucket bucket);
+    void createBucket(S3CallContext callContext, String bucketName);
 
     void updateBucket(S3CallContext callContext, S3Bucket bucket);
 

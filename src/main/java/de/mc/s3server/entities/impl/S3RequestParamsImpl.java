@@ -11,7 +11,7 @@ import java.util.Map;
 import static de.mc.s3server.common.S3Constants.*;
 
 /**
- * Created by Ralf Ulrich on 20.02.16.
+ * @author Ralf Ulrich on 20.02.16.
  */
 public class S3RequestParamsImpl implements S3RequestParams {
 

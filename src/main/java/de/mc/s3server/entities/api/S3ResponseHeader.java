@@ -10,7 +10,7 @@ import org.springframework.util.MimeType;
 import java.util.Date;
 
 /**
- * Created by Ralf Ulrich on 20.02.16.
+ * @author Ralf Ulrich on 20.02.16.
  */
 public interface S3ResponseHeader {
 

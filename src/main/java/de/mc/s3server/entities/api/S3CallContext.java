@@ -7,7 +7,7 @@ package de.mc.s3server.entities.api;
 import java.io.InputStream;
 
 /**
- * Created by Ralf Ulrich on 17.02.16.
+ * @author Ralf Ulrich on 17.02.16.
  */
 public interface S3CallContext {
 

@@ -5,7 +5,7 @@
 package de.mc.s3server.entities.api;
 
 /**
- * Created by Ralf Ulrich on 17.02.16.
+ * @author Ralf Ulrich on 17.02.16.
  */
 public interface S3User {
 

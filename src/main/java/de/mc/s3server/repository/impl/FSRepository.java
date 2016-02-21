@@ -2,10 +2,7 @@ package de.mc.s3server.repository.impl;
 
 import de.mc.s3server.entities.api.*;
 import de.mc.s3server.entities.impl.*;
-import de.mc.s3server.exceptions.BucketNotEmptyException;
-import de.mc.s3server.exceptions.InternalErrorException;
-import de.mc.s3server.exceptions.NoSuchBucketException;
-import de.mc.s3server.exceptions.NoSuchKeyException;
+import de.mc.s3server.exceptions.*;
 import de.mc.s3server.repository.api.S3Repository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.MimeType;
@@ -22,7 +19,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Created by Ralf Ulrich on 21.02.16.
+ * Simple FileSystem Repository
+ *
+ * @author Ralf Ulrich on 21.02.16.
  */
 public class FSRepository implements S3Repository {
 
@@ -47,15 +46,21 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public void createBucket(S3CallContext callContext, S3Bucket bucket) {
-
+    public void createBucket(S3CallContext callContext, String bucketName) {
+        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
+        if (bucket.toFile().exists())
+            throw new BucketAlreadyExistsException(bucketName, callContext.getRequestId());
+        try {
+            Files.createDirectory(bucket);
+        } catch (IOException e) {
+            throw new InternalErrorException(bucketName, callContext.getRequestId());
+        }
     }
 
     @Override
     public void updateBucket(S3CallContext callContext, S3Bucket bucket) {
 
     }
-
 
 
     @Override
@@ -100,7 +105,7 @@ public class FSRepository implements S3Repository {
         Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
         if (!bucket.toFile().exists())
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
-        Path object = Paths.get(bucket.toString() + File.separator + objectKey);
+        Path object = Paths.get(bucket.toString(), objectKey);
         File objectFile = object.toFile();
         if (!objectFile.exists())
             throw new NoSuchKeyException(objectKey, callContext.getRequestId());
@@ -171,7 +176,7 @@ public class FSRepository implements S3Repository {
         Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
         if (!bucket.toFile().exists())
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
-        Path object = Paths.get(bucketName, objectKey);
+        Path object = Paths.get(bucket.toString(), objectKey);
         if (!object.toFile().exists())
             throw new NoSuchKeyException(objectKey, callContext.getRequestId());
 
@@ -186,8 +191,6 @@ public class FSRepository implements S3Repository {
     public S3Metadata getObjectMetadata(S3CallContext callContext, String bucketName, String objectKey) {
         return null;
     }
-
-
 
 
 }

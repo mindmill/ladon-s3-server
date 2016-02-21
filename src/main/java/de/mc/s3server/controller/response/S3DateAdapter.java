@@ -9,7 +9,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by Ralf Ulrich on 21.02.16.
+ * Format the Date in ISO format
+ *
+ * @author Ralf Ulrich
+ * @see <a href="http://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>
  */
 public class S3DateAdapter extends XmlAdapter<String, Date> {
 

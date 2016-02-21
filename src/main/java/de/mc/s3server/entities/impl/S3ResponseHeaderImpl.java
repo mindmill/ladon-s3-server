@@ -13,7 +13,7 @@ import java.util.Date;
 import static de.mc.s3server.common.S3Constants.*;
 
 /**
- * Created by Ralf Ulrich on 20.02.16.
+ * @author Ralf Ulrich on 20.02.16.
  */
 public class S3ResponseHeaderImpl implements S3ResponseHeader {
 
