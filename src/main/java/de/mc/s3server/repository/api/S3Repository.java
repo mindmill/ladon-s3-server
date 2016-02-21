@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Ralf Ulrich on 17.02.16.
  */
-public interface Repository {
+public interface S3Repository {
 
     List<S3Bucket> listAllBuckets(S3CallContext callContext);
 

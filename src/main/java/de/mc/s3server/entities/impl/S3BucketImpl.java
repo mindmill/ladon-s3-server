@@ -5,6 +5,7 @@
 package de.mc.s3server.entities.impl;
 
 import de.mc.s3server.entities.api.S3Bucket;
+import de.mc.s3server.entities.api.S3User;
 
 import java.util.Date;
 
@@ -13,15 +14,20 @@ import java.util.Date;
  */
 public class S3BucketImpl implements S3Bucket {
 
-   private String bucketName;
+    private String bucketName;
     private Date creationDate;
+    private S3User owner;
 
-    public S3BucketImpl() {
-    }
 
-    public S3BucketImpl(String bucketName, Date creationDate) {
+    public S3BucketImpl(String bucketName, Date creationDate, S3User owner) {
         this.bucketName = bucketName;
         this.creationDate = creationDate;
+        this.owner = owner;
+    }
+
+    @Override
+    public S3User getOwner() {
+        return owner;
     }
 
     @Override
@@ -29,16 +35,10 @@ public class S3BucketImpl implements S3Bucket {
         return bucketName;
     }
 
-    public void setBucketName(String bucketName) {
-        this.bucketName = bucketName;
-    }
 
     @Override
     public Date getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
 }

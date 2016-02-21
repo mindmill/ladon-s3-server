@@ -14,4 +14,6 @@ public interface S3Bucket {
     String getBucketName();
 
     Date getCreationDate();
+
+    S3User getOwner();
 }

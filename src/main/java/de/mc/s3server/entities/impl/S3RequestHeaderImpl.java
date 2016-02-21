@@ -26,6 +26,10 @@ public class S3RequestHeaderImpl implements S3RequestHeader {
         return request.getHeader(key);
     }
 
+    private Object getAttribute(String key) {
+        return request.getAttribute(key);
+    }
+
     @Override
     public String getContentLength() {
         return getHeader(CONTENT_LENGTH);

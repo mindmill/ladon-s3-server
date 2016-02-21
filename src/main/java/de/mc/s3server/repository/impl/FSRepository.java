@@ -2,28 +2,33 @@ package de.mc.s3server.repository.impl;
 
 import de.mc.s3server.entities.api.*;
 import de.mc.s3server.entities.impl.*;
+import de.mc.s3server.exceptions.BucketNotEmptyException;
 import de.mc.s3server.exceptions.InternalErrorException;
 import de.mc.s3server.exceptions.NoSuchBucketException;
-import de.mc.s3server.repository.api.Repository;
+import de.mc.s3server.exceptions.NoSuchKeyException;
+import de.mc.s3server.repository.api.S3Repository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.MimeType;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * Created by Ralf Ulrich on 21.02.16.
  */
-@org.springframework.stereotype.Repository
-public class FSRepository implements Repository {
+public class FSRepository implements S3Repository {
 
+    public static final Predicate<Path> IS_DIRECTORY = p -> p.toFile().isDirectory();
+    public static final Predicate<Path> IS_FILE = p -> p.toFile().isFile();
     @Value("${s3server.fsrepo.baseurl}")
     private String fsrepoBaseUrl;
 
@@ -31,8 +36,11 @@ public class FSRepository implements Repository {
     @Override
     public List<S3Bucket> listAllBuckets(S3CallContext callContext) {
         try {
-            return Files.list(Paths.get(fsrepoBaseUrl)).filter(path1 -> path1.toFile().isDirectory()).map(
-                    path -> new S3BucketImpl(path.getFileName().toString(), new Date(path.toFile().lastModified()))
+            return Files.list(Paths.get(fsrepoBaseUrl)).filter(IS_DIRECTORY).map(
+                    path -> {
+                        String principal = getUserPrincipal(callContext, path, path.getFileName().toString());
+                        return new S3BucketImpl(path.getFileName().toString(), new Date(path.toFile().lastModified()), new S3UserImpl(principal, principal));
+                    }
             ).collect(Collectors.toList());
         } catch (IOException e) {
             throw new NoSuchBucketException(null, callContext.getRequestId());
@@ -56,6 +64,27 @@ public class FSRepository implements Repository {
 
     @Override
     public void deleteBucket(S3CallContext callContext, String bucketName) {
+        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
+        if (!bucket.toFile().exists())
+            throw new NoSuchBucketException(bucketName, callContext.getRequestId());
+
+        try {
+            Files.walkFileTree(bucket, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    throw new BucketNotEmptyException(bucketName, callContext.getRequestId());
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    return super.postVisitDirectory(dir, exc);
+                }
+            });
+        } catch (IOException e) {
+            throw new InternalErrorException(bucketName, callContext.getRequestId());
+        }
+
 
     }
 
@@ -76,7 +105,24 @@ public class FSRepository implements Repository {
 
     @Override
     public S3Object getObject(S3CallContext callContext, String bucketName, String objectKey) {
-        return null;
+        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
+        if (!bucket.toFile().exists())
+            throw new NoSuchBucketException(bucketName, callContext.getRequestId());
+        Path object = Paths.get(bucket.toString() + File.separator + objectKey);
+        File objectFile = object.toFile();
+        if (!objectFile.exists())
+            throw new NoSuchKeyException(objectKey, callContext.getRequestId());
+        String username = getUserPrincipal(callContext, object, objectKey);
+
+        try {
+            return new S3ObjectImpl(objectKey,
+                    new Date(objectFile.lastModified()),
+                    bucketName,
+                    objectFile.length(),
+                    new S3UserImpl(username, username), new S3MetadataImpl(), Files.newInputStream(object), getMimeType(object));
+        } catch (IOException e) {
+            throw new InternalErrorException(objectKey, callContext.getRequestId());
+        }
     }
 
     @Override
@@ -95,19 +141,17 @@ public class FSRepository implements Repository {
                     .limit(maxKeys)
                     .map(path -> {
                                 String key = bucket.relativize(path).toString();
-                                FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
-                                UserPrincipal owner = null;
+                                String owner = getUserPrincipal(callContext, path, key);
                                 try {
-                                    owner = ownerAttributeView.getOwner();
+                                    return new S3ObjectImpl(key,
+                                            new Date(path.toFile().lastModified()),
+                                            bucketName, path.toFile().length(),
+                                            new S3UserImpl(owner, owner),
+                                            new S3MetadataImpl(),
+                                            null, getMimeType(path));
                                 } catch (IOException e) {
-                                    throw new InternalErrorException(key, callContext.getRequestId());
+                                    throw new InternalErrorException(bucketName, callContext.getRequestId());
                                 }
-                                return new S3ObjectImpl(key,
-                                        new Date(path.toFile().lastModified()),
-                                        bucketName, path.toFile().length(),
-                                        new S3UserImpl(owner.toString(), owner.getName()),
-                                        new S3MetadataImpl(),
-                                        null);
                             }
                     ).collect(Collectors.toList()));
         } catch (IOException e) {
@@ -115,9 +159,35 @@ public class FSRepository implements Repository {
         }
     }
 
+    private MimeType getMimeType(Path path) throws IOException {
+        return MimeType.valueOf(Files.probeContentType(path));
+    }
+
+    private String getUserPrincipal(S3CallContext callContext, Path path, String key) {
+        FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
+        UserPrincipal owner;
+        try {
+            owner = ownerAttributeView.getOwner();
+        } catch (IOException e) {
+            throw new InternalErrorException(key, callContext.getRequestId());
+        }
+        return owner.getName();
+    }
+
     @Override
     public void deleteObject(S3CallContext callContext, String bucketName, String objectKey) {
+        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
+        if (!bucket.toFile().exists())
+            throw new NoSuchBucketException(bucketName, callContext.getRequestId());
+        Path object = Paths.get(bucketName, objectKey);
+        if (!object.toFile().exists())
+            throw new NoSuchKeyException(objectKey, callContext.getRequestId());
 
+        try {
+            Files.delete(object);
+        } catch (IOException e) {
+            throw new InternalErrorException(objectKey, callContext.getRequestId());
+        }
     }
 
     @Override
@@ -144,4 +214,6 @@ public class FSRepository implements Repository {
     public S3ACL getObjectACL(S3CallContext callContext, String bucketName, String objectKey) {
         return null;
     }
+
+
 }

@@ -8,12 +8,17 @@ import de.mc.s3server.controller.response.entities.ListAllMyBucketsResult;
 import de.mc.s3server.controller.response.entities.ListBucketResult;
 import de.mc.s3server.controller.response.mapper.ResponseWrapper;
 import de.mc.s3server.entities.api.S3CallContext;
+import de.mc.s3server.entities.api.S3Object;
+import de.mc.s3server.entities.impl.S3ResponseHeaderImpl;
 import de.mc.s3server.entities.impl.S3UserImpl;
-import de.mc.s3server.repository.api.Repository;
+import de.mc.s3server.repository.api.S3Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.HandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by Ralf Ulrich on 17.02.16.
@@ -22,13 +27,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("${s3server.api.base.url}")
 public class S3Controller {
 
-    private Repository repository;
+    private S3Repository repository;
 
     @Autowired
-    public S3Controller(Repository repository) {
+    public S3Controller(S3Repository repository) {
         this.repository = repository;
     }
-
 
     /**
      * List all my buckets
@@ -38,7 +42,7 @@ public class S3Controller {
      */
     @RequestMapping(value = {"", "/"}, method = RequestMethod.GET, produces = MediaType.APPLICATION_XML_VALUE)
     public ListAllMyBucketsResult listAllMyBucketsResult(S3CallContext callContext) {
-        return ResponseWrapper.listAllMyBucketsResult(new S3UserImpl("maxid", "max"), repository.listAllBuckets(callContext));
+        return ResponseWrapper.listAllMyBucketsResult(new S3UserImpl("test", "test"), repository.listAllBuckets(callContext));
     }
 
     /**
@@ -70,6 +74,24 @@ public class S3Controller {
     @RequestMapping(value = "/{bucketName}", method = RequestMethod.GET, produces = MediaType.APPLICATION_XML_VALUE)
     public ListBucketResult listBucketsResult(S3CallContext callContext, @PathVariable("bucketName") String bucketName) {
         return ResponseWrapper.listBucketResult(callContext, repository.listBucket(callContext, bucketName));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/{bucketName}/**", method = RequestMethod.GET, produces = {MediaType.APPLICATION_XML_VALUE})
+    public void getObject(S3CallContext callContext, @PathVariable("bucketName") String bucketName, HttpServletRequest request) {
+        String objectKey = getObjectKey(request, bucketName);
+        S3ResponseHeaderImpl header = new S3ResponseHeaderImpl();
+        S3Object s3Object = repository.getObject(callContext, bucketName, objectKey);
+        header.setContentLength(s3Object.getSize());
+        header.setContentType(s3Object.getMimeType());
+        callContext.setResponseHeader(header);
+        callContext.setContent(s3Object.getContent());
+    }
+
+    private String getObjectKey(HttpServletRequest request, String bucketName) {
+        String fullPath  = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+        int bucketIndex  = fullPath.indexOf(bucketName);
+        return fullPath.substring(bucketIndex + bucketName.length() + 1);
     }
 
 

@@ -6,10 +6,14 @@ package de.mc.s3server.entities.api;
 
 import org.springframework.security.core.context.SecurityContext;
 
+import java.io.InputStream;
+
 /**
  * Created by Ralf Ulrich on 17.02.16.
  */
 public interface S3CallContext {
+
+    void setContent(InputStream inputStream);
 
     S3RequestHeader getHeader();
 

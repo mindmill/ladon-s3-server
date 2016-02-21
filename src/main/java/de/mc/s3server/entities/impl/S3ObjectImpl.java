@@ -8,6 +8,7 @@ import de.mc.s3server.common.S3Constants;
 import de.mc.s3server.entities.api.S3Metadata;
 import de.mc.s3server.entities.api.S3Object;
 import de.mc.s3server.entities.api.S3User;
+import org.springframework.util.MimeType;
 
 import java.io.InputStream;
 import java.util.Date;
@@ -21,18 +22,18 @@ public class S3ObjectImpl implements S3Object {
     private Date lastModified;
     private String bucket;
     private Long size;
+    private MimeType mimeType;
     private S3User owner;
     private S3Metadata metadata;
     private InputStream content;
 
-    public S3ObjectImpl() {
-    }
 
-    public S3ObjectImpl(String key, Date lastModified, String bucket, Long size, S3User owner, S3Metadata metadata, InputStream content) {
+    public S3ObjectImpl(String key, Date lastModified, String bucket, Long size, S3User owner, S3Metadata metadata, InputStream content, MimeType mimeType) {
         this.key = key;
         this.lastModified = lastModified;
         this.bucket = bucket;
         this.size = size;
+        this.mimeType = mimeType;
         this.owner = owner;
         this.metadata = metadata;
         this.content = content;
@@ -51,6 +52,11 @@ public class S3ObjectImpl implements S3Object {
     @Override
     public String getStorageClass() {
         return "STANDARD";
+    }
+
+    @Override
+    public MimeType getMimeType() {
+        return mimeType;
     }
 
     @Override

@@ -4,6 +4,8 @@
 
 package de.mc.s3server.entities.api;
 
+import org.springframework.util.MimeType;
+
 import java.io.InputStream;
 import java.util.Date;
 
@@ -21,6 +23,8 @@ public interface S3Object {
     String getETag();
 
     Long getSize();
+
+    MimeType getMimeType();
 
     String getStorageClass();
 

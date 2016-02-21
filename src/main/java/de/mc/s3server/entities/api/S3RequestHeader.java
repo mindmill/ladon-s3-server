@@ -9,6 +9,7 @@ package de.mc.s3server.entities.api;
  */
 public interface S3RequestHeader {
 
+
     /**
      * Length of the message (without the headers) according to RFC
      * 2616. This header is required for PUTs and operations that load
