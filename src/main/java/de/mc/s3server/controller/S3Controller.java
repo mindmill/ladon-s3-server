@@ -76,6 +76,8 @@ public class S3Controller {
         return ResponseWrapper.listBucketResult(callContext, repository.listBucket(callContext, bucketName));
     }
 
+
+
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "/{bucketName}/**", method = RequestMethod.GET, produces = {MediaType.APPLICATION_XML_VALUE})
     public void getObject(S3CallContext callContext, @PathVariable("bucketName") String bucketName, HttpServletRequest request) {

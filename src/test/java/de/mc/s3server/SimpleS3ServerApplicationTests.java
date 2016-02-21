@@ -4,35 +4,47 @@
 
 package de.mc.s3server;
 
-import com.basho.riakcs.client.api.RiakCSClient;
-import com.basho.riakcs.client.api.RiakCSException;
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.S3ClientOptions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.net.UnknownHostException;
-
-import static org.junit.Assert.assertEquals;
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = SimpleS3ServerApplication.class)
 @WebAppConfiguration
+@IntegrationTest("server.port:8080")
 public class SimpleS3ServerApplicationTests {
 
 	@Test
 	public void contextLoads() {
+
 	}
 
 
 	@Test
-	public void testListBuckets() throws UnknownHostException, RiakCSException {
-		RiakCSClient client = new RiakCSClient("test" ,"test", "localhost:8080/api/s3/", false);
-		assertEquals(3, client.listBuckets().getAsJsonArray("bucketList").size());
+	public void testListBuckets() {
+        AmazonS3Client client = getClient();
+        System.out.println( client.listBuckets());
 
  	}
 
 
+
+
+    public AmazonS3Client getClient() {
+        AWSCredentials credentials = new BasicAWSCredentials("TESTING", "TESTING");
+        AmazonS3Client newClient = new AmazonS3Client(credentials,
+                new ClientConfiguration());
+        newClient.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
+        newClient.setEndpoint("http://localhost:8080/api/s3");
+        return newClient;
+    }
 
 }

@@ -4,8 +4,11 @@
 
 package de.mc.s3server.controller.response.entities;
 
+import de.mc.s3server.controller.response.S3DateAdapter;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Date;
 
 /**
@@ -51,6 +54,7 @@ public class Contents {
     }
 
     @XmlElement(name = "LastModified")
+    @XmlJavaTypeAdapter(S3DateAdapter.class)
     public Date getLastModified() {
         return lastModified;
     }
