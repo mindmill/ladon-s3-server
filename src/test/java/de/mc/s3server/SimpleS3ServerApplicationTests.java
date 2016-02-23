@@ -39,9 +39,10 @@ public class SimpleS3ServerApplicationTests {
     @Test
     public void testListBuckets() {
         AmazonS3Client client = getClient();
+        client.createBucket("test");
+
         System.out.println(client.listBuckets());
 
-        client.createBucket("test");
 
         List<Bucket> buckets = client.listBuckets();
         buckets.forEach(b ->
