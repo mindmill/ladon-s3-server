@@ -6,6 +6,7 @@ import de.mc.s3server.exceptions.*;
 import de.mc.s3server.repository.api.S3Repository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
@@ -51,10 +52,10 @@ public class FSRepository implements S3Repository {
     @Override
     public void createBucket(S3CallContext callContext, String bucketName) {
         Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
-        if (bucket.toFile().exists())
-            throw new BucketAlreadyExistsException(bucketName, callContext.getRequestId());
+        //if (bucket.toFile().exists())
+          //  throw new BucketAlreadyExistsException(bucketName, callContext.getRequestId());
         try {
-            Files.createDirectory(bucket);
+            Files.createDirectories(bucket);
         } catch (IOException e) {
             throw new InternalErrorException(bucketName, callContext.getRequestId());
         }
@@ -175,7 +176,8 @@ public class FSRepository implements S3Repository {
     }
 
     private MimeType getMimeType(Path path) throws IOException {
-        return MimeType.valueOf(Files.probeContentType(path));
+        String mime =  Files.probeContentType(path);
+        return mime != null ? MimeType.valueOf(mime): MimeTypeUtils.APPLICATION_OCTET_STREAM;
     }
 
     private String getUserPrincipal(S3CallContext callContext, Path path, String key) {
