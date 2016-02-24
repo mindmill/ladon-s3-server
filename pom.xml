@@ -39,15 +39,12 @@
             <artifactId>gson</artifactId>
             <version>2.2.4</version>
         </dependency>
-
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.9.11</version>
+            <version>1.10.54</version>
             <scope>test</scope>
         </dependency>
-
-
     </dependencies>
 
     <developers>
@@ -58,6 +55,12 @@
             <organizationUrl>http://mind-consulting.de</organizationUrl>
         </developer>
     </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:mindmill/s3-java-server.git</connection>
+        <developerConnection>scm:git:git@github.com:mindmill/s3-java-server.git</developerConnection>
+        <url>git@github.com:mindmill/s3-java-server.git</url>
+    </scm>
     <build>
         <plugins>
             <plugin>
