@@ -206,7 +206,7 @@ public class FSRepository implements S3Repository {
                                             new Date(path.toFile().lastModified()),
                                             bucketName, path.toFile().length(),
                                             new S3UserImpl(owner, owner),
-                                            new S3UserMetadataImpl(),
+                                            new S3MetadataImpl(),
                                             null, getMimeType(path));
                                 } catch (IOException e) {
                                     logger.error("internal error", e);
