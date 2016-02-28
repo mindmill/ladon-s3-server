@@ -32,6 +32,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 
 /**
+ * Dispatcher Servlet for the S3 API.
+ * Redirects all calls to the S3Repository instance.
+ *
  * @author Ralf Ulrich on 27.02.16.
  */
 public class S3Servlet extends HttpServlet {
@@ -90,7 +93,7 @@ public class S3Servlet extends HttpServlet {
     }
 
     private void dispatch(S3Call call, HttpServletRequest req, HttpServletResponse resp, String bucketName, String objectkey) {
-        S3CallContext context = new S3CallContextImpl(req, resp,new S3UserImpl("DEFAULT", "SYSTEM"), req.getParameterMap());
+        S3CallContext context = new S3CallContextImpl(req, resp, new S3UserImpl("DEFAULT", "SYSTEM"), req.getParameterMap());
         S3RequestId requestId = context.getRequestId();
 
         try {
@@ -174,10 +177,7 @@ public class S3Servlet extends HttpServlet {
     }
 
     private Marshaller getMarshaller() throws JAXBException {
-
-        Marshaller m = jaxbContext.createMarshaller();
-       // m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        return m;
+        return jaxbContext.createMarshaller();
     }
 
 
