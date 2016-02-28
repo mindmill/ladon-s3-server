@@ -121,50 +121,8 @@ public class S3Servlet extends HttpServlet {
                         break;
                     case postbucket:
                         throw new NotImplementedException(bucketName, requestId);
-                        // break;
                     case postobject:
                         throw new NotImplementedException(bucketName, requestId);
-//                        if (!ServletFileUpload.isMultipartContent(req)) {
-//                            throw new RequestIsNotMultiPartContentException(objectkey, requestId);
-//                        }
-//                        InputStream content = null;
-//                        // multipart processing
-//                        Map<String, String[]> params = new HashMap<>(req.getParameterMap());
-//                        boolean contentFound = false;
-//                        ServletFileUpload upload = new ServletFileUpload();
-//                        FileItemIterator iter = upload.getItemIterator(req);
-//                        while (!contentFound && iter.hasNext()) {
-//                            FileItemStream item = iter.next();
-//                            String name = item.getFieldName();
-//                            InputStream stream = item.openStream();
-//                            if (item.isFormField() && !"file".equals(name)) {
-//                                params.put(name, new String[]{Streams.asString(stream)});
-//                            } else {
-//                                contentFound = true;
-//                                String filename = item.getName();
-//                                content = stream;
-//                                if (filename != null) {
-//                                    String[] keyParamArray = params.get("key");
-//                                    String keyParam = keyParamArray != null ? keyParamArray.length > 0 ? keyParamArray[0] : null : null;
-//                                    if (keyParam != null) {
-//                                        params.put("key", new String[]{keyParam.replace("${filename}", filename)});
-//                                    } else {
-//                                        params.put("key", new String[]{filename});
-//                                    }
-//                                }
-//                                String contentType = item.getContentType();
-//                                if (contentType == null) {
-//                                    contentType = "application/octet-stream";
-//                                }
-//                                params.put(S3Constants.CONTENT_TYPE, new String[]{contentType});
-//                            }
-//                        }
-//                        if (contentFound && iter.hasNext())
-//                            throw new IncorrectNumberOfFilesInPostRequestException(params.get("key")[0], requestId);
-//
-//                        S3CallContext postContext = new S3CallContextImpl(req, resp, params, content);
-//                        repository.createObject(postContext, bucketName, params.get("key")[0]);
-//                        break;
                     case getobject:
                         repository.getObject(context, bucketName, objectkey, false);
                         break;
