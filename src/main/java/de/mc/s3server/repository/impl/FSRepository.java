@@ -120,8 +120,8 @@ public class FSRepository implements S3Repository {
         Path meta = Paths.get(metaBucket.toString(), objectKey + ".xml");
 
 
+        lock(metaBucket, objectKey, FSLock.LockType.write, callContext);
         try (InputStream in = callContext.getContent()) {
-            lock(metaBucket, objectKey, FSLock.LockType.write, callContext);
             if (!Files.exists(obj)) {
                 Files.createDirectories(obj.getParent());
                 Files.createFile(obj);
@@ -164,8 +164,8 @@ public class FSRepository implements S3Repository {
             loadMetaFile(objectMeta, callContext);
         }
 
+        lock(bucketMeta, objectKey, FSLock.LockType.read, callContext);
         try {
-            lock(bucketMeta, objectKey, FSLock.LockType.read, callContext);
             S3ResponseHeader header = new S3ResponseHeaderImpl();
             header.setContentLength(Files.size(object));
             header.setContentType(getMimeType(object));
@@ -256,8 +256,8 @@ public class FSRepository implements S3Repository {
         if (!Files.exists(objectData))
             throw new NoSuchKeyException(objectKey, callContext.getRequestId());
 
+        lock(bucketMeta, objectKey, FSLock.LockType.write, callContext);
         try {
-            lock(bucketMeta, objectKey, FSLock.LockType.write, callContext);
             Files.delete(objectData);
             Files.delete(objectMeta);
         } catch (IOException e) {
