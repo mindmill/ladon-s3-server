@@ -90,14 +90,14 @@ public class S3Servlet extends HttpServlet {
     }
 
     private void dispatch(S3Call call, HttpServletRequest req, HttpServletResponse resp, String bucketName, String objectkey) {
-        S3CallContext context = new S3CallContextImpl(req, resp, req.getParameterMap());
+        S3CallContext context = new S3CallContextImpl(req, resp,new S3UserImpl("DEFAULT", "SYSTEM"), req.getParameterMap());
         S3RequestId requestId = context.getRequestId();
 
         try {
             try {
                 switch (call) {
                     case listmybuckets:
-                        writeXmlResponse(ResponseWrapper.listAllMyBucketsResult(new S3UserImpl("test", "test"),
+                        writeXmlResponse(ResponseWrapper.listAllMyBucketsResult(context.getUser(),
                                 repository.listAllBuckets(context)),
                                 resp,
                                 HttpServletResponse.SC_OK);

@@ -14,6 +14,8 @@ public interface S3CallContext {
 
     void setContent(InputStream inputStream);
 
+    S3User getUser();
+
     S3RequestHeader getHeader();
 
     S3RequestParams getParams();
