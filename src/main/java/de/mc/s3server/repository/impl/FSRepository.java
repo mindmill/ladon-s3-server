@@ -149,17 +149,35 @@ public class FSRepository implements S3Repository {
         p.storeToXML(Files.newOutputStream(meta), null);
     }
 
+    private void loadMetaFile(Path meta, S3CallContext callContext) {
+        try {
+            Properties p = new Properties();
+            p.loadFromXML(Files.newInputStream(meta));
+            S3UserMetadata userMetadata = new S3UserMetadataImpl(p);
+            S3ResponseHeader header = new S3ResponseHeaderImpl(userMetadata);
+            callContext.setResponseHeader(header);
+        } catch (IOException e) {
+            logger.error("error reading meta file", e);
+        }
+    }
 
     @Override
     public void getObject(S3CallContext callContext, String bucketName, String objectKey, boolean head) {
         Path bucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
+        Path bucketMeta = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
         if (!bucket.toFile().exists())
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
         Path object = Paths.get(bucket.toString(), objectKey);
+        Path objectMeta = Paths.get(bucketMeta.toString(), objectKey + ".xml");
         File objectFile = object.toFile();
+        File objectMetaFile = objectMeta.toFile();
         if (!objectFile.exists())
             throw new NoSuchKeyException(objectKey, callContext.getRequestId());
         String username = getUserPrincipal(callContext, object, objectKey);
+
+        if (objectMetaFile.exists()) {
+            loadMetaFile(objectMeta, callContext);
+        }
 
         try {
             S3ResponseHeader header = new S3ResponseHeaderImpl();

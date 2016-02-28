@@ -5,6 +5,7 @@
 package de.mc.s3server.entities.impl;
 
 import de.mc.s3server.entities.api.S3ResponseHeader;
+import de.mc.s3server.entities.api.S3UserMetadata;
 import org.springframework.util.MimeType;
 
 import javax.servlet.http.HttpServletResponse;
@@ -27,7 +28,14 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
     private String xamzRequestId;
     private String xamzVersionId;
     private String xamzExpiration;
+    private S3UserMetadata meta;
 
+    public S3ResponseHeaderImpl() {
+    }
+
+    public S3ResponseHeaderImpl(S3UserMetadata meta) {
+        this.meta = meta;
+    }
 
     public void setContentLength(Long contentLength) {
         this.contentLength = contentLength;
@@ -79,6 +87,8 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
     }
 
     public static void appendHeaderToResponse(HttpServletResponse response, S3ResponseHeaderImpl header) {
+        if (header.meta != null)
+            header.meta.putInResponse(response);
         if (header.contentLength != null)
             response.setContentLengthLong(header.contentLength);
         if (header.contentType != null)

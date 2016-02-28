@@ -90,10 +90,10 @@ public class SimpleS3ServerApplicationTests {
         Bucket b = client.createBucket(UUID.randomUUID().toString());
         client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), new ObjectMetadata());
         int count = client.listBuckets().size();
-        try{
-        client.deleteBucket(b.getName());}
-        catch (AmazonS3Exception e){
-            assertEquals(409,e.getStatusCode());
+        try {
+            client.deleteBucket(b.getName());
+        } catch (AmazonS3Exception e) {
+            assertEquals(409, e.getStatusCode());
         }
         assertEquals(count, client.listBuckets().size());
 
@@ -106,6 +106,18 @@ public class SimpleS3ServerApplicationTests {
         client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), new ObjectMetadata());
         InputStream in = client.getObject(b.getName(), "test.txt").getObjectContent();
         assertEquals("test", Streams.asString(in));
+    }
+
+    @Test
+    public void testPutObjectMeta() throws IOException {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        ObjectMetadata meta = new ObjectMetadata();
+        meta.addUserMetadata("peter", "Lustig");
+        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
+        InputStream in = client.getObject(b.getName(), "test.txt").getObjectContent();
+        assertEquals("test", Streams.asString(in));
+        assertEquals("Lustig", client.getObject(b.getName(), "test.txt").getObjectMetadata().getUserMetadata().get("peter"));
     }
 
 
