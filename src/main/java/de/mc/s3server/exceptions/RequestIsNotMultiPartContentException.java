@@ -13,7 +13,7 @@ import java.net.HttpURLConnection;
  */
 public class RequestIsNotMultiPartContentException extends S3ServerException {
     public RequestIsNotMultiPartContentException(String resource, S3RequestId requestId) {
-        super("Bucket POST must be of the enclosure-type multipart/form-data.", resource, requestId, HttpURLConnection.HTTP_BAD_REQUEST);
+        super("POST must be of the enclosure-type multipart/form-data.", resource, requestId, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
 }

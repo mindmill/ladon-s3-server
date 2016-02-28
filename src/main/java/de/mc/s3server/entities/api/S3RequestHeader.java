@@ -4,11 +4,19 @@
 
 package de.mc.s3server.entities.api;
 
+import java.util.Map;
+
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
 public interface S3RequestHeader {
 
+    /**
+     * Simply return all header fields
+     *
+     * @return all fields from the HttpRequest
+     */
+    Map<String, String> getFullHeader();
 
     /**
      * Length of the message (without the headers) according to RFC

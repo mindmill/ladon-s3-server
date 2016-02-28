@@ -6,12 +6,11 @@ package de.mc.s3server.servlet;
 
 import com.google.common.base.Charsets;
 import de.mc.s3server.entities.api.S3CallContext;
-import de.mc.s3server.entities.api.S3Object;
 import de.mc.s3server.entities.api.S3RequestId;
 import de.mc.s3server.entities.impl.S3CallContextImpl;
-import de.mc.s3server.entities.impl.S3ResponseHeaderImpl;
 import de.mc.s3server.entities.impl.S3UserImpl;
 import de.mc.s3server.exceptions.InternalErrorException;
+import de.mc.s3server.exceptions.NotImplementedException;
 import de.mc.s3server.exceptions.S3ServerException;
 import de.mc.s3server.jaxb.entities.*;
 import de.mc.s3server.jaxb.entities.Error;
@@ -31,7 +30,6 @@ import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.util.UUID;
 
 /**
  * @author Ralf Ulrich on 27.02.16.
@@ -50,6 +48,7 @@ public class S3Servlet extends HttpServlet {
         listbucket,
         putbucket,
         putobject,
+        postbucket,
         postobject,
         getobject,
         headobject,
@@ -92,8 +91,7 @@ public class S3Servlet extends HttpServlet {
 
     private void dispatch(S3Call call, HttpServletRequest req, HttpServletResponse resp, String bucketName, String objectkey) {
         S3CallContext context = new S3CallContextImpl(req, resp, req.getParameterMap());
-        S3RequestId requestId = newRequestId();
-        S3ResponseHeaderImpl header = new S3ResponseHeaderImpl();
+        S3RequestId requestId = context.getRequestId();
 
         try {
             try {
@@ -121,18 +119,60 @@ public class S3Servlet extends HttpServlet {
                     case putobject:
                         repository.createObject(context, bucketName, objectkey);
                         break;
+                    case postbucket:
+                        throw new NotImplementedException(bucketName, requestId);
+                        // break;
                     case postobject:
-                        break;
+                        throw new NotImplementedException(bucketName, requestId);
+//                        if (!ServletFileUpload.isMultipartContent(req)) {
+//                            throw new RequestIsNotMultiPartContentException(objectkey, requestId);
+//                        }
+//                        InputStream content = null;
+//                        // multipart processing
+//                        Map<String, String[]> params = new HashMap<>(req.getParameterMap());
+//                        boolean contentFound = false;
+//                        ServletFileUpload upload = new ServletFileUpload();
+//                        FileItemIterator iter = upload.getItemIterator(req);
+//                        while (!contentFound && iter.hasNext()) {
+//                            FileItemStream item = iter.next();
+//                            String name = item.getFieldName();
+//                            InputStream stream = item.openStream();
+//                            if (item.isFormField() && !"file".equals(name)) {
+//                                params.put(name, new String[]{Streams.asString(stream)});
+//                            } else {
+//                                contentFound = true;
+//                                String filename = item.getName();
+//                                content = stream;
+//                                if (filename != null) {
+//                                    String[] keyParamArray = params.get("key");
+//                                    String keyParam = keyParamArray != null ? keyParamArray.length > 0 ? keyParamArray[0] : null : null;
+//                                    if (keyParam != null) {
+//                                        params.put("key", new String[]{keyParam.replace("${filename}", filename)});
+//                                    } else {
+//                                        params.put("key", new String[]{filename});
+//                                    }
+//                                }
+//                                String contentType = item.getContentType();
+//                                if (contentType == null) {
+//                                    contentType = "application/octet-stream";
+//                                }
+//                                params.put(S3Constants.CONTENT_TYPE, new String[]{contentType});
+//                            }
+//                        }
+//                        if (contentFound && iter.hasNext())
+//                            throw new IncorrectNumberOfFilesInPostRequestException(params.get("key")[0], requestId);
+//
+//                        S3CallContext postContext = new S3CallContextImpl(req, resp, params, content);
+//                        repository.createObject(postContext, bucketName, params.get("key")[0]);
+//                        break;
                     case getobject:
-                        S3Object s3Object = repository.getObject(context, bucketName, objectkey);
-                        header.setContentLength(s3Object.getSize());
-                        header.setContentType(s3Object.getMimeType());
-                        context.setResponseHeader(header);
-                        context.setContent(s3Object.getContent());
+                        repository.getObject(context, bucketName, objectkey, false);
                         break;
                     case headobject:
+                        repository.getObject(context, bucketName, objectkey, true);
                         break;
                     case headbucket:
+                        repository.getBucket(context, bucketName);
                         break;
                     case deletebucket:
                         repository.deleteBucket(context, bucketName);
@@ -161,6 +201,7 @@ public class S3Servlet extends HttpServlet {
 
     }
 
+
     private void writeXmlResponse(Object content, HttpServletResponse resp, int status) throws JAXBException, IOException {
         resp.setContentType("application/xml");
         resp.setStatus(status);
@@ -177,7 +218,7 @@ public class S3Servlet extends HttpServlet {
     private Marshaller getMarshaller() throws JAXBException {
 
         Marshaller m = jaxbContext.createMarshaller();
-        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+       // m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         return m;
     }
 
@@ -195,9 +236,6 @@ public class S3Servlet extends HttpServlet {
         }
     }
 
-    private S3RequestId newRequestId() {
-        return () -> UUID.randomUUID().toString();
-    }
 
     private String getObjectKey(HttpServletRequest req) {
         String path = req.getPathInfo();
@@ -229,9 +267,10 @@ public class S3Servlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String bucket = getBucketName(req);
         String objectKey = getObjectKey(req);
-        if (bucket != null && objectKey != null) {
+        if (bucket != null) {
             dispatch(S3Call.postobject, req, resp, bucket, objectKey);
         }
+
     }
 
     @Override

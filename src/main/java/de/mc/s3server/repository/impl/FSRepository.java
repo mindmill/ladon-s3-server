@@ -9,6 +9,8 @@ import de.mc.s3server.exceptions.NoSuchKeyException;
 import de.mc.s3server.jaxb.entities.CreateBucketConfiguration;
 import de.mc.s3server.repository.api.S3Repository;
 import org.apache.tomcat.util.buf.HexUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -27,8 +29,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Simple FileSystem Repository
@@ -37,8 +42,11 @@ import java.util.stream.Collectors;
  */
 public class FSRepository implements S3Repository {
 
+    private Logger logger = LoggerFactory.getLogger(FSRepository.class);
+    private static final String DATA_FOLDER = "data";
+    private static final String META_FOLDER = "meta";
+
     public static final Predicate<Path> IS_DIRECTORY = p -> p.toFile().isDirectory();
-    public static final Predicate<Path> IS_FILE = p -> p.toFile().isFile();
     @Value("${s3server.fsrepo.baseurl}")
     private String fsrepoBaseUrl;
 
@@ -59,30 +67,29 @@ public class FSRepository implements S3Repository {
 
     @Override
     public void createBucket(S3CallContext callContext, String bucketName, CreateBucketConfiguration configuration) {
-        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
+        Path dataBucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
+        Path metaBucket = Paths.get(fsrepoBaseUrl, bucketName + ".xml");
         //if (bucket.toFile().exists())
         //  throw new BucketAlreadyExistsException(bucketName, callContext.getRequestId());
         try {
-            Files.createDirectories(bucket);
+            Files.createDirectories(dataBucket);
+            writeMetaFile(metaBucket, callContext);
         } catch (IOException e) {
+            logger.error("internal error", e);
             throw new InternalErrorException(bucketName, callContext.getRequestId());
         }
-    }
-
-    @Override
-    public void updateBucket(S3CallContext callContext, S3Bucket bucket) {
-
     }
 
 
     @Override
     public void deleteBucket(S3CallContext callContext, String bucketName) {
-        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
-        if (!bucket.toFile().exists())
+        Path dataBucket = Paths.get(fsrepoBaseUrl, bucketName);
+        Path metaBucket = Paths.get(fsrepoBaseUrl, bucketName + ".xml");
+        if (!dataBucket.toFile().exists())
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
 
         try {
-            Files.walkFileTree(bucket, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(dataBucket, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     throw new BucketNotEmptyException(bucketName, callContext.getRequestId());
@@ -94,7 +101,9 @@ public class FSRepository implements S3Repository {
                     return super.postVisitDirectory(dir, exc);
                 }
             });
+            Files.delete(metaBucket);
         } catch (IOException e) {
+            logger.error("internal error", e);
             throw new InternalErrorException(bucketName, callContext.getRequestId());
         }
 
@@ -103,10 +112,11 @@ public class FSRepository implements S3Repository {
 
     @Override
     public void createObject(S3CallContext callContext, String bucketName, String objectKey) {
-        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
-        if (!bucket.toFile().exists())
+        Path dataBucket = Paths.get(fsrepoBaseUrl, bucketName);
+        if (!dataBucket.toFile().exists())
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
-        Path obj = Paths.get(bucket.toString(), objectKey);
+        Path obj = Paths.get(dataBucket.toString(), DATA_FOLDER, objectKey);
+        Path meta = Paths.get(dataBucket.toString(), META_FOLDER, objectKey + ".xml");
         File objectFile = obj.toFile();
 
         try (InputStream in = callContext.getContent()) {
@@ -114,6 +124,7 @@ public class FSRepository implements S3Repository {
                 Files.createDirectories(obj.getParent());
                 Files.createFile(obj);
             }
+
             DigestInputStream din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
             OutputStream out = Files.newOutputStream(obj);
             StreamUtils.copy(din, out);
@@ -121,20 +132,27 @@ public class FSRepository implements S3Repository {
             header.setEtag(HexUtils.toHexString(din.getMessageDigest().digest()));
             header.setDate(new Date());
             callContext.setResponseHeader(header);
+
+            Files.createDirectories(meta.getParent());
+            writeMetaFile(meta, callContext);
+
         } catch (IOException | NoSuchAlgorithmException e) {
+            logger.error("internal error", e);
             throw new InternalErrorException(objectKey, callContext.getRequestId());
         }
     }
 
-    @Override
-    public void updateObject(S3CallContext callContext, String bucketName, S3Object object) {
-
+    private void writeMetaFile(Path meta, S3CallContext callContext) throws IOException {
+        Map<String, String> header = callContext.getHeader().getFullHeader();
+        Properties p = new Properties();
+        p.putAll(header);
+        p.storeToXML(Files.newOutputStream(meta), null);
     }
 
 
     @Override
-    public S3Object getObject(S3CallContext callContext, String bucketName, String objectKey) {
-        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
+    public void getObject(S3CallContext callContext, String bucketName, String objectKey, boolean head) {
+        Path bucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
         if (!bucket.toFile().exists())
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
         Path object = Paths.get(bucket.toString(), objectKey);
@@ -144,14 +162,25 @@ public class FSRepository implements S3Repository {
         String username = getUserPrincipal(callContext, object, objectKey);
 
         try {
-            return new S3ObjectImpl(objectKey,
-                    new Date(objectFile.lastModified()),
-                    bucketName,
-                    objectFile.length(),
-                    new S3UserImpl(username, username), new S3UserMetadataImpl(), Files.newInputStream(object), getMimeType(object));
+            S3ResponseHeader header = new S3ResponseHeaderImpl();
+            header.setContentLength(objectFile.length());
+            header.setContentType(getMimeType(object));
+            callContext.setResponseHeader(header);
+            if (!head)
+                callContext.setContent(Files.newInputStream(object));
         } catch (IOException e) {
+            logger.error("internal error", e);
             throw new InternalErrorException(objectKey, callContext.getRequestId());
         }
+    }
+
+    @Override
+    public void getBucket(S3CallContext callContext, String bucketName) {
+        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
+        if (!bucket.toFile().exists())
+            throw new NoSuchBucketException(bucketName, callContext.getRequestId());
+
+
     }
 
     @Override
@@ -161,12 +190,10 @@ public class FSRepository implements S3Repository {
         String prefix = callContext.getParams().getPrefix() != null ?
                 callContext.getParams().getPrefix() : "";
 
-        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
-
+        Path bucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
         try {
-            return new S3ListBucketResultImpl(false, bucketName, Files.walk(Paths.get(fsrepoBaseUrl, bucketName))
-                    .filter(p -> p.toFile().isFile())
-                    .filter(p -> bucket.relativize(p).toString().startsWith(prefix))
+            Long count = getPathStream(bucketName, prefix, bucket).limit(maxKeys + 1).count();
+            return new S3ListBucketResultImpl(count > maxKeys, bucketName, getPathStream(bucketName, prefix, bucket)
                     .limit(maxKeys)
                     .map(path -> {
                                 String key = bucket.relativize(path).toString();
@@ -179,6 +206,7 @@ public class FSRepository implements S3Repository {
                                             new S3UserMetadataImpl(),
                                             null, getMimeType(path));
                                 } catch (IOException e) {
+                                    logger.error("internal error", e);
                                     throw new InternalErrorException(bucketName, callContext.getRequestId());
                                 }
                             }
@@ -186,6 +214,12 @@ public class FSRepository implements S3Repository {
         } catch (IOException e) {
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
         }
+    }
+
+    private Stream<Path> getPathStream(String bucketName, String prefix, Path bucket) throws IOException {
+        return Files.walk(Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER))
+                .filter(p -> p.toFile().isFile())
+                .filter(p -> bucket.relativize(p).toString().startsWith(prefix));
     }
 
     private MimeType getMimeType(Path path) throws IOException {
@@ -199,6 +233,7 @@ public class FSRepository implements S3Repository {
         try {
             owner = ownerAttributeView.getOwner();
         } catch (IOException e) {
+            logger.error("internal error", e);
             throw new InternalErrorException(key, callContext.getRequestId());
         }
         return owner.getName();
@@ -206,16 +241,20 @@ public class FSRepository implements S3Repository {
 
     @Override
     public void deleteObject(S3CallContext callContext, String bucketName, String objectKey) {
-        Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
-        if (!bucket.toFile().exists())
+        Path bucketData = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
+        Path bucketMeta = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
+        if (!bucketData.toFile().exists())
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
-        Path object = Paths.get(bucket.toString(), objectKey);
-        if (!object.toFile().exists())
+        Path objectData = Paths.get(bucketData.toString(), objectKey);
+        Path objectMeta = Paths.get(bucketMeta.toString(), objectKey + ".xml");
+        if (!objectData.toFile().exists())
             throw new NoSuchKeyException(objectKey, callContext.getRequestId());
 
         try {
-            Files.delete(object);
+            Files.delete(objectData);
+            Files.delete(objectMeta);
         } catch (IOException e) {
+            logger.error("internal error", e);
             throw new InternalErrorException(objectKey, callContext.getRequestId());
         }
     }

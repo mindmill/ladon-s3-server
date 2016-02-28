@@ -4,8 +4,8 @@
 
 package de.mc.s3server.repository.api;
 
-import de.mc.s3server.jaxb.entities.CreateBucketConfiguration;
 import de.mc.s3server.entities.api.*;
+import de.mc.s3server.jaxb.entities.CreateBucketConfiguration;
 
 import java.util.List;
 
@@ -20,15 +20,11 @@ public interface S3Repository {
 
     void createBucket(S3CallContext callContext, String bucketName, CreateBucketConfiguration configuration);
 
-    void updateBucket(S3CallContext callContext, S3Bucket bucket);
-
     void deleteBucket(S3CallContext callContext, String bucketName);
 
     void createObject(S3CallContext callContext, String bucketName, String objectKey);
 
-    void updateObject(S3CallContext callContext, String bucketName, S3Object object);
-
-    S3Object getObject(S3CallContext callContext, String bucketName, String objectKey);
+    void getObject(S3CallContext callContext, String bucketName, String objectKey, boolean head);
 
     S3ListBucketResult listBucket(S3CallContext callContext, String bucketName);
 
@@ -36,4 +32,5 @@ public interface S3Repository {
 
     S3UserMetadata getObjectMetadata(S3CallContext callContext, String bucketName, String objectKey);
 
+    void getBucket(S3CallContext callContext, String bucketName);
 }

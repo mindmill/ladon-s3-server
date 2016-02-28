@@ -25,13 +25,15 @@ public class S3CallContextImpl implements S3CallContext {
     private HttpServletRequest request;
     private S3RequestHeader header;
     private S3RequestParams params;
+    private InputStream alternativeStream;
     private String requestId = UUID.randomUUID().toString();
 
-    public S3CallContextImpl(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> params) {
+    public S3CallContextImpl(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> params, InputStream... alternativeStream) {
         this.header = new S3RequestHeaderImpl(request);
         this.params = new S3RequestParamsImpl(params);
         this.request = request;
         this.response = response;
+        this.alternativeStream = alternativeStream.length > 0 ? alternativeStream[0] : null;
 
     }
 
@@ -57,8 +59,13 @@ public class S3CallContextImpl implements S3CallContext {
 
     @Override
     public InputStream getContent() throws IOException {
-       return request.getInputStream();
+        if (alternativeStream != null) {
+            return alternativeStream;
+        } else {
+            return request.getInputStream();
+        }
     }
+
 
     @Override
     public S3RequestHeader getHeader() {

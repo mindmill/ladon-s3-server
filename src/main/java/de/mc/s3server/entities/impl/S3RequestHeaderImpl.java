@@ -8,6 +8,9 @@ import de.mc.s3server.entities.api.S3ACL;
 import de.mc.s3server.entities.api.S3RequestHeader;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import static de.mc.s3server.common.S3Constants.*;
 
@@ -23,13 +26,21 @@ public class S3RequestHeaderImpl implements S3RequestHeader {
     }
 
 
+    @Override
+    public Map<String, String> getFullHeader() {
+        Map<String, String> result = new HashMap<>();
+        Enumeration<String> names = request.getHeaderNames();
+        while (names.hasMoreElements()) {
+            String name = names.nextElement();
+            result.put(name, request.getHeader(name));
+        }
+        return result;
+    }
+
     private String getHeader(String key) {
         return request.getHeader(key);
     }
 
-//    private Object getAttribute(String key) {
-//        return request.getAttribute(key);
-//    }
 
     @Override
     public Long getContentLength() {
