@@ -26,6 +26,7 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
     private Boolean xamzDeleteMarker;
     private String xamzRequestId;
     private String xamzVersionId;
+    private String xamzExpiration;
 
 
     public void setContentLength(Long contentLength) {
@@ -72,6 +73,11 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
         this.xamzVersionId = xamzVersionId;
     }
 
+    @Override
+    public void setXamzExpiration(String expiration) {
+        this.xamzExpiration = expiration;
+    }
+
     public static void appendHeaderToResponse(HttpServletResponse response, S3ResponseHeaderImpl header) {
         if (header.contentLength != null)
             response.setContentLengthLong(header.contentLength);
@@ -91,6 +97,7 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
             response.setHeader(X_AMZ_REQUEST_ID, header.xamzRequestId);
         if (header.xamzVersionId != null)
             response.setHeader(X_AMZ_VERSION_ID, header.xamzVersionId);
-
+        if (header.xamzExpiration != null)
+            response.setHeader(X_AMZ_EXPIRATION, header.xamzExpiration);
     }
 }

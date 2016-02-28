@@ -6,6 +6,8 @@ package de.mc.s3server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
 
 
 /**
@@ -13,7 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  * @author Ralf Ulrich
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class})
 public class SimpleS3ServerApplication {
 
     public static void main(String[] args) {

@@ -6,12 +6,14 @@ package de.mc.s3server.exceptions;
 
 import de.mc.s3server.entities.api.S3RequestId;
 
+import java.net.HttpURLConnection;
+
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
 public class InvalidSecurityException extends S3ServerException {
     public InvalidSecurityException(String resource, S3RequestId requestId) {
-        super("The provided security credentials are not valid.", resource, requestId);
+        super("The provided security credentials are not valid.", resource, requestId, HttpURLConnection.HTTP_FORBIDDEN);
     }
 
 }

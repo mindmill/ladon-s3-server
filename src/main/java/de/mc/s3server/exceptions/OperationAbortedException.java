@@ -6,12 +6,14 @@ package de.mc.s3server.exceptions;
 
 import de.mc.s3server.entities.api.S3RequestId;
 
+import java.net.HttpURLConnection;
+
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
 public class OperationAbortedException extends S3ServerException {
     public OperationAbortedException(String resource, S3RequestId requestId) {
-        super("A conflicting conditional operation is currently in progress against this resource. Try again.", resource, requestId);
+        super("A conflicting conditional operation is currently in progress against this resource. Try again.", resource, requestId, HttpURLConnection.HTTP_CONFLICT);
     }
 
 

@@ -6,12 +6,14 @@ package de.mc.s3server.exceptions;
 
 import de.mc.s3server.entities.api.S3RequestId;
 
+import java.net.HttpURLConnection;
+
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
 public class MaxMessageLengthExceededException extends S3ServerException {
     public MaxMessageLengthExceededException(String resource, S3RequestId requestId) {
-        super("Your request was too big.", resource, requestId);
+        super("Your request was too big.", resource, requestId, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
 

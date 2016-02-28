@@ -28,6 +28,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.springframework.boot</groupId>-->
+            <!--<artifactId>spring-boot-starter-ws</artifactId>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -39,28 +43,21 @@
             <artifactId>gson</artifactId>
             <version>2.2.4</version>
         </dependency>
+
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.10.54</version>
+            <version>1.9.11</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>19.0</version>
+        </dependency>
+
     </dependencies>
 
-    <developers>
-        <developer>
-            <name>Ralf Ulrich</name>
-            <email>ralf.ulrich@mind-consulting.de</email>
-            <organization>Mind Consulting UG</organization>
-            <organizationUrl>http://mind-consulting.de</organizationUrl>
-        </developer>
-    </developers>
-
-    <scm>
-        <connection>scm:git:git@github.com:mindmill/s3-java-server.git</connection>
-        <developerConnection>scm:git:git@github.com:mindmill/s3-java-server.git</developerConnection>
-        <url>git@github.com:mindmill/s3-java-server.git</url>
-    </scm>
     <build>
         <plugins>
             <plugin>

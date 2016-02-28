@@ -6,13 +6,15 @@ package de.mc.s3server.exceptions;
 
 import de.mc.s3server.entities.api.S3RequestId;
 
+import java.net.HttpURLConnection;
+
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
 public class InvalidLocationConstraintException extends S3ServerException {
 
     public InvalidLocationConstraintException(String resource, S3RequestId requestId) {
-        super("The specified location constraint is not valid", resource, requestId);
+        super("The specified location constraint is not valid", resource, requestId, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
 

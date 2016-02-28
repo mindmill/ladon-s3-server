@@ -6,12 +6,14 @@ package de.mc.s3server.exceptions;
 
 import de.mc.s3server.entities.api.S3RequestId;
 
+import java.net.HttpURLConnection;
+
 /**
  * Created by max on 20.02.16.
  */
 public class ExpiredTokenException extends S3ServerException {
     public ExpiredTokenException(String resource, S3RequestId requestId) {
-        super("The provided token has expired.", resource, requestId);
+        super("The provided token has expired.", resource, requestId, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
 

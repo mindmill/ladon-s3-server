@@ -1,5 +1,6 @@
 package de.mc.s3server.repository.impl;
 
+import de.mc.s3server.jaxb.entities.CreateBucketConfiguration;
 import de.mc.s3server.entities.api.*;
 import de.mc.s3server.entities.impl.*;
 import de.mc.s3server.exceptions.*;
@@ -50,7 +51,7 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public void createBucket(S3CallContext callContext, String bucketName) {
+    public void createBucket(S3CallContext callContext, String bucketName, CreateBucketConfiguration configuration) {
         Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
         //if (bucket.toFile().exists())
           //  throw new BucketAlreadyExistsException(bucketName, callContext.getRequestId());
@@ -94,14 +95,14 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public void createObject(S3CallContext callContext, String bucketName, S3Object s3Object) {
+    public void createObject(S3CallContext callContext, String bucketName, String objectKey) {
         Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
         if (!bucket.toFile().exists())
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
-        Path obj = Paths.get(bucket.toString(), s3Object.getKey());
+        Path obj = Paths.get(bucket.toString(), objectKey);
         File objectFile = obj.toFile();
 
-        try (InputStream in = s3Object.getContent()) {
+        try (InputStream in = callContext.getContent()) {
             if (!objectFile.exists()) {
                 Files.createDirectories(obj.getParent());
                 Files.createFile(obj);
@@ -109,7 +110,7 @@ public class FSRepository implements S3Repository {
             OutputStream out = Files.newOutputStream(obj);
             StreamUtils.copy(in, out);
         } catch (IOException e) {
-            throw new InternalErrorException(s3Object.getKey(), callContext.getRequestId());
+            throw new InternalErrorException(objectKey, callContext.getRequestId());
         }
     }
 
@@ -135,7 +136,7 @@ public class FSRepository implements S3Repository {
                     new Date(objectFile.lastModified()),
                     bucketName,
                     objectFile.length(),
-                    new S3UserImpl(username, username), new S3MetadataImpl(), Files.newInputStream(object), getMimeType(object));
+                    new S3UserImpl(username, username), new S3UserMetadataImpl(), Files.newInputStream(object), getMimeType(object));
         } catch (IOException e) {
             throw new InternalErrorException(objectKey, callContext.getRequestId());
         }
@@ -163,7 +164,7 @@ public class FSRepository implements S3Repository {
                                             new Date(path.toFile().lastModified()),
                                             bucketName, path.toFile().length(),
                                             new S3UserImpl(owner, owner),
-                                            new S3MetadataImpl(),
+                                            new S3UserMetadataImpl(),
                                             null, getMimeType(path));
                                 } catch (IOException e) {
                                     throw new InternalErrorException(bucketName, callContext.getRequestId());
@@ -208,7 +209,7 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public S3Metadata getObjectMetadata(S3CallContext callContext, String bucketName, String objectKey) {
+    public S3UserMetadata getObjectMetadata(S3CallContext callContext, String bucketName, String objectKey) {
         return null;
     }
 

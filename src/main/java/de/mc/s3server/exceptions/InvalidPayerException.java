@@ -6,12 +6,14 @@ package de.mc.s3server.exceptions;
 
 import de.mc.s3server.entities.api.S3RequestId;
 
+import java.net.HttpURLConnection;
+
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
 public class InvalidPayerException extends S3ServerException {
     public InvalidPayerException(String resource, S3RequestId requestId) {
-        super("All access to this object has been disabled.", resource, requestId);
+        super("All access to this object has been disabled.", resource, requestId, HttpURLConnection.HTTP_FORBIDDEN);
     }
 
 

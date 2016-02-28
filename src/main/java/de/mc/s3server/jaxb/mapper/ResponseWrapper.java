@@ -2,13 +2,13 @@
  * Copyright (c) 2016 Mind Consulting UG(haftungsbeschränkt)
  */
 
-package de.mc.s3server.controller.response.mapper;
+package de.mc.s3server.jaxb.mapper;
 
-import de.mc.s3server.controller.response.entities.*;
 import de.mc.s3server.entities.api.S3Bucket;
 import de.mc.s3server.entities.api.S3CallContext;
 import de.mc.s3server.entities.api.S3ListBucketResult;
 import de.mc.s3server.entities.api.S3User;
+import de.mc.s3server.jaxb.entities.*;
 
 import java.util.List;
 import java.util.stream.Collectors;

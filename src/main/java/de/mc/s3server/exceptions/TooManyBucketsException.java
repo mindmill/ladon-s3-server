@@ -6,12 +6,14 @@ package de.mc.s3server.exceptions;
 
 import de.mc.s3server.entities.api.S3RequestId;
 
+import java.net.HttpURLConnection;
+
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
 public class TooManyBucketsException extends S3ServerException {
     public TooManyBucketsException(String resource, S3RequestId requestId) {
-        super("You have attempt to create more buckets than allowed.", resource, requestId);
+        super("You have attempt to create more buckets than allowed.", resource, requestId, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
 

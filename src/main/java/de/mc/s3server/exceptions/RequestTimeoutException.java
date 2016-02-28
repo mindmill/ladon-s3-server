@@ -6,12 +6,14 @@ package de.mc.s3server.exceptions;
 
 import de.mc.s3server.entities.api.S3RequestId;
 
+import java.net.HttpURLConnection;
+
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
 public class RequestTimeoutException extends S3ServerException {
     public RequestTimeoutException(String resource, S3RequestId requestId) {
-        super("Request timeout", resource, requestId);
+        super("Request timeout", resource, requestId, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
 

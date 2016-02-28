@@ -6,13 +6,15 @@ package de.mc.s3server.exceptions;
 
 import de.mc.s3server.entities.api.S3RequestId;
 
+import java.net.HttpURLConnection;
+
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
 public class IncorrectNumberOfFilesInPostRequestException extends S3ServerException {
 
     public IncorrectNumberOfFilesInPostRequestException(String resource, S3RequestId requestId) {
-        super("POST requires exactly one file upload per request", resource, requestId);
+        super("POST requires exactly one file upload per request", resource, requestId, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
 

@@ -11,7 +11,7 @@ import de.mc.s3server.entities.api.S3RequestId;
  */
 public class SlowDownException extends S3ServerException {
     public SlowDownException(String resource, S3RequestId requestId) {
-        super("Reduce your request rate.", resource, requestId);
+        super("Reduce your request rate.", resource, requestId, 429);
     }
 
 

@@ -11,7 +11,8 @@ import de.mc.s3server.entities.api.S3RequestId;
  */
 public class InvalidRangeException extends S3ServerException {
     public InvalidRangeException(String resource, S3RequestId requestId) {
-        super("The requested range cannot be satisfied.", resource, requestId);
+        // THERE IS NO REQUESTED_RANGE_NOT_SATISFIABLE in HttpURLConnection
+        super("The requested range cannot be satisfied.", resource, requestId, 416);
     }
 
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2016 Mind Consulting UG(haftungsbeschränkt)
  */
 
-package de.mc.s3server.controller.response;
+package de.mc.s3server.jaxb;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.text.SimpleDateFormat;

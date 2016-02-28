@@ -156,6 +156,8 @@ public interface S3RequestHeader {
      * quest body until it receives an acknowledgment. If the message is
      * rejected based on the headers, the body of the message is not sent.
      * This header can be used only if you are sending a body.
+     * Type: String
+     * Default: None
      * Valid Values: 100-continue
      */
     String getExpect();
@@ -169,5 +171,51 @@ public interface S3RequestHeader {
      * automatically); optional for HTTP/1.0 requests.
      */
     String getHost();
+
+    /**
+     * The date and time at which the object is no longer cacheable.
+     * Type: String
+     * Default: None
+     */
+    String getExpires();
+
+    /**
+     * Can be used to specify caching behavior along the request/reply chain.
+     * Type: String
+     * Default: None
+     */
+    String getCacheControl();
+
+    /**
+     * Specifies presentational information for the object. e.g.
+     * Content-Disposition: attachment; filename="fname.ext"
+     * Type: String
+     * Default: None
+     */
+    String getContentDisposition();
+
+    /**
+     * Specifies what content encodings have been applied to the object and thus
+     * what decoding mechanisms must be applied to obtain
+     * the media-type referenced by the Content-Type header field.
+     * Type: String
+     * Default: None
+     */
+    String getContentEncoding();
+
+    /**
+     * f you don't specify, Standard is the default storage class. Amazon
+     * S3 supports other storage classes.
+     * Default: STANDARD
+     * Type: ENUM
+     */
+    String getStorageClass();
+
+
+    /**
+     * The  ACL to apply to the object.
+     */
+    S3ACL getAcl();
+
 
 }

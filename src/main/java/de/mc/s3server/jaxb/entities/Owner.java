@@ -2,7 +2,7 @@
  * Copyright (c) 2016 Mind Consulting UG(haftungsbeschränkt)
  */
 
-package de.mc.s3server.controller.response.entities;
+package de.mc.s3server.jaxb.entities;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;

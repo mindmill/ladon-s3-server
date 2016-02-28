@@ -110,4 +110,15 @@ public interface S3ResponseHeader {
      */
     void setXamzVersionId(String versionId);
 
+
+    /**
+     * If the object expiration is configured, the response
+     * includes this header. It includes the expiry-date and rule-id key-value pairs
+     * providing object expiration information. The value of the rule-id is URL encoded.
+     * Type: String
+     *
+     * @param expiration String with expiry-date and rule-id
+     */
+    void setXamzExpiration(String expiration);
+
 }

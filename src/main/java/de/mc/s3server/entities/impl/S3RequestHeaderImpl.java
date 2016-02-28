@@ -4,6 +4,7 @@
 
 package de.mc.s3server.entities.impl;
 
+import de.mc.s3server.entities.api.S3ACL;
 import de.mc.s3server.entities.api.S3RequestHeader;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,9 +27,9 @@ public class S3RequestHeaderImpl implements S3RequestHeader {
         return request.getHeader(key);
     }
 
-    private Object getAttribute(String key) {
-        return request.getAttribute(key);
-    }
+//    private Object getAttribute(String key) {
+//        return request.getAttribute(key);
+//    }
 
     @Override
     public Long getContentLength() {
@@ -109,5 +110,41 @@ public class S3RequestHeaderImpl implements S3RequestHeader {
     @Override
     public String getHost() {
         return getHeader(HOST);
+    }
+
+    @Override
+    public String getExpires() {
+        return getHeader(EXPIRES);
+    }
+
+    @Override
+    public String getCacheControl() {
+        return getHeader(CACHE_CONTROL);
+    }
+
+    @Override
+    public String getContentDisposition() {
+        return getHeader(CONTENT_DISPOSITION);
+    }
+
+    @Override
+    public String getContentEncoding() {
+        return getHeader(CONTENT_ENCODING);
+    }
+
+    @Override
+    public String getStorageClass() {
+        return getHeader(X_AMZ_STORAGE_CLASS);
+    }
+
+    @Override
+    public S3ACL getAcl() {
+        return new S3ACLImpl(
+                getHeader(X_AMZ_ACL),
+                getHeader(X_AMZ_GRANT_READ),
+                getHeader(X_AMZ_GRANT_WRITE),
+                getHeader(X_AMZ_GRANT_READ_ACP),
+                getHeader(X_AMZ_GRANT_WRITE_ACP),
+                getHeader(X_AMZ_GRANT_FULL_CONTROL));
     }
 }

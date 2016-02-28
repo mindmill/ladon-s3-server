@@ -7,7 +7,7 @@ package de.mc.s3server.entities.api;
 /**
  * @author Ralf Ulrich on 17.02.16.
  */
-public interface S3Metadata {
+public interface S3UserMetadata {
 
     String get(String key);
 

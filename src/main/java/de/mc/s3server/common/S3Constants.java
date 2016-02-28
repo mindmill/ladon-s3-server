@@ -211,4 +211,132 @@ public interface S3Constants {
      */
     String PREFIX = "prefix";
 
+
+    /**
+     * Can be used to specify caching behavior along the request/reply chain.
+     */
+    String CACHE_CONTROL = "Cache-Control";
+
+
+    /**
+     * Specifies presentational information for the object. e.g.
+     * Content-Disposition: attachment; filename="fname.ext"
+     */
+    String CONTENT_DISPOSITION = "Content-Disposition";
+
+
+    /**
+     * Specifies what content encodings have been applied to the object and thus
+     * what decoding mechanisms must be applied to obtain
+     * the media-type referenced by the Content-Type header field.
+     */
+    String CONTENT_ENCODING = "Content-Encoding";
+
+
+    /**
+     * The date and time at which the object is no longer cacheable.
+     */
+    String EXPIRES = "Expires";
+
+    /**
+     * The date and time at which the object is no longer cacheable.
+     */
+    String X_AMZ_EXPIRATION = "x-amz-expiration";
+
+    /**
+     * If you don't specify, Standard is the default storage class. Amazon
+     * S3 supports other storage classes.
+     */
+    String X_AMZ_STORAGE_CLASS = "x-amz-storage-class";
+
+    /**
+     * Headers starting with this prefix are user-defined metadata.
+     * No
+     * Within the PUT request header, the user-defined metadata is
+     * limited to 2 KB in size. User-defined metadata is a set of key-
+     * value pairs. The size of user-defined metadata is measured by
+     * taking the sum of the number of bytes in the UTF-8 encoding of
+     * each key and value. Amazon S3 doesn't validate or interpret
+     * user-defined metadata.
+     */
+    String X_AMZ_META_PREFIX = "x-amz-meta-";
+
+    /**
+     * If the bucket is configured as a website, redirects requests for
+     * this object to another object in the same bucket or to an external
+     * URL.
+     */
+    String X_AMZ_WEBSITE_REDIRECT_LOCATION = "x-amz-website-redirect-location";
+
+    /**
+     * The canned ACL to apply to the object.
+     * Type: String
+     * Default: private
+     * Valid Values: private | public-read | public-read-
+     * write | aws-exec-read | authenticated-read |
+     * bucket-owner-read | bucket-owner-full-control
+     */
+    String X_AMZ_ACL = "x-amz-acl";
+
+    /**
+     * Allows grantee to read the object/bucket data and its metadata.
+     * Type: String
+     * Default: None
+     * Constraints: None
+     */
+    String X_AMZ_GRANT_READ = "x-amz-grant-read";
+
+    /**
+     * This applies only when granting permission on a
+     * bucket.
+     * Type: String
+     * Default: None
+     * Constraints: None
+     */
+    String X_AMZ_GRANT_WRITE = "x-amz-grant-write";
+
+    /**
+     * Allows grantee to read the object/bucket ACL.
+     * Type: String
+     * Default: None
+     * Constraints: None
+     */
+    String X_AMZ_GRANT_READ_ACP = "x-amz-grant-read-acp";
+
+    /**
+     * Allows grantee to write the ACL for the applicable object.
+     * Type: String
+     * Default: None
+     * Constraints: None
+     */
+    String X_AMZ_GRANT_WRITE_ACP = "x-amz-grant-write-acp";
+
+    /**
+     * Allows grantee the READ, READ_ACP, and WRITE_ACP permissions on the object.
+     * Type: String
+     * Default: None
+     * Constraints: None
+     */
+    String X_AMZ_GRANT_FULL_CONTROL = "x-amz-grant-full-control";
+
+    /**
+     * The canned ACL to apply to the object.
+     */
+    enum CannedACL {
+        PRIVATE("private"),
+        PUBLIC_READ("public-read"),
+        PUBLIC_READ_WRITE("public-read-write"),
+        AWS_EXEC_READ("aws-exec-read"),
+        AUTHENTICATED_READ("authenticated-read"),
+        BUCKET_OWNER_READ("bucket-owner-read"),
+        BUCKET_OWNER_FULL_CONTROL("bucket-owner-full-control");
+
+        private String value;
+
+        CannedACL(String value) {
+            this.value = value;
+        }
+
+
+    }
 }

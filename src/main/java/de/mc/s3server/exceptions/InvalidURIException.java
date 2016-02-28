@@ -6,13 +6,15 @@ package de.mc.s3server.exceptions;
 
 import de.mc.s3server.entities.api.S3RequestId;
 
+import java.net.HttpURLConnection;
+
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
 public class InvalidURIException extends S3ServerException {
 
     public InvalidURIException(String resource, S3RequestId requestId) {
-        super("Couldn't parse the specified URI.", resource, requestId);
+        super("Couldn't parse the specified URI.", resource, requestId, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
 

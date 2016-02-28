@@ -4,6 +4,7 @@
 
 package de.mc.s3server.entities.api;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -18,6 +19,8 @@ public interface S3CallContext {
     S3RequestParams getParams();
 
     S3RequestId getRequestId();
+
+    InputStream getContent() throws IOException;
 
     void setResponseHeader(S3ResponseHeader responseHeader);
 
