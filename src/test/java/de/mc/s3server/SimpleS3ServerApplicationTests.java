@@ -9,7 +9,11 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.S3ClientOptions;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.IntegrationTest;
@@ -17,7 +21,14 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Example Integration Test
@@ -40,14 +51,61 @@ public class SimpleS3ServerApplicationTests {
     public void testListBuckets() {
         AmazonS3Client client = getClient();
         client.createBucket("test");
-
-        System.out.println(client.listBuckets());
-
-
         List<Bucket> buckets = client.listBuckets();
-        buckets.forEach(b ->
-                System.out.println(client.listObjects(b.getName()))
-        );
+        assertTrue(buckets.size() >= 1);
+    }
+
+    @Test
+    public void testListEmptyBucket() {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        ObjectListing listing = client.listObjects(b.getName());
+        assertEquals(0, listing.getObjectSummaries().size());
+    }
+
+    @Test
+    public void testListNonEmptyBucket() {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), new ObjectMetadata());
+        ObjectListing listing = client.listObjects(b.getName());
+        assertEquals(1, listing.getObjectSummaries().size());
+    }
+
+    @Test
+    public void testDeleteEmptyBucket() {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        int count = client.listBuckets().size();
+        ObjectListing listing = client.listObjects(b.getName());
+        assertEquals(0, listing.getObjectSummaries().size());
+        client.deleteBucket(b.getName());
+        assertEquals(count - 1, client.listBuckets().size());
+    }
+
+
+    @Test
+    public void testDeleteNonEmptyBucket() {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), new ObjectMetadata());
+        int count = client.listBuckets().size();
+        try{
+        client.deleteBucket(b.getName());}
+        catch (AmazonS3Exception e){
+            assertEquals(409,e.getStatusCode());
+        }
+        assertEquals(count, client.listBuckets().size());
+
+    }
+
+    @Test
+    public void testGetObject() throws IOException {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), new ObjectMetadata());
+        InputStream in = client.getObject(b.getName(), "test.txt").getObjectContent();
+        assertEquals("test", Streams.asString(in));
     }
 
 

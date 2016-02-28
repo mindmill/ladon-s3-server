@@ -93,6 +93,7 @@ public class S3Servlet extends HttpServlet {
     private void dispatch(S3Call call, HttpServletRequest req, HttpServletResponse resp, String bucketName, String objectkey) {
         S3CallContext context = new S3CallContextImpl(req, resp, req.getParameterMap());
         S3RequestId requestId = newRequestId();
+        S3ResponseHeaderImpl header = new S3ResponseHeaderImpl();
 
         try {
             try {
@@ -124,7 +125,6 @@ public class S3Servlet extends HttpServlet {
                         break;
                     case getobject:
                         S3Object s3Object = repository.getObject(context, bucketName, objectkey);
-                        S3ResponseHeaderImpl header = new S3ResponseHeaderImpl();
                         header.setContentLength(s3Object.getSize());
                         header.setContentType(s3Object.getMimeType());
                         context.setResponseHeader(header);
@@ -163,10 +163,10 @@ public class S3Servlet extends HttpServlet {
 
     private void writeXmlResponse(Object content, HttpServletResponse resp, int status) throws JAXBException, IOException {
         resp.setContentType("application/xml");
+        resp.setStatus(status);
         resp.setCharacterEncoding(Charsets.UTF_8.displayName());
         getMarshaller().marshal(content, resp.getOutputStream());
         resp.flushBuffer();
-        resp.setStatus(status);
     }
 
 

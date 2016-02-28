@@ -1,10 +1,14 @@
 package de.mc.s3server.repository.impl;
 
-import de.mc.s3server.jaxb.entities.CreateBucketConfiguration;
 import de.mc.s3server.entities.api.*;
 import de.mc.s3server.entities.impl.*;
-import de.mc.s3server.exceptions.*;
+import de.mc.s3server.exceptions.BucketNotEmptyException;
+import de.mc.s3server.exceptions.InternalErrorException;
+import de.mc.s3server.exceptions.NoSuchBucketException;
+import de.mc.s3server.exceptions.NoSuchKeyException;
+import de.mc.s3server.jaxb.entities.CreateBucketConfiguration;
 import de.mc.s3server.repository.api.S3Repository;
+import org.apache.tomcat.util.buf.HexUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -18,6 +22,9 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.UserPrincipal;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
@@ -54,7 +61,7 @@ public class FSRepository implements S3Repository {
     public void createBucket(S3CallContext callContext, String bucketName, CreateBucketConfiguration configuration) {
         Path bucket = Paths.get(fsrepoBaseUrl, bucketName);
         //if (bucket.toFile().exists())
-          //  throw new BucketAlreadyExistsException(bucketName, callContext.getRequestId());
+        //  throw new BucketAlreadyExistsException(bucketName, callContext.getRequestId());
         try {
             Files.createDirectories(bucket);
         } catch (IOException e) {
@@ -107,9 +114,14 @@ public class FSRepository implements S3Repository {
                 Files.createDirectories(obj.getParent());
                 Files.createFile(obj);
             }
+            DigestInputStream din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
             OutputStream out = Files.newOutputStream(obj);
-            StreamUtils.copy(in, out);
-        } catch (IOException e) {
+            StreamUtils.copy(din, out);
+            S3ResponseHeader header = new S3ResponseHeaderImpl();
+            header.setEtag(HexUtils.toHexString(din.getMessageDigest().digest()));
+            header.setDate(new Date());
+            callContext.setResponseHeader(header);
+        } catch (IOException | NoSuchAlgorithmException e) {
             throw new InternalErrorException(objectKey, callContext.getRequestId());
         }
     }
@@ -177,8 +189,8 @@ public class FSRepository implements S3Repository {
     }
 
     private MimeType getMimeType(Path path) throws IOException {
-        String mime =  Files.probeContentType(path);
-        return mime != null ? MimeType.valueOf(mime): MimeTypeUtils.APPLICATION_OCTET_STREAM;
+        String mime = Files.probeContentType(path);
+        return mime != null ? MimeType.valueOf(mime) : MimeTypeUtils.APPLICATION_OCTET_STREAM;
     }
 
     private String getUserPrincipal(S3CallContext callContext, Path path, String key) {

@@ -82,7 +82,7 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
         if (header.contentLength != null)
             response.setContentLengthLong(header.contentLength);
         if (header.contentType != null)
-            response.setContentType(header.contentType.getType());
+            response.setContentType(header.contentType.toString());
         if (header.connection != null)
             response.setHeader(CONNECTION, header.connection.name());
         if (header.date != null)
