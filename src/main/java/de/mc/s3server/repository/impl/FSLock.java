@@ -28,17 +28,29 @@ public class FSLock {
     public static final String LOCK_TYPE = "type";
     public static final String LOCK_USER = "user";
     public static final String LOCK_FILE_EXTENSION = ".lock";
+    public static final int LOCK_TIMEOUT = 3600 * 1000;
     private String type;
     private String user;
     private String time;
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
 
+    /**
+     * Possible types of the lock
+     */
     public enum LockType {
         read, write
     }
 
 
+    /**
+     * Create a lock object from reading an existing properties file.
+     *
+     * @param metaPath  meta data path of the bucket
+     * @param objectKey key of the object this lock is for
+     * @return a FSLock object loaded from the file
+     * @throws IOException if there is no file or it couldn't be read
+     */
     public static FSLock load(Path metaPath, String objectKey) throws IOException {
         Properties p = new Properties();
         Path lockPath = Paths.get(metaPath.toString(), objectKey + LOCK_FILE_EXTENSION);
@@ -49,6 +61,15 @@ public class FSLock {
 
     }
 
+    /**
+     * Deletes the lock file if allowed. That is if the user requesting the delete holds the lock
+     * or if the lock is obsolete.
+     *
+     * @param requestingUser user requesting delete of the lock file
+     * @param metaPath       meta data path of the bucket
+     * @param objectKey      key of the object this lock is for
+     * @throws IOException if the file can't be deleted
+     */
     public void delete(S3User requestingUser, Path metaPath, String objectKey) throws IOException {
         if (isUnlockAllowed(requestingUser)) {
             Path lockPath = Paths.get(metaPath.toString(), objectKey + LOCK_FILE_EXTENSION);
@@ -56,7 +77,13 @@ public class FSLock {
         }
     }
 
-
+    /**
+     * Save the FSLock as a properties file in the metaPath path.
+     *
+     * @param metaPath  meta data path of the bucket
+     * @param objectKey the key of the object this lock is for
+     * @throws IOException if the properties file can't be written
+     */
     public void save(Path metaPath, String objectKey) throws IOException {
         Path lockPath = Paths.get(metaPath.toString(), objectKey + LOCK_FILE_EXTENSION);
         try (OutputStream out = Files.newOutputStream(lockPath)) {
@@ -64,13 +91,24 @@ public class FSLock {
         }
     }
 
+    /**
+     * Create new FSLock with the given type and user
+     *
+     * @param type read or write type
+     * @param user the current user using this lock
+     */
     public FSLock(LockType type, S3User user) {
         this.type = type.name();
         this.user = user.getUserID();
         this.time = format.format(new Date());
     }
 
-    public FSLock(Properties p) {
+    /**
+     * Creates a new lock reading the info from a properties object
+     *
+     * @param p properties object with FSLock data
+     */
+    private FSLock(Properties p) {
         if (!p.isEmpty()) {
             this.type = p.getProperty(LOCK_TYPE);
             this.user = p.getProperty(LOCK_USER);
@@ -78,6 +116,11 @@ public class FSLock {
         }
     }
 
+    /**
+     * Simple conversion to a properties object
+     *
+     * @return properties object with the data of this lock
+     */
     public Properties toProperties() {
         Properties p = new Properties();
         p.setProperty(LOCK_TIME, time);
@@ -86,27 +129,51 @@ public class FSLock {
         return p;
     }
 
-
+    /**
+     * Set a new userid holding this lock
+     *
+     * @param user the user that updates this lock
+     */
     public void setUser(S3User user) {
         this.user = user.getUserID();
     }
 
+    /**
+     * Refresh the timestamp of the lock
+     */
     public void updateTime() {
         this.time = format.format(new Date());
     }
 
+    /**
+     * Tests whether the lock is still valid or just an obsolete file
+     *
+     * @return true if the lock is older than the timeout, false else
+     */
     public boolean isObsolete() {
         try {
-            return format.parse(time).getTime() < System.currentTimeMillis() - 3600 * 1000;
+            return format.parse(time).getTime() < System.currentTimeMillis() - LOCK_TIMEOUT;
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * Read locks can be aquired concurrently with this setting
+     *
+     * @param requestedLock type of the lock requested
+     * @return true if sharing is possible
+     */
     public boolean isSharingAllowed(LockType requestedLock) {
         return requestedLock == LockType.read && type.equals(LockType.read.name()) || isObsolete();
     }
 
+    /**
+     * Checks if it is save to delete the lock file
+     *
+     * @param requestingUser user requesting the unlock
+     * @return true if the lock can be deleted from the given user
+     */
     public boolean isUnlockAllowed(S3User requestingUser) {
         return user.equals(requestingUser.getUserID()) || isObsolete();
     }
