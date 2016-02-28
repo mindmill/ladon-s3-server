@@ -1,6 +1,9 @@
 package de.mc.s3server.repository.impl;
 
-import de.mc.s3server.entities.api.*;
+import de.mc.s3server.entities.api.S3Bucket;
+import de.mc.s3server.entities.api.S3CallContext;
+import de.mc.s3server.entities.api.S3ListBucketResult;
+import de.mc.s3server.entities.api.S3ResponseHeader;
 import de.mc.s3server.entities.impl.*;
 import de.mc.s3server.exceptions.BucketNotEmptyException;
 import de.mc.s3server.exceptions.InternalErrorException;
@@ -149,35 +152,17 @@ public class FSRepository implements S3Repository {
         p.storeToXML(Files.newOutputStream(meta), null);
     }
 
-    private void loadMetaFile(Path meta, S3CallContext callContext) {
-        try {
-            Properties p = new Properties();
-            p.loadFromXML(Files.newInputStream(meta));
-            S3Metadata userMetadata = new S3MetadataImpl(p);
-            S3ResponseHeader header = new S3ResponseHeaderImpl(userMetadata);
-            callContext.setResponseHeader(header);
-        } catch (IOException e) {
-            logger.error("error reading meta file", e);
-        }
-    }
 
     @Override
     public void getObject(S3CallContext callContext, String bucketName, String objectKey, boolean head) {
         Path bucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
-        Path bucketMeta = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
         if (!bucket.toFile().exists())
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
         Path object = Paths.get(bucket.toString(), objectKey);
-        Path objectMeta = Paths.get(bucketMeta.toString(), objectKey + ".xml");
         File objectFile = object.toFile();
-        File objectMetaFile = objectMeta.toFile();
         if (!objectFile.exists())
             throw new NoSuchKeyException(objectKey, callContext.getRequestId());
         String username = getUserPrincipal(callContext, object, objectKey);
-
-        if (objectMetaFile.exists()) {
-            loadMetaFile(objectMeta, callContext);
-        }
 
         try {
             S3ResponseHeader header = new S3ResponseHeaderImpl();
@@ -221,7 +206,7 @@ public class FSRepository implements S3Repository {
                                             new Date(path.toFile().lastModified()),
                                             bucketName, path.toFile().length(),
                                             new S3UserImpl(owner, owner),
-                                            new S3MetadataImpl(),
+                                            new S3UserMetadataImpl(),
                                             null, getMimeType(path));
                                 } catch (IOException e) {
                                     logger.error("internal error", e);
@@ -276,11 +261,5 @@ public class FSRepository implements S3Repository {
             throw new InternalErrorException(objectKey, callContext.getRequestId());
         }
     }
-
-    @Override
-    public S3Metadata getObjectMetadata(S3CallContext callContext, String bucketName, String objectKey) {
-        return null;
-    }
-
 
 }
