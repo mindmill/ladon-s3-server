@@ -153,7 +153,7 @@ public class FSRepository implements S3Repository {
         try {
             Properties p = new Properties();
             p.loadFromXML(Files.newInputStream(meta));
-            S3UserMetadata userMetadata = new S3UserMetadataImpl(p);
+            S3Metadata userMetadata = new S3MetadataImpl(p);
             S3ResponseHeader header = new S3ResponseHeaderImpl(userMetadata);
             callContext.setResponseHeader(header);
         } catch (IOException e) {
@@ -221,7 +221,7 @@ public class FSRepository implements S3Repository {
                                             new Date(path.toFile().lastModified()),
                                             bucketName, path.toFile().length(),
                                             new S3UserImpl(owner, owner),
-                                            new S3UserMetadataImpl(),
+                                            new S3MetadataImpl(),
                                             null, getMimeType(path));
                                 } catch (IOException e) {
                                     logger.error("internal error", e);
@@ -278,7 +278,7 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public S3UserMetadata getObjectMetadata(S3CallContext callContext, String bucketName, String objectKey) {
+    public S3Metadata getObjectMetadata(S3CallContext callContext, String bucketName, String objectKey) {
         return null;
     }
 

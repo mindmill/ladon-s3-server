@@ -30,7 +30,7 @@ public interface S3Repository {
 
     void deleteObject(S3CallContext callContext, String bucketName, String objectKey);
 
-    S3UserMetadata getObjectMetadata(S3CallContext callContext, String bucketName, String objectKey);
+    S3Metadata getObjectMetadata(S3CallContext callContext, String bucketName, String objectKey);
 
     void getBucket(S3CallContext callContext, String bucketName);
 }

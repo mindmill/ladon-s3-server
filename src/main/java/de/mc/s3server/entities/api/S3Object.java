@@ -30,7 +30,7 @@ public interface S3Object {
 
     String getBucket();
 
-    S3UserMetadata getMetadata();
+    S3Metadata getMetadata();
 
     InputStream getContent();
 

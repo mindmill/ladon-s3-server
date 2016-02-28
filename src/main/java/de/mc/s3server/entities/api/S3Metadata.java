@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author Ralf Ulrich on 17.02.16.
  */
-public interface S3UserMetadata {
+public interface S3Metadata {
 
     String get(String key);
 

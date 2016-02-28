@@ -5,7 +5,7 @@
 package de.mc.s3server.entities.impl;
 
 import de.mc.s3server.common.S3Constants;
-import de.mc.s3server.entities.api.S3UserMetadata;
+import de.mc.s3server.entities.api.S3Metadata;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
@@ -14,12 +14,12 @@ import java.util.Properties;
 /**
  * @author Ralf Ulrich on 21.02.16.
  */
-public class S3UserMetadataImpl extends HashMap<String, String> implements S3UserMetadata {
+public class S3MetadataImpl extends HashMap<String, String> implements S3Metadata {
 
-    public S3UserMetadataImpl() {
+    public S3MetadataImpl() {
     }
 
-    public S3UserMetadataImpl(Properties properties) {
+    public S3MetadataImpl(Properties properties) {
         properties.entrySet().stream()
                 .filter(e -> ((String) e.getKey()).startsWith(S3Constants.X_AMZ_META_PREFIX))
                 .forEach(e -> put((String) e.getKey(), (String) e.getValue()));

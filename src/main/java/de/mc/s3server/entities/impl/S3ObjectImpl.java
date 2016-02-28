@@ -5,7 +5,7 @@
 package de.mc.s3server.entities.impl;
 
 import de.mc.s3server.common.S3Constants;
-import de.mc.s3server.entities.api.S3UserMetadata;
+import de.mc.s3server.entities.api.S3Metadata;
 import de.mc.s3server.entities.api.S3Object;
 import de.mc.s3server.entities.api.S3User;
 import org.springframework.util.MimeType;
@@ -24,11 +24,11 @@ public class S3ObjectImpl implements S3Object {
     private Long size;
     private MimeType mimeType;
     private S3User owner;
-    private S3UserMetadata metadata;
+    private S3Metadata metadata;
     private InputStream content;
 
 
-    public S3ObjectImpl(String key, Date lastModified, String bucket, Long size, S3User owner, S3UserMetadata metadata, InputStream content, MimeType mimeType) {
+    public S3ObjectImpl(String key, Date lastModified, String bucket, Long size, S3User owner, S3Metadata metadata, InputStream content, MimeType mimeType) {
         this.key = key;
         this.lastModified = lastModified;
         this.bucket = bucket;
@@ -81,7 +81,7 @@ public class S3ObjectImpl implements S3Object {
 
 
     @Override
-    public S3UserMetadata getMetadata() {
+    public S3Metadata getMetadata() {
         return metadata;
     }
 
