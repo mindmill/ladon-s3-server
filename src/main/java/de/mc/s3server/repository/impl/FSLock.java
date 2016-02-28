@@ -54,11 +54,23 @@ public class FSLock {
     public static FSLock load(Path metaPath, String objectKey) throws IOException {
         Properties p = new Properties();
         Path lockPath = Paths.get(metaPath.toString(), objectKey + LOCK_FILE_EXTENSION);
+        if (!Files.exists(lockPath)) throw new IOException("lock file not found");
         try (InputStream in = Files.newInputStream(lockPath)) {
             p.loadFromXML(in);
         }
         return new FSLock(p);
 
+    }
+
+    /**
+     * Return the file of this lock;
+     *
+     * @param metaPath  meta data path of the bucket
+     * @param objectKey key of the object to lock
+     * @return the path of the lock file
+     */
+    public static Path getPath(Path metaPath, String objectKey) {
+        return Paths.get(metaPath.toString(), objectKey + LOCK_FILE_EXTENSION);
     }
 
     /**
@@ -72,7 +84,7 @@ public class FSLock {
      */
     public void delete(S3User requestingUser, Path metaPath, String objectKey) throws IOException {
         if (isUnlockAllowed(requestingUser)) {
-            Path lockPath = Paths.get(metaPath.toString(), objectKey + LOCK_FILE_EXTENSION);
+            Path lockPath = metaPath.resolve(objectKey + LOCK_FILE_EXTENSION);
             Files.delete(lockPath);
         }
     }
@@ -85,7 +97,7 @@ public class FSLock {
      * @throws IOException if the properties file can't be written
      */
     public void save(Path metaPath, String objectKey) throws IOException {
-        Path lockPath = Paths.get(metaPath.toString(), objectKey + LOCK_FILE_EXTENSION);
+        Path lockPath = metaPath.resolve(objectKey + LOCK_FILE_EXTENSION);
         try (OutputStream out = Files.newOutputStream(lockPath)) {
             toProperties().storeToXML(out, null);
         }
@@ -158,15 +170,6 @@ public class FSLock {
         }
     }
 
-    /**
-     * Read locks can be aquired concurrently with this setting
-     *
-     * @param requestedLock type of the lock requested
-     * @return true if sharing is possible
-     */
-    public boolean isSharingAllowed(LockType requestedLock) {
-        return requestedLock == LockType.read && type.equals(LockType.read.name()) || isObsolete();
-    }
 
     /**
      * Checks if it is save to delete the lock file

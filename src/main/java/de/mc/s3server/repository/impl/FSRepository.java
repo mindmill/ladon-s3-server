@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 public class FSRepository implements S3Repository {
 
 
+    public static final String META_XML_EXTENSION = "_meta.xml";
     private Logger logger = LoggerFactory.getLogger(FSRepository.class);
     private static final String DATA_FOLDER = "data";
     private static final String META_FOLDER = "meta";
@@ -67,7 +68,7 @@ public class FSRepository implements S3Repository {
     public void createBucket(S3CallContext callContext, String bucketName, CreateBucketConfiguration configuration) {
         Path dataBucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
         Path metaBucket = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
-        Path metaBucketFile = Paths.get(fsrepoBaseUrl, bucketName + ".xml");
+        Path metaBucketFile = Paths.get(fsrepoBaseUrl, bucketName + META_XML_EXTENSION);
         //if (bucket.toFile().exists())
         //  throw new BucketAlreadyExistsException(bucketName, callContext.getRequestId());
         try {
@@ -84,7 +85,7 @@ public class FSRepository implements S3Repository {
     @Override
     public void deleteBucket(S3CallContext callContext, String bucketName) {
         Path dataBucket = Paths.get(fsrepoBaseUrl, bucketName);
-        Path metaBucket = Paths.get(fsrepoBaseUrl, bucketName + ".xml");
+        Path metaBucket = Paths.get(fsrepoBaseUrl, bucketName + META_XML_EXTENSION);
         if (!Files.exists(dataBucket))
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
 
@@ -116,8 +117,8 @@ public class FSRepository implements S3Repository {
         Path metaBucket = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
         if (!Files.exists(dataBucket))
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
-        Path obj = Paths.get(dataBucket.toString(), objectKey);
-        Path meta = Paths.get(metaBucket.toString(), objectKey + ".xml");
+        Path obj = dataBucket.resolve(objectKey);
+        Path meta = metaBucket.resolve(objectKey + META_XML_EXTENSION);
 
 
         lock(metaBucket, objectKey, FSLock.LockType.write, callContext);
@@ -139,7 +140,7 @@ public class FSRepository implements S3Repository {
             writeMetaFile(meta, callContext);
 
         } catch (IOException | NoSuchAlgorithmException e) {
-            logger.error("internal error", e);
+            //logger.error("internal error", e);
             throw new InternalErrorException(objectKey, callContext.getRequestId());
         } finally {
             unlock(metaBucket, objectKey, callContext);
@@ -149,22 +150,21 @@ public class FSRepository implements S3Repository {
 
     @Override
     public void getObject(S3CallContext callContext, String bucketName, String objectKey, boolean head) {
-        Path bucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
+        Path bucketData = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
         Path bucketMeta = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
-        if (!Files.exists(bucket))
+        if (!Files.exists(bucketData))
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
-        Path object = Paths.get(bucket.toString(), objectKey);
-        Path objectMeta = Paths.get(bucketMeta.toString(), objectKey + ".xml");
+        Path object = bucketData.resolve(objectKey);
+        Path objectMeta = bucketMeta.resolve(objectKey + META_XML_EXTENSION);
 
         if (!Files.exists(object))
             throw new NoSuchKeyException(objectKey, callContext.getRequestId());
-        String username = getUserPrincipal(callContext, object, objectKey);
 
+        lock(bucketMeta, objectKey, FSLock.LockType.read, callContext);
         if (Files.exists(objectMeta)) {
             loadMetaFile(objectMeta, callContext);
         }
 
-        lock(bucketMeta, objectKey, FSLock.LockType.read, callContext);
         try {
             S3ResponseHeader header = new S3ResponseHeaderImpl();
             header.setContentLength(Files.size(object));
@@ -251,8 +251,8 @@ public class FSRepository implements S3Repository {
         Path bucketMeta = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
         if (!Files.exists(bucketData))
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
-        Path objectData = Paths.get(bucketData.toString(), objectKey);
-        Path objectMeta = Paths.get(bucketMeta.toString(), objectKey + ".xml");
+        Path objectData = bucketData.resolve(objectKey);
+        Path objectMeta = bucketMeta.resolve(objectKey + META_XML_EXTENSION);
         if (!Files.exists(objectData))
             throw new NoSuchKeyException(objectKey, callContext.getRequestId());
 
@@ -270,26 +270,18 @@ public class FSRepository implements S3Repository {
 
 
     private void lock(Path metaPath, String objectKey, FSLock.LockType lockType, S3CallContext callContext) {
-        FSLock lock = null;
+        FSLock lock;
         try {
-            lock = FSLock.load(metaPath, objectKey);
-            if (lock.isSharingAllowed(lockType)) {
-                lock.setUser(callContext.getUser());
-                lock.updateTime();
-                lock.save(metaPath, objectKey);
-            } else {
-                throw new OperationAbortedException(objectKey, callContext.getRequestId());
+            if (Files.exists(FSLock.getPath(metaPath, objectKey))) {
+                lock = FSLock.load(metaPath, objectKey);
+                if (!lock.isObsolete()) {
+                    throw new OperationAbortedException(objectKey, callContext.getRequestId());
+                }
             }
-        } catch (IOException e) {
-            logger.debug("resource not locked", e);
-        }
-        if (lock == null) {
             lock = new FSLock(lockType, callContext.getUser());
-            try {
-                lock.save(metaPath, objectKey);
-            } catch (IOException e) {
-                throw new InternalErrorException(objectKey, callContext.getRequestId());
-            }
+            lock.save(metaPath, objectKey);
+        } catch (IOException e) {
+            throw new InternalErrorException(objectKey, callContext.getRequestId());
         }
     }
 
