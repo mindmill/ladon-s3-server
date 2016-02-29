@@ -17,7 +17,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Simple file system lock object based on properties
+ * Simple file system lock object. This is useful when using multiple server instances on the same file system.
+ * One Server won't need it since it prevents concurrent access on resources.
  *
  * @author Ralf Ulrich on 28.02.16.
  */

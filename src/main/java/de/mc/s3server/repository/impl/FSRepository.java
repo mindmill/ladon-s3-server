@@ -140,7 +140,7 @@ public class FSRepository implements S3Repository {
             writeMetaFile(meta, callContext);
 
         } catch (IOException | NoSuchAlgorithmException e) {
-            //logger.error("internal error", e);
+            logger.error("internal error", e);
             throw new InternalErrorException(objectKey, callContext.getRequestId());
         } finally {
             unlock(metaBucket, objectKey, callContext);
