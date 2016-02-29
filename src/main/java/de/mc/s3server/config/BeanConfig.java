@@ -7,8 +7,6 @@ package de.mc.s3server.config;
 import de.mc.s3server.repository.api.S3Repository;
 import de.mc.s3server.repository.impl.FSRepository;
 import de.mc.s3server.servlet.S3Servlet;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -21,11 +19,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class BeanConfig {
-    @Value("${s3server.api.base.url}")
-    String baseUrl;
 
-    @Autowired
-    S3Repository repository;
 
     @ConditionalOnMissingBean
     @Bean
@@ -34,11 +28,12 @@ public class BeanConfig {
     }
 
     @Bean
-    ServletRegistrationBean s3ServletRegistrationBean() {
+    ServletRegistrationBean s3Registration(S3ServletConfiguration config, S3Repository repository) {
         ServletRegistrationBean bean = new ServletRegistrationBean();
         bean.setName("s3servlet");
-        bean.addUrlMappings(baseUrl + "/*");
-        bean.setServlet(new S3Servlet(repository));
+        bean.setAsyncSupported(true);
+        bean.addUrlMappings(config.getBaseUrl() + "/*");
+        bean.setServlet(new S3Servlet(repository, config.getThreadPoolSize()));
         return bean;
     }
 

@@ -46,7 +46,7 @@ public class FSRepository implements S3Repository {
 
 
     public static final Predicate<Path> IS_DIRECTORY = p -> Files.isDirectory(p);
-    @Value("${s3server.fsrepo.baseurl}")
+    @Value("${s3server.fsrepo.root}")
     private String fsrepoBaseUrl;
 
 

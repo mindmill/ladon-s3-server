@@ -23,6 +23,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,60 +52,49 @@ public class FSStorageTests {
 
     @Test
     public void testFSLockConcurrentAccess() throws IOException, InterruptedException {
-        AmazonS3Client client1 = getClient();
-        AmazonS3Client client2 = getClient();
-        AmazonS3Client client3 = getClient();
+
 
         ObjectMetadata meta1 = new ObjectMetadata();
         meta1.addUserMetadata("test", "1111111111");
-        ObjectMetadata meta2 = new ObjectMetadata();
-        meta1.addUserMetadata("test", "2222222222");
-        ObjectMetadata meta3 = new ObjectMetadata();
-        meta1.addUserMetadata("test", "3333333333");
-        Bucket b = client1.createBucket(UUID.randomUUID().toString());
+        Bucket b = getClient().createBucket(UUID.randomUUID().toString());
 
-        service.execute(() -> {
-            for (int i = 0; i < 100; i++) {
-                client1.putObject(b.getName(), "test.txt", new ByteArrayInputStream("1111111111".getBytes()), meta1);
-                try {
-                    if (i > 0)
-                        assertEquals(10, Streams.asString(client1.getObject(b.getName(), "test.txt").getObjectContent()).chars().count());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-//        service.execute(() -> {
-//            for (int i = 0; i < 100; i++) {
-//                client2.putObject(b.getName(), "test.txt", new ByteArrayInputStream("2222222222".getBytes()), meta2);
-//                try {
-//                    if (i > 0)
-//                        assertEquals(10, Streams.asString(client2.getObject(b.getName(), "test.txt").getObjectContent()).chars().count());
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//        });
-//
-//        service.execute(() -> {
-//            for (int i = 0; i < 100; i++) {
-//                client3.putObject(b.getName(), "test.txt", new ByteArrayInputStream("3333333333".getBytes()), meta3);
-//                try {
-//                    if (i > 0)
-//                        assertEquals(10, Streams.asString(client3.getObject(b.getName(), "test.txt").getObjectContent()).chars().count());
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//        });
+        for (int j = 0; j < 10; j++) {
+            final int finalJ = j;
+            executeOnBucket(meta1, b, finalJ,"1111111111");
+            executeOnBucket(meta1, b, finalJ,"2222222222");
+            executeOnBucket(meta1, b, finalJ,"3333333333");
+        }
+
+
         service.shutdown();
         service.awaitTermination(1, TimeUnit.MINUTES);
-        S3Object object1 = client1.getObject(b.getName(), "test.txt");
+        S3Object object1 = getClient().getObject(b.getName(), "test1.txt");
         String content = Streams.asString(object1.getObjectContent());
         String meta = object1.getObjectMetadata().getUserMetadata().get("test");
 
         assertEquals(1, content.chars().distinct().count());
         assertEquals(1, meta.chars().distinct().count());
+    }
+
+    private void executeOnBucket(ObjectMetadata meta1, Bucket b, int finalJ, String content) {
+        service.execute(() -> {
+            AmazonS3Client c = getClient();
+            Random random  = new Random(System.currentTimeMillis());
+            for (int i = 0; i < 10; i++) {
+                c.putObject(b.getName(), "test"+ finalJ +".txt", new ByteArrayInputStream(content.getBytes()), meta1);
+                try {
+                    Thread.sleep(random.nextInt(10));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    if (i > 0)
+                        assertEquals(10, Streams.asString(c.getObject(b.getName(), "test"+ finalJ +".txt").getObjectContent()).chars().count());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
 

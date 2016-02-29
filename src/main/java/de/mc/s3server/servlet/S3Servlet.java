@@ -12,6 +12,7 @@ import de.mc.s3server.entities.impl.S3UserImpl;
 import de.mc.s3server.exceptions.InternalErrorException;
 import de.mc.s3server.exceptions.NotImplementedException;
 import de.mc.s3server.exceptions.S3ServerException;
+import de.mc.s3server.executor.HashBasedExecutor;
 import de.mc.s3server.jaxb.entities.*;
 import de.mc.s3server.jaxb.entities.Error;
 import de.mc.s3server.jaxb.mapper.ResponseWrapper;
@@ -19,6 +20,7 @@ import de.mc.s3server.repository.api.S3Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -39,12 +41,13 @@ import java.net.HttpURLConnection;
  */
 public class S3Servlet extends HttpServlet {
 
-    private Logger logger = LoggerFactory.getLogger(S3Servlet.class);
+    private final Logger logger = LoggerFactory.getLogger(S3Servlet.class);
 
-    private JAXBContext jaxbContext;
+    private final JAXBContext jaxbContext;
 
+    private final HashBasedExecutor executor;
 
-    private S3Repository repository;
+    private final S3Repository repository;
 
     private enum S3Call {
         listmybuckets,
@@ -61,8 +64,9 @@ public class S3Servlet extends HttpServlet {
     }
 
 
-    public S3Servlet(S3Repository repository) {
+    public S3Servlet(S3Repository repository, int threadPoolSize) {
         this.repository = repository;
+        this.executor = new HashBasedExecutor(threadPoolSize);
         try {
             jaxbContext = JAXBContext.newInstance(
                     Bucket.class,
@@ -76,6 +80,7 @@ public class S3Servlet extends HttpServlet {
             throw new RuntimeException(e);
         }
     }
+
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -95,70 +100,73 @@ public class S3Servlet extends HttpServlet {
     private void dispatch(S3Call call, HttpServletRequest req, HttpServletResponse resp, String bucketName, String objectkey) {
         S3CallContext context = new S3CallContextImpl(req, resp, new S3UserImpl("DEFAULT", "SYSTEM"), req.getParameterMap());
         S3RequestId requestId = context.getRequestId();
-
-        try {
+        AsyncContext asyncContext = req.startAsync(req, resp);
+        executor.execute(bucketName + objectkey, () -> {
             try {
-                switch (call) {
-                    case listmybuckets:
-                        writeXmlResponse(ResponseWrapper.listAllMyBucketsResult(context.getUser(),
-                                repository.listAllBuckets(context)),
-                                resp,
-                                HttpServletResponse.SC_OK);
-                        break;
-                    case listbucket:
-                        writeXmlResponse(ResponseWrapper.listBucketResult(context, repository.listBucket(context, bucketName)),
-                                resp,
-                                HttpServletResponse.SC_OK);
-                        break;
-                    case putbucket:
-                        CreateBucketConfiguration config;
-                        try (InputStream in = req.getInputStream()) {
-                            config = (CreateBucketConfiguration) getUnmarshaller().unmarshal(in);
-                        } catch (JAXBException e) {
-                            config = new CreateBucketConfiguration("STANDARD");
-                        }
-                        repository.createBucket(context, bucketName, config);
-                        break;
-                    case putobject:
-                        repository.createObject(context, bucketName, objectkey);
-                        break;
-                    case postbucket:
-                        throw new NotImplementedException(bucketName, requestId);
-                    case postobject:
-                        throw new NotImplementedException(bucketName, requestId);
-                    case getobject:
-                        repository.getObject(context, bucketName, objectkey, false);
-                        break;
-                    case headobject:
-                        repository.getObject(context, bucketName, objectkey, true);
-                        break;
-                    case headbucket:
-                        repository.getBucket(context, bucketName);
-                        break;
-                    case deletebucket:
-                        repository.deleteBucket(context, bucketName);
-                        resp.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
-                        break;
-                    case deleteobject:
-                        repository.deleteObject(context, bucketName, objectkey);
-                        resp.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
-                        break;
+                try {
+                    switch (call) {
+                        case listmybuckets:
+                            writeXmlResponse(ResponseWrapper.listAllMyBucketsResult(context.getUser(),
+                                    repository.listAllBuckets(context)),
+                                    resp,
+                                    HttpServletResponse.SC_OK);
+                            break;
+                        case listbucket:
+                            writeXmlResponse(ResponseWrapper.listBucketResult(context, repository.listBucket(context, bucketName)),
+                                    resp,
+                                    HttpServletResponse.SC_OK);
+                            break;
+                        case putbucket:
+                            CreateBucketConfiguration config;
+                            try (InputStream in = req.getInputStream()) {
+                                config = (CreateBucketConfiguration) getUnmarshaller().unmarshal(in);
+                            } catch (JAXBException e) {
+                                config = new CreateBucketConfiguration("STANDARD");
+                            }
+                            repository.createBucket(context, bucketName, config);
+                            break;
+                        case putobject:
+                            repository.createObject(context, bucketName, objectkey);
+                            break;
+                        case postbucket:
+                            throw new NotImplementedException(bucketName, requestId);
+                        case postobject:
+                            throw new NotImplementedException(bucketName, requestId);
+                        case getobject:
+                            repository.getObject(context, bucketName, objectkey, false);
+                            break;
+                        case headobject:
+                            repository.getObject(context, bucketName, objectkey, true);
+                            break;
+                        case headbucket:
+                            repository.getBucket(context, bucketName);
+                            break;
+                        case deletebucket:
+                            repository.deleteBucket(context, bucketName);
+                            resp.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
+                            break;
+                        case deleteobject:
+                            repository.deleteObject(context, bucketName, objectkey);
+                            resp.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
+                            break;
+                    }
+                } catch (JAXBException e) {
+                    logger.error("error procession xml " + requestId.get(), e);
+                    throw new InternalErrorException(objectkey, requestId);
+                } catch (IOException e) {
+                    logger.error("error procession stream " + requestId.get(), e);
+                    throw new InternalErrorException(objectkey, requestId);
                 }
-            } catch (JAXBException e) {
-                logger.error("error procession xml " + requestId.get(), e);
-                throw new InternalErrorException(objectkey, requestId);
-            } catch (IOException e) {
-                logger.error("error procession stream " + requestId.get(), e);
-                throw new InternalErrorException(objectkey, requestId);
+            } catch (S3ServerException e) {
+                try {
+                    writeXmlResponse(new Error(e), resp, e.getResponseStatus());
+                } catch (Exception e1) {
+                    logger.error("Error writing error response " + requestId.get(), e1);
+                }
+            } finally {
+                asyncContext.complete();
             }
-        } catch (S3ServerException e) {
-            try {
-                writeXmlResponse(new Error(e), resp, e.getResponseStatus());
-            } catch (Exception e1) {
-                logger.error("Error writing error response " + requestId.get(), e1);
-            }
-        }
-
+        });
 
     }
 
@@ -258,5 +266,13 @@ public class S3Servlet extends HttpServlet {
         }
     }
 
+    @Override
+    public void destroy() {
+        try {
+            executor.shutdown(10);
+        } catch (InterruptedException e) {
+            logger.error("error while executor shutdown", e);
+        }
+    }
 
 }
