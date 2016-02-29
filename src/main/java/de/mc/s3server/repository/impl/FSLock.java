@@ -7,15 +7,14 @@ package de.mc.s3server.repository.impl;
 import de.mc.s3server.entities.api.S3User;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
-import java.util.Properties;
+import java.util.List;
 
 /**
  * Simple file system lock object based on properties
@@ -24,11 +23,10 @@ import java.util.Properties;
  */
 public class FSLock {
 
-    public static final String LOCK_TIME = "time";
-    public static final String LOCK_TYPE = "type";
-    public static final String LOCK_USER = "user";
+
     public static final String LOCK_FILE_EXTENSION = ".lock";
     public static final int LOCK_TIMEOUT = 3600 * 1000;
+    public static final String SPLIT_MARKER = ">-//-<";
     private String type;
     private String user;
     private String time;
@@ -52,13 +50,11 @@ public class FSLock {
      * @throws IOException if there is no file or it couldn't be read
      */
     public static FSLock load(Path metaPath, String objectKey) throws IOException {
-        Properties p = new Properties();
+
         Path lockPath = Paths.get(metaPath.toString(), objectKey + LOCK_FILE_EXTENSION);
         if (!Files.exists(lockPath)) throw new IOException("lock file not found");
-        try (InputStream in = Files.newInputStream(lockPath)) {
-            p.loadFromXML(in);
-        }
-        return new FSLock(p);
+        List<String> lines = Files.readAllLines(lockPath);
+        return new FSLock(lines.get(0));
 
     }
 
@@ -98,9 +94,7 @@ public class FSLock {
      */
     public void save(Path metaPath, String objectKey) throws IOException {
         Path lockPath = metaPath.resolve(objectKey + LOCK_FILE_EXTENSION);
-        try (OutputStream out = Files.newOutputStream(lockPath)) {
-            toProperties().storeToXML(out, null);
-        }
+        Files.write(lockPath, Collections.singletonList(toString()));
     }
 
     /**
@@ -116,29 +110,26 @@ public class FSLock {
     }
 
     /**
-     * Creates a new lock reading the info from a properties object
+     * Creates a new lock reading the info from a string
      *
-     * @param p properties object with FSLock data
+     * @param lockString a string representing the lock
      */
-    private FSLock(Properties p) {
-        if (!p.isEmpty()) {
-            this.type = p.getProperty(LOCK_TYPE);
-            this.user = p.getProperty(LOCK_USER);
-            this.time = p.getProperty(LOCK_TIME);
+    private FSLock(String lockString) {
+        if (lockString != null) {
+            String[] parts = lockString.split(SPLIT_MARKER);
+            this.type = parts[0];
+            this.user = parts[1];
+            this.time = parts[2];
         }
     }
 
     /**
-     * Simple conversion to a properties object
+     * Simple conversion to a string
      *
-     * @return properties object with the data of this lock
+     * @return string with the data of this lock
      */
-    public Properties toProperties() {
-        Properties p = new Properties();
-        p.setProperty(LOCK_TIME, time);
-        p.setProperty(LOCK_TYPE, type);
-        p.setProperty(LOCK_USER, user);
-        return p;
+    public String toString() {
+        return type + SPLIT_MARKER + user + SPLIT_MARKER + time;
     }
 
     /**
