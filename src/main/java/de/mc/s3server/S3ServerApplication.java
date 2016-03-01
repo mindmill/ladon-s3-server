@@ -16,9 +16,13 @@ import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
  * @author Ralf Ulrich
  */
 @SpringBootApplication(exclude = {DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class})
-public class SimpleS3ServerApplication {
+public class S3ServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SimpleS3ServerApplication.class, args);
+        SpringApplication app = new SpringApplication(S3ServerApplication.class);
+        app.setBanner((environment, aClass, printStream) -> {
+            printStream.append("Mind S3 Server\n");
+        });
+        app.run(args);
     }
 }

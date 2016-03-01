@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
  * @author Ralf Ulrich
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = SimpleS3ServerApplication.class)
+@SpringApplicationConfiguration(classes = S3ServerApplication.class)
 @WebAppConfiguration
 @IntegrationTest("server.port:8080")
 public class FSStorageTests {
