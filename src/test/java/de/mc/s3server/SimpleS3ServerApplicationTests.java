@@ -4,6 +4,7 @@
 
 package de.mc.s3server;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -13,6 +14,8 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -106,6 +109,58 @@ public class SimpleS3ServerApplicationTests {
         client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), new ObjectMetadata());
         InputStream in = client.getObject(b.getName(), "test.txt").getObjectContent();
         assertEquals("test", Streams.asString(in));
+    }
+
+    @Test
+    public void testPutObjectNoMd5NoLength() throws IOException {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        ObjectMetadata meta = new ObjectMetadata();
+        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
+
+    }
+
+    @Test(expected = AmazonS3Exception.class)
+    public void testPutObjectWrongMd5() throws IOException {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        String md5 = Base64.encodeBase64String(DigestUtils.md5("test1"));
+        ObjectMetadata meta = new ObjectMetadata();
+        meta.setContentMD5(md5);
+        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
+
+    }
+
+    @Test(expected = AmazonClientException.class)
+    public void testPutObjectWrongLengthRightMd5() throws IOException {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        String md5 = Base64.encodeBase64String(DigestUtils.md5("test"));
+        ObjectMetadata meta = new ObjectMetadata();
+        meta.setContentMD5(md5);
+        meta.setContentLength(5);
+        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
+
+    }
+
+    @Test
+    public void testPutObjectWithMd5AndLength() throws IOException {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        ObjectMetadata meta = new ObjectMetadata();
+        String md5 = Base64.encodeBase64String(DigestUtils.md5("test"));
+        meta.setContentMD5(md5);
+        meta.setContentLength(4);
+        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
+    }
+
+    @Test
+    public void testPutObjectWithoutAndLength() throws IOException {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        ObjectMetadata meta = new ObjectMetadata();
+        meta.setContentLength(4);
+        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
     }
 
     @Test

@@ -1,17 +1,17 @@
 package de.mc.s3server.repository.impl;
 
+import com.google.common.io.BaseEncoding;
+import de.mc.s3server.common.StreamUtils;
 import de.mc.s3server.entities.api.*;
 import de.mc.s3server.entities.impl.*;
 import de.mc.s3server.exceptions.*;
 import de.mc.s3server.jaxb.entities.CreateBucketConfiguration;
 import de.mc.s3server.repository.api.S3Repository;
-import org.apache.tomcat.util.buf.HexUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -120,6 +120,8 @@ public class FSRepository implements S3Repository {
         Path obj = dataBucket.resolve(objectKey);
         Path meta = metaBucket.resolve(objectKey + META_XML_EXTENSION);
 
+        Long contentLength = callContext.getHeader().getContentLength();
+        String md5 = callContext.getHeader().getContentMD5();
 
         lock(metaBucket, objectKey, FSLock.LockType.write, callContext);
         try (InputStream in = callContext.getContent()) {
@@ -130,10 +132,22 @@ public class FSRepository implements S3Repository {
 
             DigestInputStream din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
             OutputStream out = Files.newOutputStream(obj);
-            StreamUtils.copy(din, out);
+
+            long bytesCopied = StreamUtils.copy(din, out);
+            byte[] md5bytes = din.getMessageDigest().digest();
+            String storageMd5base64 = BaseEncoding.base64().encode(md5bytes);
+            String storageMd5base16 = BaseEncoding.base16().encode(md5bytes);
+
+            if (contentLength != null && contentLength != bytesCopied
+                    || md5 != null && !md5.equals(storageMd5base64)) {
+                Files.delete(obj);
+                Files.deleteIfExists(meta);
+                throw new InvalidDigestException(objectKey, callContext.getRequestId());
+            }
+
             S3ResponseHeader header = new S3ResponseHeaderImpl();
-            header.setEtag(HexUtils.toHexString(din.getMessageDigest().digest()));
-            header.setDate(new Date());
+            header.setEtag(storageMd5base16);
+            header.setDate(new Date(Files.getLastModifiedTime(obj).toMillis()));
             callContext.setResponseHeader(header);
 
             Files.createDirectories(meta.getParent());
@@ -141,6 +155,9 @@ public class FSRepository implements S3Repository {
 
         } catch (IOException | NoSuchAlgorithmException e) {
             logger.error("internal error", e);
+            throw new InternalErrorException(objectKey, callContext.getRequestId());
+        } catch (InterruptedException e) {
+            logger.error("interrupted thread", e);
             throw new InternalErrorException(objectKey, callContext.getRequestId());
         } finally {
             unlock(metaBucket, objectKey, callContext);
