@@ -23,7 +23,7 @@ All you have to do is provide a bean of this type.
 
 The request base path for the controller is configured with a property:
 ```properties
-s3server.api.base.url=/api/s3
+s3server.baseUrl=/api/s3
 ```
 For a quick start there is an example for a file system storage added.
 ```java
@@ -33,7 +33,7 @@ If you want to use it, you have to specify the root directory where it will stor
 Default is: {user.home}/.s3server
 
 ```properties
-s3server.fsrepo.baseurl=${user.home}/.s3server
+s3server.fsrepo.root=${user.home}/.s3server
 ```
 
 Supported so far are only basic S3 operations, no authentication, no ACL, no policies, no torrent ....
