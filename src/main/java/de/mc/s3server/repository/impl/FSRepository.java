@@ -215,8 +215,10 @@ public class FSRepository implements S3Repository {
 
         Path bucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
         try {
-            Long count = getPathStream(bucketName, prefix, bucket).limit(maxKeys + 1).count();
-            return new S3ListBucketResultImpl(count > maxKeys, bucketName, getPathStream(bucketName, prefix, bucket)
+            Long count = getPathStream(bucketName, prefix, bucket, marker).limit(maxKeys + 1).count();
+
+
+            return new S3ListBucketResultImpl(count > maxKeys, bucketName, getPathStream(bucketName, prefix, bucket, marker)
                     .limit(maxKeys)
                     .map(path -> {
                                 String key = bucket.relativize(path).toString();
@@ -239,10 +241,19 @@ public class FSRepository implements S3Repository {
         }
     }
 
-    private Stream<Path> getPathStream(String bucketName, String prefix, Path bucket) throws IOException {
-        return Files.walk(Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER))
-                .filter(p -> Files.isRegularFile(p))
-                .filter(p -> bucket.relativize(p).toString().startsWith(prefix));
+    private Stream<Path> getPathStream(String bucketName, String prefix, Path bucket, String marker) throws IOException {
+        final Boolean[] markerFound = new Boolean[]{marker == null};
+        return Files.walk(Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER)).sorted()
+                .filter(p -> {
+                    String relpath = bucket.relativize(p).toString();
+                    boolean include = markerFound[0];
+                    if (!markerFound[0]) {
+                        markerFound[0] = relpath.equals(marker);
+                    }
+                    return Files.isRegularFile(p)
+                            && relpath.startsWith(prefix)
+                            && include;
+                });
     }
 
     private MimeType getMimeType(Path path) throws IOException {
