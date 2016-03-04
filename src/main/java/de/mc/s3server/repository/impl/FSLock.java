@@ -95,6 +95,7 @@ public class FSLock {
      */
     public void save(Path metaPath, String objectKey) throws IOException {
         Path lockPath = metaPath.resolve(objectKey + LOCK_FILE_EXTENSION);
+        Files.createDirectories(lockPath.getParent());
         Files.write(lockPath, Collections.singletonList(toString()));
     }
 
@@ -133,21 +134,7 @@ public class FSLock {
         return type + SPLIT_MARKER + user + SPLIT_MARKER + time;
     }
 
-    /**
-     * Set a new userid holding this lock
-     *
-     * @param user the user that updates this lock
-     */
-    public void setUser(S3User user) {
-        this.user = user.getUserID();
-    }
 
-    /**
-     * Refresh the timestamp of the lock
-     */
-    public void updateTime() {
-        this.time = format.format(new Date());
-    }
 
     /**
      * Tests whether the lock is still valid or just an obsolete file
