@@ -4,9 +4,9 @@
 
 package de.mc.s3server.entities.impl;
 
+import de.mc.s3server.common.StreamUtils;
 import de.mc.s3server.entities.api.*;
 import de.mc.s3server.exceptions.InternalErrorException;
-import org.springframework.util.StreamUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,7 +52,7 @@ public class S3CallContextImpl implements S3CallContext {
         try (InputStream in = inputStream) {
             StreamUtils.copy(in, response.getOutputStream());
             response.flushBuffer();
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new InternalErrorException("", getRequestId());
         }
     }
