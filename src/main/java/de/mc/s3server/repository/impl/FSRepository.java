@@ -6,7 +6,7 @@ import de.mc.s3server.entities.api.*;
 import de.mc.s3server.entities.impl.*;
 import de.mc.s3server.exceptions.*;
 import de.mc.s3server.jaxb.entities.CreateBucketConfiguration;
-import de.mc.s3server.jaxb.entities.FSStorageMeta;
+import de.mc.s3server.jaxb.fsmeta.FSStorageMeta;
 import de.mc.s3server.repository.api.S3Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
