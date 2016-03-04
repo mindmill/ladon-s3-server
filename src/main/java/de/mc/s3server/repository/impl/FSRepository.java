@@ -6,6 +6,7 @@ import de.mc.s3server.entities.api.*;
 import de.mc.s3server.entities.impl.*;
 import de.mc.s3server.exceptions.*;
 import de.mc.s3server.jaxb.entities.CreateBucketConfiguration;
+import de.mc.s3server.jaxb.entities.FSStorageMeta;
 import de.mc.s3server.repository.api.S3Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,7 +30,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,10 +43,19 @@ public class FSRepository implements S3Repository {
 
 
     public static final String META_XML_EXTENSION = "_meta.xml";
+    private final JAXBContext jaxbContext;
     private Logger logger = LoggerFactory.getLogger(FSRepository.class);
     private static final String DATA_FOLDER = "data";
     private static final String META_FOLDER = "meta";
 
+
+    public FSRepository() {
+        try {
+            jaxbContext = JAXBContext.newInstance(FSStorageMeta.class);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static final Predicate<Path> IS_DIRECTORY = p -> Files.isDirectory(p);
     @Value("${s3server.fsrepo.root}")
@@ -75,7 +87,7 @@ public class FSRepository implements S3Repository {
             Files.createDirectories(dataBucket);
             Files.createDirectories(metaBucket);
             writeMetaFile(metaBucketFile, callContext);
-        } catch (IOException e) {
+        } catch (IOException | JAXBException e) {
             logger.error("internal error", e);
             throw new InternalErrorException(bucketName, callContext.getRequestId());
         }
@@ -153,7 +165,7 @@ public class FSRepository implements S3Repository {
             Files.createDirectories(meta.getParent());
             writeMetaFile(meta, callContext);
 
-        } catch (IOException | NoSuchAlgorithmException e) {
+        } catch (IOException | NoSuchAlgorithmException | JAXBException e) {
             logger.error("internal error", e);
             throw new InternalErrorException(objectKey, callContext.getRequestId());
         } catch (InterruptedException e) {
@@ -327,24 +339,24 @@ public class FSRepository implements S3Repository {
         }
     }
 
-    private void writeMetaFile(Path meta, S3CallContext callContext) throws IOException {
+    private void writeMetaFile(Path meta, S3CallContext callContext) throws IOException, JAXBException {
         Map<String, String> header = callContext.getHeader().getFullHeader();
-        Properties p = new Properties();
-        p.putAll(header);
+        Files.createDirectories(meta.getParent());
         try (OutputStream out = Files.newOutputStream(meta)) {
-            p.storeToXML(out, null);
+            Marshaller m = jaxbContext.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            m.marshal(new FSStorageMeta(header), out);
         }
     }
 
 
     private void loadMetaFile(Path meta, S3CallContext callContext) {
         try (InputStream in = Files.newInputStream(meta)) {
-            Properties p = new Properties();
-            p.loadFromXML(in);
-            S3Metadata userMetadata = new S3MetadataImpl(p);
+            FSStorageMeta metaData = (FSStorageMeta) jaxbContext.createUnmarshaller().unmarshal(in);
+            S3Metadata userMetadata = new S3MetadataImpl(metaData.getMeta());
             S3ResponseHeader header = new S3ResponseHeaderImpl(userMetadata);
             callContext.setResponseHeader(header);
-        } catch (IOException e) {
+        } catch (IOException | JAXBException e) {
             logger.error("error reading meta file", e);
         }
     }
