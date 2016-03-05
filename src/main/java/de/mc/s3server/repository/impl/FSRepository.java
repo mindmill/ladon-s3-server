@@ -22,8 +22,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileOwnerAttributeView;
-import java.nio.file.attribute.UserPrincipal;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -67,8 +65,7 @@ public class FSRepository implements S3Repository {
         try {
             return Files.list(Paths.get(fsrepoBaseUrl)).filter(IS_DIRECTORY).map(
                     path -> {
-                        String principal = getUserPrincipal(callContext, path, path.getFileName().toString());
-                        return new S3BucketImpl(path.getFileName().toString(), new Date(path.toFile().lastModified()), new S3UserImpl(principal, principal));
+                        return new S3BucketImpl(path.getFileName().toString(), new Date(path.toFile().lastModified()), new S3UserImpl());
                     }
             ).collect(Collectors.toList());
         } catch (IOException e) {
@@ -234,12 +231,11 @@ public class FSRepository implements S3Repository {
                     .limit(maxKeys)
                     .map(path -> {
                                 String key = bucket.relativize(path).toString();
-                                String owner = getUserPrincipal(callContext, path, key);
                                 try {
                                     return new S3ObjectImpl(key,
                                             new Date(path.toFile().lastModified()),
                                             bucketName, path.toFile().length(),
-                                            new S3UserImpl(owner, owner),
+                                            new S3UserImpl(),
                                             new S3MetadataImpl(),
                                             null, getMimeType(path));
                                 } catch (IOException e) {
@@ -273,17 +269,6 @@ public class FSRepository implements S3Repository {
         return mime != null ? MimeType.valueOf(mime) : MimeTypeUtils.APPLICATION_OCTET_STREAM;
     }
 
-    private String getUserPrincipal(S3CallContext callContext, Path path, String key) {
-        FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
-        UserPrincipal owner;
-        try {
-            owner = ownerAttributeView.getOwner();
-        } catch (IOException e) {
-            logger.error("internal error", e);
-            throw new InternalErrorException(key, callContext.getRequestId());
-        }
-        return owner.getName();
-    }
 
     @Override
     public void deleteObject(S3CallContext callContext, String bucketName, String objectKey) {
@@ -308,6 +293,11 @@ public class FSRepository implements S3Repository {
         }
     }
 
+    @Override
+    public S3User getUser(String authorization) {
+        if (authorization == null) return null;
+        return null;
+    }
 
     private void lock(Path metaPath, String objectKey, FSLock.LockType lockType, S3CallContext callContext) {
         FSLock lock;
