@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class ResponseWrapper {
 
     public static ListAllMyBucketsResult listAllMyBucketsResult(S3User user, List<S3Bucket> buckets) {
-        ListAllMyBucketsResult result = new ListAllMyBucketsResult(new Owner(user.getUserID(), user.getUserName()));
+        ListAllMyBucketsResult result = new ListAllMyBucketsResult(new Owner(user.getUserId(), user.getUserName()));
         result.setBucketList(buckets.stream().map(b -> new Bucket(b.getBucketName(), b.getCreationDate())).collect(Collectors.toList()));
         return result;
 
@@ -27,7 +27,7 @@ public class ResponseWrapper {
 
     public static ListBucketResult listBucketResult(S3CallContext callContext, S3ListBucketResult list) {
         return new ListBucketResult(callContext, list.getBucketName(),
-                list.getObjects().stream().map(o -> new Contents(new Owner(o.getOwner().getUserID(), o.getOwner().getUserName()),
+                list.getObjects().stream().map(o -> new Contents(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
                         o.getKey(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass()))
                         .collect(Collectors.toList()), list.isTruncated());
     }
