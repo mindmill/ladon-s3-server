@@ -107,7 +107,7 @@ public class FSLock {
      */
     public FSLock(LockType type, S3User user) {
         this.type = type.name();
-        this.user = user.getUserID();
+        this.user = user.getUserId();
         this.time = format.format(new Date());
     }
 
@@ -157,7 +157,7 @@ public class FSLock {
      * @return true if the lock can be deleted from the given user
      */
     public boolean isUnlockAllowed(S3User requestingUser) {
-        return user.equals(requestingUser.getUserID()) || isObsolete();
+        return user.equals(requestingUser.getUserId()) || isObsolete();
     }
 
 
