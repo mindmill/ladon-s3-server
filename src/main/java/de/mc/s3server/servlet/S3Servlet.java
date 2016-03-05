@@ -106,7 +106,7 @@ public class S3Servlet extends HttpServlet {
         executor.execute(bucketName + objectkey, () -> {
             try {
                 try {
-                    if (!Validator.isValidBucketName(bucketName)) {
+                    if (bucketName != null && !Validator.isValidBucketName(bucketName)) {
                         throw new InvalidBucketName(bucketName, context.getRequestId());
                     }
                     switch (call) {

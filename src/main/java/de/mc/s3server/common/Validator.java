@@ -13,7 +13,7 @@ public class Validator {
     }
 
     public static boolean isValidBucketName(String name) {
-        return !name.contains("..") && !name.contains("/") && !name.contains("\\");
+        return name != null && !name.contains("..") && !name.contains("/") && !name.contains("\\");
     }
 
 }
