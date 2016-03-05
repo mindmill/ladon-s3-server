@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * @author Ralf Ulrich on 04.03.16.
  */
-@XmlRootElement(name = "fsmeta")
+@XmlRootElement(name = "FsMeta")
 public class FSStorageMeta {
 
     private Map<String, String> meta;
@@ -24,8 +24,8 @@ public class FSStorageMeta {
         this.meta = meta;
     }
 
-    @XmlElement(name = "data")
-    @XmlElementWrapper(name = "entries")
+    @XmlElement(name = "Data")
+    @XmlElementWrapper(name = "Entries")
     public Map<String, String> getMeta() {
         return meta;
     }
