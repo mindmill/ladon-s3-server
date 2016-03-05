@@ -5,11 +5,13 @@
 package de.mc.s3server.servlet;
 
 import com.google.common.base.Charsets;
+import de.mc.s3server.common.Validator;
 import de.mc.s3server.entities.api.S3CallContext;
 import de.mc.s3server.entities.api.S3RequestId;
 import de.mc.s3server.entities.impl.S3CallContextImpl;
 import de.mc.s3server.entities.impl.S3UserImpl;
 import de.mc.s3server.exceptions.InternalErrorException;
+import de.mc.s3server.exceptions.InvalidBucketName;
 import de.mc.s3server.exceptions.NotImplementedException;
 import de.mc.s3server.exceptions.S3ServerException;
 import de.mc.s3server.executor.HashBasedExecutor;
@@ -104,6 +106,9 @@ public class S3Servlet extends HttpServlet {
         executor.execute(bucketName + objectkey, () -> {
             try {
                 try {
+                    if (!Validator.isValidBucketName(bucketName)) {
+                        throw new InvalidBucketName(bucketName, context.getRequestId());
+                    }
                     switch (call) {
                         case listmybuckets:
                             writeXmlResponse(ResponseWrapper.listAllMyBucketsResult(context.getUser(),
