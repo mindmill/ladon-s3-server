@@ -9,9 +9,14 @@ package de.mc.s3server.entities.api;
  */
 public interface S3User {
 
-    String getUserID();
+    String getUserId();
 
     String getUserName();
 
+    String getSecretKey();
+
+    String getPublicKey();
+
+    String getEmail();
 
 }

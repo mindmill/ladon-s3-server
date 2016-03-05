@@ -6,6 +6,7 @@ package de.mc.s3server.entities.impl;
 
 import de.mc.s3server.entities.api.S3RequestParams;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static de.mc.s3server.common.S3Constants.*;
@@ -20,8 +21,14 @@ public class S3RequestParamsImpl implements S3RequestParams {
     private String marker;
     private Integer maxKeys;
     private String prefix;
+    private Map<String,String> allParams;
 
     public S3RequestParamsImpl(Map<String, String[]> requestParams) {
+        allParams = new HashMap<>(requestParams.size());
+        for (String p : requestParams.keySet()){
+            allParams.put(p,requestParams.get(p)[0]);
+        }
+
         this.delimiter = getFirstOrNull(DELIMITER, requestParams);
         this.encodingType = getFirstOrNull(ENCODING_TYPE, requestParams);
         this.marker = getFirstOrNull(MARKER, requestParams);
@@ -65,5 +72,9 @@ public class S3RequestParamsImpl implements S3RequestParams {
     @Override
     public String getPrefix() {
         return prefix;
+    }
+
+    public Map<String, String> getAllParams() {
+        return allParams;
     }
 }

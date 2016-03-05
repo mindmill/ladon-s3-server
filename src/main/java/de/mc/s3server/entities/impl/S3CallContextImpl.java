@@ -7,6 +7,7 @@ package de.mc.s3server.entities.impl;
 import de.mc.s3server.common.StreamUtils;
 import de.mc.s3server.entities.api.*;
 import de.mc.s3server.exceptions.InternalErrorException;
+import de.mc.s3server.repository.api.S3Repository;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,14 +28,22 @@ public class S3CallContextImpl implements S3CallContext {
     private S3RequestParams params;
     private String requestId = UUID.randomUUID().toString();
     private S3User user;
+    private String method;
+    private String uri;
+    private final String queryString;
 
-    public S3CallContextImpl(HttpServletRequest request, HttpServletResponse response, S3User user, Map<String, String[]> params) {
+    public S3CallContextImpl(HttpServletRequest request, HttpServletResponse response, S3Repository repository, Map<String, String[]> params) {
         this.header = new S3RequestHeaderImpl(request);
         this.params = new S3RequestParamsImpl(params);
         this.request = request;
+        this.method = request.getMethod();
+        this.uri = request.getRequestURI();
+        this.queryString = request.getQueryString();
         this.response = response;
-        this.user = user;
+        if (header.getAuthorization() != null) {
+            this.user = repository.getUser(header.getAuthorization());
 
+        }
     }
 
     @Override
@@ -78,4 +87,17 @@ public class S3CallContextImpl implements S3CallContext {
         return params;
     }
 
+    @Override
+    public String getMethod() {
+        return method;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    @Override
+    public String getQueryString() {
+        return queryString;
+    }
 }

@@ -22,6 +22,12 @@ public interface S3CallContext {
 
     S3RequestId getRequestId();
 
+    String getMethod();
+
+    String getUri();
+
+    String getQueryString();
+
     InputStream getContent() throws IOException;
 
     void setResponseHeader(S3ResponseHeader responseHeader);

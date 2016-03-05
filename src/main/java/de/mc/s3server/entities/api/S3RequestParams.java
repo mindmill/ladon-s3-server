@@ -4,6 +4,8 @@
 
 package de.mc.s3server.entities.api;
 
+import java.util.Map;
+
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
@@ -74,4 +76,11 @@ public interface S3RequestParams {
      * @return the prefix to use or null
      */
     String getPrefix();
+
+    /**
+     * Get all params as a simple Map. Notice: only the first value is added, multivalue is not supported
+     *
+     * @return Map with all param keys and the first param value
+     */
+    Map<String, String> getAllParams();
 }
