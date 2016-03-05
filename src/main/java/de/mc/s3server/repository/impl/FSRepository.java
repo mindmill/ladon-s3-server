@@ -296,7 +296,7 @@ public class FSRepository implements S3Repository {
     @Override
     public S3User getUser(String authorization) {
         if (authorization == null) return null;
-        return null;
+        return new S3UserImpl("SYSTEM", "DEFAULT", "","","");
     }
 
     private void lock(Path metaPath, String objectKey, FSLock.LockType lockType, S3CallContext callContext) {
