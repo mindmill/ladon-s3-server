@@ -9,7 +9,6 @@ import de.mc.s3server.common.Validator;
 import de.mc.s3server.entities.api.S3CallContext;
 import de.mc.s3server.entities.api.S3RequestId;
 import de.mc.s3server.entities.impl.S3CallContextImpl;
-import de.mc.s3server.entities.impl.S3UserImpl;
 import de.mc.s3server.exceptions.InternalErrorException;
 import de.mc.s3server.exceptions.InvalidBucketName;
 import de.mc.s3server.exceptions.NotImplementedException;
@@ -100,7 +99,7 @@ public class S3Servlet extends HttpServlet {
     }
 
     private void dispatch(S3Call call, HttpServletRequest req, HttpServletResponse resp, String bucketName, String objectkey) {
-        S3CallContext context = new S3CallContextImpl(req, resp, new S3UserImpl("DEFAULT", "SYSTEM"), req.getParameterMap());
+        S3CallContext context = new S3CallContextImpl(req, resp, repository, req.getParameterMap());
         S3RequestId requestId = context.getRequestId();
         AsyncContext asyncContext = req.startAsync(req, resp);
         executor.execute(bucketName + objectkey, () -> {

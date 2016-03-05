@@ -7,6 +7,7 @@ package de.mc.s3server.repository.api;
 import de.mc.s3server.entities.api.S3Bucket;
 import de.mc.s3server.entities.api.S3CallContext;
 import de.mc.s3server.entities.api.S3ListBucketResult;
+import de.mc.s3server.entities.api.S3User;
 import de.mc.s3server.jaxb.entities.CreateBucketConfiguration;
 
 import java.util.List;
@@ -112,4 +113,11 @@ public interface S3Repository {
      * @param bucketName  name of the bucket
      */
     void getBucket(S3CallContext callContext, String bucketName);
+
+    /**
+     *
+     * @param authorization
+     * @return
+     */
+    S3User getUser(String authorization);
 }
