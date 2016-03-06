@@ -295,7 +295,7 @@ public class FSRepository implements S3Repository {
 
     @Override
     public S3User getUser(String authorization) {
-        if (authorization == null) return null;
+        //if (authorization == null) return null;
         return new S3UserImpl("SYSTEM", "DEFAULT", "","","");
     }
 

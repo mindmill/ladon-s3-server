@@ -40,10 +40,9 @@ public class S3CallContextImpl implements S3CallContext {
         this.uri = request.getRequestURI();
         this.queryString = request.getQueryString();
         this.response = response;
-        if (header.getAuthorization() != null) {
+       // if (header.getAuthorization() != null) {
             this.user = repository.getUser(header.getAuthorization());
-
-        }
+       // }
     }
 
     @Override
