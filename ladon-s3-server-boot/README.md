@@ -1,7 +1,6 @@
 # Ladon S3 Spring Boot Starter
 Runs the Ladon S3 Servlet with Spring Boot and Embedded Tomcat
 
-### Start:
 Build the project with maven and run the jar:
 ```bash
 mvn package && java -jar target/s3-server-{version}.jar
