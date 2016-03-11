@@ -48,7 +48,7 @@ public class S3Servlet extends HttpServlet {
 
     private final HashBasedExecutor executor;
 
-    private final S3Repository repository;
+    private S3Repository repository;
 
     private enum S3Call {
         listmybuckets,
@@ -65,8 +65,7 @@ public class S3Servlet extends HttpServlet {
     }
 
 
-    public S3Servlet(S3Repository repository, int threadPoolSize) {
-        this.repository = repository;
+    public S3Servlet(int threadPoolSize) {
         this.executor = new HashBasedExecutor(threadPoolSize);
         try {
             jaxbContext = JAXBContext.newInstance(
@@ -279,4 +278,8 @@ public class S3Servlet extends HttpServlet {
         }
     }
 
+    //additional support for lazy setting
+    public void setRepository(S3Repository repository) {
+        this.repository = repository;
+    }
 }

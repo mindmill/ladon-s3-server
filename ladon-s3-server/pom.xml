@@ -16,9 +16,25 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${groupId}.${artifactId}</Bundle-SymbolicName>
+                        <Export-Package>de.mc.ladon.s3server.*</Export-Package>
+                        <Bundle-Name>Mind Consulting :: Ladon S3 Server</Bundle-Name>
+                        <Bundle-Description>${description}</Bundle-Description>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-Activator>de.mc.ladon.s3server.osgi.S3ServerActivator</Bundle-Activator>
+                        <Bundle-Vendor>Mind Consulting UG</Bundle-Vendor>
+                    </instructions>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
     <name>ladon-s3-server</name>
     <description>Ladon S3 implementation</description>
@@ -41,6 +57,20 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.http</artifactId>
+            <version>1.2.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

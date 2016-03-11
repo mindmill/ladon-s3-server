@@ -36,7 +36,9 @@ public class BeanConfig {
         bean.setName("s3servlet");
         bean.setAsyncSupported(true);
         bean.addUrlMappings(config.getBaseUrl() + "/*");
-        bean.setServlet(new S3Servlet(repository, config.getThreadPoolSize()));
+        S3Servlet s3Servlet = new S3Servlet(config.getThreadPoolSize());
+        s3Servlet.setRepository(repository);
+        bean.setServlet(s3Servlet);
         return bean;
     }
 
