@@ -1,6 +1,6 @@
 # Ladon S3 Example Repository
 
-For a quick start this example for a file system storage is added.
+For a quick start this example of a file system storage is added.
 ```java
 public class FSRepository {...}
 ```
