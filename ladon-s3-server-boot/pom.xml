@@ -4,27 +4,54 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.mindconsulting</groupId>
-    <artifactId>s3-server</artifactId>
+    <artifactId>ladon-s3-server-boot</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <name>s3-server-boot</name>
-    <description>Ladon S3 implementation</description>
+    <description>Spring boot application starter</description>
 
-
-    <modules>
-        <module>ladon-s3-server</module>
-        <module>ladon-s3-server-fs</module>
-        <module>ladon-s3-server-boot</module>
-    </modules>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.3.2.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
+        <s3-server.version>${project.version}</s3-server.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>de.mindconsulting</groupId>
+            <artifactId>ladon-s3-server</artifactId>
+            <version>${s3-server.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.mindconsulting</groupId>
+            <artifactId>ladon-s3-server-fs</artifactId>
+            <version>${s3-server.version}</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>1.9.11</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
