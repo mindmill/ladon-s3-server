@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mindmill/s3-java-server.svg?branch=master)](https://travis-ci.org/mindmill/s3-java-server)
+[![Build Status](https://travis-ci.org/mindmill/ladon-s3-server.svg?branch=master)](https://travis-ci.org/mindmill/ladon-s3-server)
 
 !early project stage
 # Ladon S3 Server 
