@@ -1,11 +1,11 @@
 [![Build Status](https://travis-ci.org/mindmill/s3-java-server.svg?branch=master)](https://travis-ci.org/mindmill/s3-java-server)
 
 !early project stage
-# Java S3 Server API
+# Ladon S3 Server 
 Build your own S3 Server and keep your data safe! 
 
 ### Installation:
-The Java S3 Server is built using Java 8 and Maven
+The Ladon S3 Server is built using Java 8 and Maven
 ```bash
 mvn package && java -jar target/s3-server-{version}.jar
 ```
