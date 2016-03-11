@@ -1,7 +1,6 @@
 [![Build Status](https://travis-ci.org/mindmill/ladon-s3-server.svg?branch=master)](https://travis-ci.org/mindmill/ladon-s3-server)
 
-!early project stage
-# Ladon S3 Server 
+# Ladon S3 Server
 Build your own S3 Server and keep your data safe! 
 
 ### Installation:
