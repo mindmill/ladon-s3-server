@@ -35,7 +35,7 @@ Default is: {user.home}/.s3server
 s3server.fsrepo.root=${user.home}/.s3server
 ```
 
-Supported so far are only basic S3 operations, no authentication, no ACL, no policies, no torrent ....
+Supported so far is only access via REST API, no ACL, no policies, no torrent ....
 
 ### License
 Copyright (C) 2016 Mind Consulting
