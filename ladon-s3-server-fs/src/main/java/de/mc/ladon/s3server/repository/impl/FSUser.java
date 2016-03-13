@@ -2,25 +2,24 @@
  * Copyright (c) 2016 Mind Consulting UG(haftungsbeschränkt)
  */
 
-package de.mc.ladon.s3server.entities.impl;
+package de.mc.ladon.s3server.repository.impl;
 
 import de.mc.ladon.s3server.entities.api.S3User;
 
 /**
- * @author Ralf Ulrich on 17.02.16.
+ * @author Ralf Ulrich on 13.03.16.
  */
-public class S3UserImpl implements S3User {
-
+public class FSUser implements S3User {
     private String userId;
     private String userName;
     private String secretKey;
     private String publicKey;
     private String email;
 
-    public S3UserImpl() {
+    public FSUser() {
     }
 
-    public S3UserImpl(String userId, String userName, String publicKey, String secretKey, String email) {
+    public FSUser(String userId, String userName, String publicKey, String secretKey, String email) {
         this.userId = userId;
         this.userName = userName;
         this.secretKey = secretKey;

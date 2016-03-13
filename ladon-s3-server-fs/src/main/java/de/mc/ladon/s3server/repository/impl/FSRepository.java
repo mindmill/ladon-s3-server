@@ -1,11 +1,13 @@
 package de.mc.ladon.s3server.repository.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 import de.mc.ladon.s3server.common.StreamUtils;
 import de.mc.ladon.s3server.entities.api.*;
 import de.mc.ladon.s3server.entities.impl.*;
 import de.mc.ladon.s3server.exceptions.*;
 import de.mc.ladon.s3server.jaxb.fsmeta.FSStorageMeta;
+import de.mc.ladon.s3server.jaxb.fsmeta.FSUserData;
 import de.mc.ladon.s3server.repository.api.S3Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,16 +41,20 @@ public class FSRepository implements S3Repository {
 
 
     public static final String META_XML_EXTENSION = "_meta.xml";
+    public static final String USER_FOLDER = "users";
+    public static final String SYSTEM_DEFAULT_USER = "SYSTEM";
     private final JAXBContext jaxbContext;
     private Logger logger = LoggerFactory.getLogger(FSRepository.class);
     private static final String DATA_FOLDER = "data";
     private static final String META_FOLDER = "meta";
     private final String fsrepoBaseUrl;
+    private final ConcurrentMap<String, S3User> userMap;
 
     public FSRepository(String fsrepoBaseUrl) {
         this.fsrepoBaseUrl = fsrepoBaseUrl;
         try {
-            jaxbContext = JAXBContext.newInstance(FSStorageMeta.class);
+            jaxbContext = JAXBContext.newInstance(FSStorageMeta.class, FSUserData.class);
+            userMap = new ConcurrentHashMap<>(loadUserFile());
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
@@ -289,9 +297,8 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public S3User getUser(String authorization) {
-        //if (authorization == null) return null;
-        return new S3UserImpl("SYSTEM", "DEFAULT", "", "", "");
+    public S3User getUser(S3CallContext callContext, String accessKey) {
+        return loadUser(callContext, accessKey);
     }
 
     private void lock(Path metaPath, String objectKey, FSLock.LockType lockType, S3CallContext callContext) {
@@ -324,6 +331,50 @@ public class FSRepository implements S3Repository {
         }
     }
 
+
+    private S3User loadUser(S3CallContext callContext, String accessKey) {
+        S3User user = userMap.get(accessKey);
+        if (user != null) return user;
+        else {
+            S3User reloaded = loadUserFile().get(accessKey);
+            if (reloaded != null) {
+                return userMap.put(accessKey, reloaded);
+            }
+        }
+        throw new InvalidAccessKeyIdException("", callContext.getRequestId());
+    }
+
+    private Map<String, FSUser> loadUserFile() {
+        Path basePath = Paths.get(fsrepoBaseUrl);
+        Path userFile = basePath.resolve("userdb" + META_XML_EXTENSION);
+        try {
+            if (!Files.exists(userFile)) {
+                initDefaultUser();
+            }
+            try (InputStream in = Files.newInputStream(userFile)) {
+                FSUserData userData = (FSUserData) jaxbContext.createUnmarshaller().unmarshal(in);
+                return userData.getUsers();
+            }
+        } catch (IOException | JAXBException e) {
+            logger.error("error reading user file ", e);
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private void initDefaultUser() throws IOException, JAXBException {
+        Path basePath = Paths.get(fsrepoBaseUrl);
+        Files.createDirectories(basePath);
+        Path userFile = basePath.resolve("userdb" + META_XML_EXTENSION);
+        try (OutputStream out = Files.newOutputStream(userFile)) {
+            Marshaller m = jaxbContext.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            m.marshal(new FSUserData(ImmutableMap.of(SYSTEM_DEFAULT_USER, new FSUser(SYSTEM_DEFAULT_USER, SYSTEM_DEFAULT_USER, SYSTEM_DEFAULT_USER, SYSTEM_DEFAULT_USER, null))), out);
+        }
+
+    }
+
+
     private void writeMetaFile(Path meta, S3CallContext callContext) throws IOException, JAXBException {
         Map<String, String> header = callContext.getHeader().getFullHeader();
         Files.createDirectories(meta.getParent());
@@ -333,7 +384,6 @@ public class FSRepository implements S3Repository {
             m.marshal(new FSStorageMeta(header), out);
         }
     }
-
 
     private void loadMetaFile(Path meta, S3CallContext callContext) {
         try (InputStream in = Files.newInputStream(meta)) {

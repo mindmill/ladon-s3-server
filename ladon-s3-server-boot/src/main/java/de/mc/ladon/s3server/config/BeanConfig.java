@@ -38,6 +38,7 @@ public class BeanConfig {
         bean.addUrlMappings(config.getBaseUrl() + "/*");
         S3Servlet s3Servlet = new S3Servlet(config.getThreadPoolSize());
         s3Servlet.setRepository(repository);
+        s3Servlet.setSecurityEnabled(config.isSecurityEnabled());
         bean.setServlet(s3Servlet);
         return bean;
     }

@@ -29,8 +29,8 @@ public interface S3Repository {
     /**
      * This implementation of the PUT operation creates a new bucket. Not every string is an acceptable bucket name.
      *
-     * @param callContext   the S3CallContext
-     * @param bucketName    name of the bucket
+     * @param callContext        the S3CallContext
+     * @param bucketName         name of the bucket
      * @param locationConstraint configuration or null. Contains the location information
      */
     void createBucket(S3CallContext callContext, String bucketName, String locationConstraint);
@@ -114,9 +114,11 @@ public interface S3Repository {
     void getBucket(S3CallContext callContext, String bucketName);
 
     /**
+     * Used to load the user details for a given access key. Only needed if security is enabled.
      *
-     * @param authorization
-     * @return
+     * @param callContext the S3CallContext
+     * @param accessKey   the access key of the request
+     * @return the S3User object from the repository
      */
-    S3User getUser(String authorization);
+    S3User getUser(S3CallContext callContext, String accessKey);
 }

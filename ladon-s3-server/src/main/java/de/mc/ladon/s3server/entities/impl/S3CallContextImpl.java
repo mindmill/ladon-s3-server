@@ -7,7 +7,6 @@ package de.mc.ladon.s3server.entities.impl;
 import de.mc.ladon.s3server.common.StreamUtils;
 import de.mc.ladon.s3server.entities.api.*;
 import de.mc.ladon.s3server.exceptions.InternalErrorException;
-import de.mc.ladon.s3server.repository.api.S3Repository;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,6 +21,7 @@ import java.util.UUID;
 public class S3CallContextImpl implements S3CallContext {
 
 
+    public static final String SYSTEM = "SYSTEM";
     private HttpServletResponse response;
     private HttpServletRequest request;
     private S3RequestHeader header;
@@ -32,7 +32,7 @@ public class S3CallContextImpl implements S3CallContext {
     private String uri;
     private final String queryString;
 
-    public S3CallContextImpl(HttpServletRequest request, HttpServletResponse response, S3Repository repository, Map<String, String[]> params) {
+    public S3CallContextImpl(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> params) {
         this.header = new S3RequestHeaderImpl(request);
         this.params = new S3RequestParamsImpl(params);
         this.request = request;
@@ -40,9 +40,7 @@ public class S3CallContextImpl implements S3CallContext {
         this.uri = request.getRequestURI();
         this.queryString = request.getQueryString();
         this.response = response;
-        // if (header.getAuthorization() != null) {
-        this.user = repository.getUser(header.getAuthorization());
-        // }
+        this.user = new S3UserImpl(SYSTEM, SYSTEM, SYSTEM, SYSTEM, "SYSTEM@SYSTEM.COM");
     }
 
     @Override
@@ -69,6 +67,7 @@ public class S3CallContextImpl implements S3CallContext {
     public S3User getUser() {
         return user;
     }
+
 
     @Override
     public InputStream getContent() throws IOException {
@@ -98,5 +97,9 @@ public class S3CallContextImpl implements S3CallContext {
     @Override
     public String getQueryString() {
         return queryString;
+    }
+
+    public void setUser(S3User user) {
+        this.user = user;
     }
 }

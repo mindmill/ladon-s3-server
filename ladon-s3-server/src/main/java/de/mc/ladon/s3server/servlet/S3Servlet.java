@@ -5,6 +5,7 @@
 package de.mc.ladon.s3server.servlet;
 
 import com.google.common.base.Charsets;
+import de.mc.ladon.s3server.authorization.Authorization;
 import de.mc.ladon.s3server.common.Validator;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 import de.mc.ladon.s3server.entities.api.S3RequestId;
@@ -49,6 +50,7 @@ public class S3Servlet extends HttpServlet {
     private final HashBasedExecutor executor;
 
     private S3Repository repository;
+    private boolean securityEnabled = true;
 
     private enum S3Call {
         listmybuckets,
@@ -98,7 +100,7 @@ public class S3Servlet extends HttpServlet {
     }
 
     private void dispatch(S3Call call, HttpServletRequest req, HttpServletResponse resp, String bucketName, String objectkey) {
-        S3CallContext context = new S3CallContextImpl(req, resp, repository, req.getParameterMap());
+        S3CallContext context = new S3CallContextImpl(req, resp, req.getParameterMap());
         S3RequestId requestId = context.getRequestId();
         AsyncContext asyncContext = req.startAsync(req, resp);
         executor.execute(bucketName + objectkey, () -> {
@@ -107,6 +109,10 @@ public class S3Servlet extends HttpServlet {
                     if (bucketName != null && !Validator.isValidBucketName(bucketName)) {
                         throw new InvalidBucketName(bucketName, context.getRequestId());
                     }
+                    if (securityEnabled) {
+                        Authorization.checkAuthHeader(context, repository);
+                    }
+
                     switch (call) {
                         case listmybuckets:
                             writeXmlResponse(ResponseWrapper.listAllMyBucketsResult(context.getUser(),
@@ -278,8 +284,12 @@ public class S3Servlet extends HttpServlet {
         }
     }
 
-    //additional support for lazy setting
+
     public void setRepository(S3Repository repository) {
         this.repository = repository;
+    }
+
+    public void setSecurityEnabled(boolean enabled) {
+        this.securityEnabled = enabled;
     }
 }

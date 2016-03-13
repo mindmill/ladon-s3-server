@@ -119,7 +119,7 @@ public class FSStorageTests {
     }
 
     public static AmazonS3Client getClient() {
-        AWSCredentials credentials = new BasicAWSCredentials("TESTING", "TESTING");
+        AWSCredentials credentials = new BasicAWSCredentials("SYSTEM", "SYSTEM");
         AmazonS3Client newClient = new AmazonS3Client(credentials,
                 new ClientConfiguration());
         newClient.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));

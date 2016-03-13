@@ -5,95 +5,66 @@
 package de.mc.ladon.s3server.authorization;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
+import de.mc.ladon.s3server.exceptions.InternalErrorException;
+import de.mc.ladon.s3server.exceptions.S3ServerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+/**
+ * Helper class for aws signature v2
+ */
 public class AwsSignatureVersion2 {
 
-    private static final List<String> SIGNED_PARAMETERS = Arrays.asList("acl",
-            "torrent",
-            "logging",
-            "location",
-            "policy",
-            "requestPayment",
-            "versioning",
-            "versions",
-            "versionId",
-            "notification",
-            "uploadId",
-            "uploads",
-            "partNumber",
-            "website",
-            "delete",
-            "lifecycle",
-            "tagging",
-            "cors",
-            "restore");
+    private static final Logger logger = LoggerFactory.getLogger(AwsSignatureVersion2.class);
     public static final String HMAC_SHA_1 = "HmacSHA1";
+    public static final Pattern AWS_AUTH_PATTERN = Pattern.compile("AWS ([^:]+):(.*)");
 
+    public String computeV2(S3CallContext callContext, String pathPrefix) throws S3ServerException {
 
-    public String computeV2(S3CallContext callContext, String pathPrefix) throws Exception {
-        StringBuilder stringToSign = new StringBuilder(callContext.getMethod());
-        stringToSign.append("\n");
-        stringToSign.append(callContext.getHeader().getContentMD5());
-        stringToSign.append("\n");
-        stringToSign.append(callContext.getHeader().getContentType());
-        stringToSign.append("\n");
-
-        String expires = callContext.getHeader().getExpires();
-        String date = expires == null ? callContext.getHeader().getDate() : expires;
-        if (callContext.getHeader().getXamzDate() == null) {
-            stringToSign.append(date);
-        }
-        stringToSign.append("\n");
-
-        Map<String, String> requestHeaders = callContext.getHeader().getFullHeader();
-        List<String> headers = requestHeaders.keySet()
-                .stream()
-                .filter(this::relevantAmazonHeader)
-                .map(name -> toHeaderStringRepresentation(name, requestHeaders))
-                .sorted()
-                .collect(Collectors.toList());
-
-        for (String header : headers) {
-            stringToSign.append(header);
-            stringToSign.append("\n");
-        }
-
-        stringToSign.append(pathPrefix).append(callContext.getUri().substring(3));
-
-        char separator = '?';
-        for (String parameterName : callContext.getParams().getAllParams().keySet().stream().sorted().collect(Collectors.toList())) {
-            if (SIGNED_PARAMETERS.contains(parameterName)) {
-                stringToSign.append(separator).append(parameterName);
-                String parameterValue = callContext.getParams().getAllParams().get(parameterName);
-                if (!Strings.isNullOrEmpty(parameterValue)) {
-                    stringToSign.append("=").append(parameterValue);
-                }
-                separator = '&';
-            }
-        }
-
+        String canonicalString = RestUtils.makeS3CanonicalString(callContext.getMethod(), callContext.getUri(), callContext, null);
         SecretKeySpec keySpec = new SecretKeySpec(callContext.getUser().getSecretKey().getBytes(), HMAC_SHA_1);
-        Mac mac = Mac.getInstance(HMAC_SHA_1);
-        mac.init(keySpec);
-        byte[] result = mac.doFinal(stringToSign.toString().getBytes(Charsets.UTF_8.name()));
-        return BaseEncoding.base64().encode(result);
+
+        try {
+            Mac mac = Mac.getInstance(HMAC_SHA_1);
+            mac.init(keySpec);
+            byte[] result = mac.doFinal(canonicalString.getBytes(Charsets.UTF_8.name()));
+            return BaseEncoding.base64().encode(result);
+        } catch (UnsupportedEncodingException e) {
+            // UTF8 should be supported
+            logger.error("utf-8 not supported", e);
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("sha1 not found", e);
+        } catch (InvalidKeyException e) {
+            logger.error("invalid key", e);
+        }
+        throw new InternalErrorException(pathPrefix, callContext.getRequestId());
     }
 
-    private boolean relevantAmazonHeader(final String name) {
-        return name.toLowerCase().startsWith("x-amz-");
+
+    public String getSignature(S3CallContext callContext) {
+        Matcher m = AWS_AUTH_PATTERN.matcher(callContext.getHeader().getAuthorization());
+        if (m.matches()) {
+            return m.group(2);
+        }
+        return null;
     }
 
-    private String toHeaderStringRepresentation(final String headerName, Map<String, String> requestHeaders) {
-        return headerName.toLowerCase().trim() + ":" + requestHeaders.get(headerName).trim();
+    public String getAccessKey(S3CallContext callContext) {
+        Matcher m = AWS_AUTH_PATTERN.matcher(callContext.getHeader().getAuthorization());
+        if (m.matches()) {
+            return m.group(1);
+        }
+        return null;
     }
+
 }
