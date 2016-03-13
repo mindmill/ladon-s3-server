@@ -25,9 +25,9 @@ public class S3RequestParamsImpl implements S3RequestParams {
 
     public S3RequestParamsImpl(Map<String, String[]> requestParams) {
         allParams = new HashMap<>(requestParams.size());
-        requestParams.forEach((s, strings) ->
-                allParams.put(s,requestParams.get(strings)[0])
-        );
+        for (String p : requestParams.keySet()){
+            allParams.put(p,requestParams.get(p)[0]);
+        }
 
         this.delimiter = getFirstOrNull(DELIMITER, requestParams);
         this.encodingType = getFirstOrNull(ENCODING_TYPE, requestParams);
