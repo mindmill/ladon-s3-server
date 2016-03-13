@@ -5,7 +5,7 @@
 package de.mc.ladon.s3server.servlet;
 
 import com.google.common.base.Charsets;
-import de.mc.ladon.s3server.authorization.Authorization;
+import de.mc.ladon.s3server.auth.Authorization;
 import de.mc.ladon.s3server.common.Validator;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 import de.mc.ladon.s3server.entities.api.S3RequestId;

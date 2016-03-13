@@ -2,7 +2,7 @@
  * Copyright (c) 2016 Mind Consulting UG(haftungsbeschränkt)
  */
 
-package de.mc.ladon.s3server.authorization;
+package de.mc.ladon.s3server.auth;
 
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 import de.mc.ladon.s3server.exceptions.InternalErrorException;

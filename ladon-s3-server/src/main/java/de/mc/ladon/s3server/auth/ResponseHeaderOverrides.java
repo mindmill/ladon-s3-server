@@ -12,7 +12,7 @@
  * License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.mc.ladon.s3server.authorization;
+package de.mc.ladon.s3server.auth;
 
 
 /**

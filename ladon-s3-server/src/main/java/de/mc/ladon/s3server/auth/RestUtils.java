@@ -1,4 +1,4 @@
-package de.mc.ladon.s3server.authorization;
+package de.mc.ladon.s3server.auth;
 
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 

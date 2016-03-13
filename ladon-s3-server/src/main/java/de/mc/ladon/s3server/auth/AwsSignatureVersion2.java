@@ -2,7 +2,7 @@
  * Copyright (c) 2016 Mind Consulting UG(haftungsbeschränkt)
  */
 
-package de.mc.ladon.s3server.authorization;
+package de.mc.ladon.s3server.auth;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.BaseEncoding;

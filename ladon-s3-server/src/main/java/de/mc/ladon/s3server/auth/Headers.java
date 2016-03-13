@@ -12,7 +12,7 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package de.mc.ladon.s3server.authorization;
+package de.mc.ladon.s3server.auth;
 
 /**
  * Common S3 HTTP header values used throughout the AWS S3 Java client.
