@@ -13,6 +13,8 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,7 +24,7 @@ import static com.google.common.hash.Hashing.sha256;
 import static com.google.common.io.BaseEncoding.base16;
 
 /**
- *
+ * Helper class for aws signature v4
  */
 public class AwsSignatureVersion4 {
     private static final Logger logger = LoggerFactory.getLogger(AwsSignatureVersion4.class);
@@ -94,14 +96,19 @@ public class AwsSignatureVersion4 {
         canonicalRequest.append("\n");
         canonicalRequest.append(callContext.getUri());
         canonicalRequest.append("\n");
-        canonicalRequest.append(callContext.getQueryString());
+        if (callContext.getQueryString() != null)
+            canonicalRequest.append(callContext.getQueryString());
         canonicalRequest.append("\n");
 
         assert aws4Header != null;
+
+        Map<String, String> fullHeader = callContext.getHeader().getFullHeader();
+        Map<String, String> headerLowerCase = new HashMap<>(fullHeader.size());
+        fullHeader.forEach((k, v) -> headerLowerCase.put(k.toLowerCase(), v));
         for (String name : aws4Header.group(4).split(";")) {
             canonicalRequest.append(name.trim());
             canonicalRequest.append(":");
-            canonicalRequest.append(callContext.getHeader().getFullHeader().get(name).trim());
+            canonicalRequest.append(headerLowerCase.get(name).trim());
             canonicalRequest.append("\n");
         }
         canonicalRequest.append("\n");
