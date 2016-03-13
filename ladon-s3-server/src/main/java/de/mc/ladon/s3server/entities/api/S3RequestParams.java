@@ -63,7 +63,7 @@ public interface S3RequestParams {
      *
      * @return the max number of keys to return
      */
-    Integer getMaxKeys();
+    int getMaxKeys();
 
 
     /**

@@ -54,7 +54,7 @@ public class HashBasedExecutor {
 
 
     private int keyToIndex(String key) {
-        return Math.abs(key.hashCode()) % poolsize;
+        return Math.abs(key.hashCode() % poolsize);
         // for testing: new Random().nextInt(poolsize);
     }
 

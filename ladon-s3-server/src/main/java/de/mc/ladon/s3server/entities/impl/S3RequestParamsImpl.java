@@ -25,9 +25,9 @@ public class S3RequestParamsImpl implements S3RequestParams {
 
     public S3RequestParamsImpl(Map<String, String[]> requestParams) {
         allParams = new HashMap<>(requestParams.size());
-        for (String p : requestParams.keySet()){
-            allParams.put(p,requestParams.get(p)[0]);
-        }
+        requestParams.forEach((s, strings) ->
+                allParams.put(s,requestParams.get(strings)[0])
+        );
 
         this.delimiter = getFirstOrNull(DELIMITER, requestParams);
         this.encodingType = getFirstOrNull(ENCODING_TYPE, requestParams);
@@ -65,7 +65,7 @@ public class S3RequestParamsImpl implements S3RequestParams {
     }
 
     @Override
-    public Integer getMaxKeys() {
+    public int getMaxKeys() {
         return maxKeys == null ? 1000 : maxKeys > 1000 ? 1000 : maxKeys;
     }
 
