@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.mindconsulting</groupId>
-    <artifactId>ladon-s3-server</artifactId>
+    <artifactId>ladon-s3-server-osgi-starter</artifactId>
     <version>1.0-SNAPSHOT</version>
     <build>
         <plugins>
@@ -23,17 +23,10 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${groupId}.${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>
-                            de.mc.ladon.s3server.servlet,
-                            de.mc.ladon.s3server.repository.api,
-                            de.mc.ladon.s3server.entities.*,
-                            de.mc.ladon.s3server.exceptions,
-                            de.mc.ladon.s3server.common,
-                        </Export-Package>
-                        <Private-Package>de.mc.ladon.s3server.*</Private-Package>
-                        <Bundle-Name>Mind Consulting :: Ladon S3 Server</Bundle-Name>
+                        <Bundle-Name>Mind Consulting :: Ladon S3 Server :: OSGI Servlet Activator</Bundle-Name>
                         <Bundle-Description>${description}</Bundle-Description>
                         <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-Activator>de.mc.ladon.s3server.osgi.S3ServerActivator</Bundle-Activator>
                         <Bundle-Vendor>Mind Consulting UG</Bundle-Vendor>
                     </instructions>
                 </configuration>
@@ -42,8 +35,8 @@
     </build>
     <packaging>bundle</packaging>
 
-    <name>ladon-s3-server</name>
-    <description>Ladon S3 implementation</description>
+    <name>ladon-s3-server-osgi-starter</name>
+    <description>Ladon S3 OSGI Servlet Registration</description>
 
 
     <properties>
@@ -52,24 +45,23 @@
     </properties>
 
     <dependencies>
-
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>19.0</version>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.http</artifactId>
+            <version>1.2.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.18</version>
+            <groupId>de.mindconsulting</groupId>
+            <artifactId>ladon-s3-server</artifactId>
+            <version>${project.version}</version>
         </dependency>
-
-
     </dependencies>
 
 </project>

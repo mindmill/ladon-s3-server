@@ -24,7 +24,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${groupId}.${artifactId}</Bundle-SymbolicName>
                         <Export-Package>de.mc.ladon.s3server</Export-Package>
-                        <Bundle-Name>Mind Consulting :: Ladon S3 File System Repository</Bundle-Name>
+                        <Bundle-Name>Mind Consulting :: Ladon S3 Server :: File System Repository</Bundle-Name>
                         <Bundle-Description>${description}</Bundle-Description>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-Activator>de.mc.ladon.s3server.osgi.Activator</Bundle-Activator>

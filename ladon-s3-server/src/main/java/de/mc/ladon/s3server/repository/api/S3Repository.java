@@ -8,7 +8,6 @@ import de.mc.ladon.s3server.entities.api.S3Bucket;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 import de.mc.ladon.s3server.entities.api.S3ListBucketResult;
 import de.mc.ladon.s3server.entities.api.S3User;
-import de.mc.ladon.s3server.jaxb.entities.CreateBucketConfiguration;
 
 import java.util.List;
 
@@ -32,9 +31,9 @@ public interface S3Repository {
      *
      * @param callContext   the S3CallContext
      * @param bucketName    name of the bucket
-     * @param configuration configuration or null. Contains the location information
+     * @param locationConstraint configuration or null. Contains the location information
      */
-    void createBucket(S3CallContext callContext, String bucketName, CreateBucketConfiguration configuration);
+    void createBucket(S3CallContext callContext, String bucketName, String locationConstraint);
 
     /**
      * This implementation of the DELETE operation deletes the bucket named in the URI. All objects (including

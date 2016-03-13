@@ -5,7 +5,6 @@ import de.mc.ladon.s3server.common.StreamUtils;
 import de.mc.ladon.s3server.entities.api.*;
 import de.mc.ladon.s3server.entities.impl.*;
 import de.mc.ladon.s3server.exceptions.*;
-import de.mc.ladon.s3server.jaxb.entities.CreateBucketConfiguration;
 import de.mc.ladon.s3server.jaxb.fsmeta.FSStorageMeta;
 import de.mc.ladon.s3server.repository.api.S3Repository;
 import org.slf4j.Logger;
@@ -70,7 +69,7 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public void createBucket(S3CallContext callContext, String bucketName, CreateBucketConfiguration configuration) {
+    public void createBucket(S3CallContext callContext, String bucketName, String locationConstraint) {
         Path dataBucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
         Path metaBucket = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
         Path metaBucketFile = Paths.get(fsrepoBaseUrl, bucketName + META_XML_EXTENSION);

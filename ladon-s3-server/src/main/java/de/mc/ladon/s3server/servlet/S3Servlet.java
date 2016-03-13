@@ -126,7 +126,7 @@ public class S3Servlet extends HttpServlet {
                             } catch (JAXBException e) {
                                 config = new CreateBucketConfiguration("STANDARD");
                             }
-                            repository.createBucket(context, bucketName, config);
+                            repository.createBucket(context, bucketName, config.getLocationConstraint());
                             break;
                         case putobject:
                             repository.createObject(context, bucketName, objectkey);
