@@ -1,11 +1,6 @@
-# Ladon S3 Spring Boot Starter
-Runs the Ladon S3 Servlet with Spring Boot and Embedded Tomcat
+# Ladon S3 Server OSGI Servlet Activator
 
-Build the project with maven and run the jar:
-```bash
-mvn package && java -jar target/s3-server-{version}.jar
-```
-
+This bundle registers the S3Servlet under the context path "/api/s3" in an OSGI container.
 
 ### License
 Copyright (C) 2016 Mind Consulting
