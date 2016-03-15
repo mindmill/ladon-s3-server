@@ -34,9 +34,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:mindmill/s3-java-server.git</connection>
-        <developerConnection>scm:git:git@github.com:mindmill/s3-java-server.git</developerConnection>
-        <url>git@github.com:mindmill/s3-java-server.git</url>
+        <connection>scm:git:git@github.com:mindmill/ladon-s3-server.git</connection>
+        <developerConnection>scm:git:git@github.com:mindmill/ladon-s3-server.git</developerConnection>
+        <url>git@github.com:mindmill/ladon-s3-server.git</url>
     </scm>
     <build>
         <plugins>
