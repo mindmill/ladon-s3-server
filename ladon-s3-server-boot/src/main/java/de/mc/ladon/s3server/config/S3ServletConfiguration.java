@@ -15,6 +15,7 @@ public class S3ServletConfiguration {
     private String baseUrl = "/api/s3";
     private int threadPoolSize = 5;
     private boolean securityEnabled = true;
+    private boolean loggingEnabled = false;
 
 
     public String getBaseUrl() {
@@ -39,5 +40,13 @@ public class S3ServletConfiguration {
 
     public void setSecurityEnabled(boolean securityEnabled) {
         this.securityEnabled = securityEnabled;
+    }
+
+    public boolean isLoggingEnabled() {
+        return loggingEnabled;
+    }
+
+    public void setLoggingEnabled(boolean loggingEnabled) {
+        this.loggingEnabled = loggingEnabled;
     }
 }

@@ -11,6 +11,7 @@ import de.mc.ladon.s3server.repository.impl.FSRepository;
 import de.mc.ladon.s3server.servlet.S3Servlet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,7 @@ public class BeanConfig {
     @ConditionalOnMissingBean
     @Bean
     S3Repository s3Repository() {
-        return new LoggingRepository(new FSRepository(fsRepoRoot));
+        return new FSRepository(fsRepoRoot);
     }
 
     @Bean
@@ -40,14 +41,18 @@ public class BeanConfig {
         bean.setAsyncSupported(true);
         bean.addUrlMappings(config.getBaseUrl() + "/*");
         S3Servlet s3Servlet = new S3Servlet(config.getThreadPoolSize());
-        s3Servlet.setRepository(repository);
+        if (config.isLoggingEnabled()) {
+            s3Servlet.setRepository(new LoggingRepository(repository));
+        } else {
+            s3Servlet.setRepository(repository);
+        }
         s3Servlet.setSecurityEnabled(config.isSecurityEnabled());
         bean.setServlet(s3Servlet);
         return bean;
     }
 
-
     @Bean
+    @ConditionalOnProperty(value = "s3server.loggingEnabled" , havingValue = "true")
     FilterRegistrationBean filterRegistrationBean() {
         FilterRegistrationBean filterBean = new FilterRegistrationBean();
         filterBean.setFilter(new PerformanceLoggingFilter());
