@@ -159,12 +159,12 @@ public class FSRepository implements S3Repository {
             }
 
             S3ResponseHeader header = new S3ResponseHeaderImpl();
-            header.setEtag(storageMd5base16);
+            header.setEtag(inQuotes(storageMd5base16));
             header.setDate(new Date(Files.getLastModifiedTime(obj).toMillis()));
             callContext.setResponseHeader(header);
 
             Files.createDirectories(meta.getParent());
-            writeMetaFile(meta, callContext, S3Constants.ETAG, storageMd5base16);
+            writeMetaFile(meta, callContext, S3Constants.ETAG, inQuotes(storageMd5base16));
 
         } catch (IOException | NoSuchAlgorithmException | JAXBException e) {
             logger.error("internal error", e);
@@ -175,6 +175,10 @@ public class FSRepository implements S3Repository {
         } finally {
             unlock(metaBucket, objectKey, callContext);
         }
+    }
+
+    private String inQuotes(String etag) {
+        return "\"" + etag + "\"";
     }
 
 
