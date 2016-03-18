@@ -144,27 +144,28 @@ public class FSRepository implements S3Repository {
             }
 
             DigestInputStream din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
-            OutputStream out = Files.newOutputStream(obj);
+            try(OutputStream out = Files.newOutputStream(obj)){
+                long bytesCopied = StreamUtils.copy(din, out);
+                byte[] md5bytes = din.getMessageDigest().digest();
+                String storageMd5base64 = BaseEncoding.base64().encode(md5bytes);
+                String storageMd5base16 = BaseEncoding.base16().encode(md5bytes);
 
-            long bytesCopied = StreamUtils.copy(din, out);
-            byte[] md5bytes = din.getMessageDigest().digest();
-            String storageMd5base64 = BaseEncoding.base64().encode(md5bytes);
-            String storageMd5base16 = BaseEncoding.base16().encode(md5bytes);
+                if (contentLength != null && contentLength != bytesCopied
+                        || md5 != null && !md5.equals(storageMd5base64)) {
+                    Files.delete(obj);
+                    Files.deleteIfExists(meta);
+                    throw new InvalidDigestException(objectKey, callContext.getRequestId());
+                }
 
-            if (contentLength != null && contentLength != bytesCopied
-                    || md5 != null && !md5.equals(storageMd5base64)) {
-                Files.delete(obj);
-                Files.deleteIfExists(meta);
-                throw new InvalidDigestException(objectKey, callContext.getRequestId());
+                S3ResponseHeader header = new S3ResponseHeaderImpl();
+                header.setEtag(inQuotes(storageMd5base16));
+                header.setDate(new Date(Files.getLastModifiedTime(obj).toMillis()));
+                callContext.setResponseHeader(header);
+
+                Files.createDirectories(meta.getParent());
+                writeMetaFile(meta, callContext, S3Constants.ETAG, inQuotes(storageMd5base16));
             }
 
-            S3ResponseHeader header = new S3ResponseHeaderImpl();
-            header.setEtag(inQuotes(storageMd5base16));
-            header.setDate(new Date(Files.getLastModifiedTime(obj).toMillis()));
-            callContext.setResponseHeader(header);
-
-            Files.createDirectories(meta.getParent());
-            writeMetaFile(meta, callContext, S3Constants.ETAG, inQuotes(storageMd5base16));
 
         } catch (IOException | NoSuchAlgorithmException | JAXBException e) {
             logger.error("internal error", e);
@@ -406,7 +407,7 @@ public class FSRepository implements S3Repository {
             FSStorageMeta metaData = (FSStorageMeta) jaxbContext.createUnmarshaller().unmarshal(in);
             return new S3MetadataImpl(metaData.getMeta());
         } catch (IOException | JAXBException e) {
-            logger.error("error reading meta file", e);
+            logger.warn("error reading meta file at " + meta.toString(), e);
         }
         return new S3MetadataImpl();
     }
