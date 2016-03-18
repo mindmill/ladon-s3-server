@@ -34,7 +34,7 @@ Default is: {user.home}/.s3server
 ```properties
 s3server.fsrepo.root=${user.home}/.s3server
 ```
-For other configuration options have a look at the [application.properties]( ladon-s3-server/ladon-s3-server-boot/src/main/resources/application.properties ) 
+For other configuration options have a look at the [application.properties](./ladon-s3-server-boot/src/main/resources/application.properties ) 
 
 Supported so far is only access via REST API, no ACL, no policies, no torrent ....
 
