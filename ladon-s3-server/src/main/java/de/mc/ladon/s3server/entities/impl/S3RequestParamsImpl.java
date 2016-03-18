@@ -77,4 +77,15 @@ public class S3RequestParamsImpl implements S3RequestParams {
     public Map<String, String> getAllParams() {
         return allParams;
     }
+
+    @Override
+    public String toString() {
+        return "S3RequestParams{" +
+                "delimiter='" + delimiter + '\'' +
+                ", encodingType='" + encodingType + '\'' +
+                ", marker='" + marker + '\'' +
+                ", maxKeys=" + maxKeys +
+                ", prefix='" + prefix + '\'' +
+                '}';
+    }
 }

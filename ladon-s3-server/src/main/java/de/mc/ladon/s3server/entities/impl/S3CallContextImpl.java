@@ -102,4 +102,14 @@ public class S3CallContextImpl implements S3CallContext {
     public void setUser(S3User user) {
         this.user = user;
     }
+
+    @Override
+    public String toString() {
+        return "S3CallContext{" +
+                "requestId='" + requestId + '\'' +
+                ", user=" + user +
+                ", method='" + method + '\'' +
+                ", uri='" + uri + '\'' +
+                '}';
+    }
 }

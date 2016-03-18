@@ -76,4 +76,12 @@ public class S3UserImpl implements S3User {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    @Override
+    public String toString() {
+        return "S3User{" +
+                "userId='" + userId + '\'' +
+                ", userName='" + userName + '\'' +
+                '}';
+    }
 }
