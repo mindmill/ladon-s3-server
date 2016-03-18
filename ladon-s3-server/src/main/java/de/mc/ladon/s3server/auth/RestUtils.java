@@ -1,5 +1,6 @@
 package de.mc.ladon.s3server.auth;
 
+import de.mc.ladon.s3server.common.S3Constants;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 
 import java.util.*;
@@ -45,14 +46,14 @@ public class RestUtils {
 
                 // Ignore any headers that are not particularly interesting.
                 if (lk.equals("content-type") || lk.equals("content-md5") || lk.equals("date") ||
-                        lk.startsWith(Headers.AMAZON_PREFIX)) {
+                        lk.startsWith(S3Constants.X_AMZ_PREFIX)) {
                     interestingHeaders.put(lk, value);
                 }
             }
         }
 
         // Remove default date timestamp if "x-amz-date" is set.
-        if (interestingHeaders.containsKey(Headers.S3_ALTERNATE_DATE)) {
+        if (interestingHeaders.containsKey(S3Constants.X_AMZ_DATE)) {
             interestingHeaders.put("date", "");
         }
 
@@ -81,7 +82,7 @@ public class RestUtils {
             String key = entry.getKey();
             String value = entry.getValue();
 
-            if (key.startsWith(Headers.AMAZON_PREFIX)) {
+            if (key.startsWith(S3Constants.X_AMZ_PREFIX)) {
                 buf.append(key).append(':');
                 if (value != null) {
                     buf.append(value);

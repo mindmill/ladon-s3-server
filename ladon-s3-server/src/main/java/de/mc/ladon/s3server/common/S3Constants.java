@@ -261,6 +261,12 @@ public interface S3Constants {
      */
     String X_AMZ_META_PREFIX = "x-amz-meta-";
 
+
+    /**
+     * Prefix for general Amazon headers: x-amz-
+     */
+    String X_AMZ_PREFIX = "x-amz-";
+
     /**
      * If the bucket is configured as a website, redirects requests for
      * this object to another object in the same bucket or to an external
