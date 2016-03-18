@@ -4,7 +4,6 @@
 
 package de.mc.ladon.s3server.entities.impl;
 
-import de.mc.ladon.s3server.common.S3Constants;
 import de.mc.ladon.s3server.entities.api.S3Metadata;
 import de.mc.ladon.s3server.entities.api.S3Object;
 import de.mc.ladon.s3server.entities.api.S3User;
@@ -25,9 +24,10 @@ public class S3ObjectImpl implements S3Object {
     private S3User owner;
     private S3Metadata metadata;
     private InputStream content;
+    private String etag;
 
 
-    public S3ObjectImpl(String key, Date lastModified, String bucket, Long size, S3User owner, S3Metadata metadata, InputStream content, String mimeType) {
+    public S3ObjectImpl(String key, Date lastModified, String bucket, Long size, S3User owner, S3Metadata metadata, InputStream content, String mimeType, String etag) {
         this.key = key;
         this.lastModified = lastModified;
         this.bucket = bucket;
@@ -36,6 +36,7 @@ public class S3ObjectImpl implements S3Object {
         this.owner = owner;
         this.metadata = metadata;
         this.content = content;
+        this.etag = etag;
     }
 
     @Override
@@ -60,7 +61,7 @@ public class S3ObjectImpl implements S3Object {
 
     @Override
     public String getETag() {
-        return metadata.get(S3Constants.ETAG);
+        return etag;
     }
 
     @Override

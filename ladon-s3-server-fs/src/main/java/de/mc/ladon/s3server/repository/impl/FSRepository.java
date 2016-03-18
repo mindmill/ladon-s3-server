@@ -2,6 +2,7 @@ package de.mc.ladon.s3server.repository.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
+import de.mc.ladon.s3server.common.S3Constants;
 import de.mc.ladon.s3server.common.StreamUtils;
 import de.mc.ladon.s3server.entities.api.*;
 import de.mc.ladon.s3server.entities.impl.*;
@@ -163,7 +164,7 @@ public class FSRepository implements S3Repository {
             callContext.setResponseHeader(header);
 
             Files.createDirectories(meta.getParent());
-            writeMetaFile(meta, callContext);
+            writeMetaFile(meta, callContext, S3Constants.ETAG, storageMd5base16);
 
         } catch (IOException | NoSuchAlgorithmException | JAXBException e) {
             logger.error("internal error", e);
@@ -191,7 +192,7 @@ public class FSRepository implements S3Repository {
 
         lock(bucketMeta, objectKey, FSLock.LockType.read, callContext);
         if (Files.exists(objectMeta)) {
-            loadMetaFile(objectMeta, callContext);
+            loadMetaFileIntoHeader(objectMeta, callContext);
         }
 
         try {
@@ -226,25 +227,25 @@ public class FSRepository implements S3Repository {
                 callContext.getParams().getPrefix() : "";
 
         Path bucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
+        Path bucketMeta = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
+
         try {
             Long count = getPathStream(bucketName, prefix, bucket, marker).limit(maxKeys + 1).count();
-
 
             return new S3ListBucketResultImpl(count > maxKeys, bucketName, getPathStream(bucketName, prefix, bucket, marker)
                     .limit(maxKeys)
                     .map(path -> {
                                 String key = bucket.relativize(path).toString();
-                                try {
-                                    return new S3ObjectImpl(key,
-                                            new Date(path.toFile().lastModified()),
-                                            bucketName, path.toFile().length(),
-                                            new S3UserImpl(),
-                                            new S3MetadataImpl(),
-                                            null, getMimeType(path));
-                                } catch (IOException e) {
-                                    logger.error("internal error", e);
-                                    throw new InternalErrorException(bucketName, callContext.getRequestId());
-                                }
+                                Path objectMeta = bucketMeta.resolve(key + META_XML_EXTENSION);
+                                S3Metadata meta = loadMetaFile(objectMeta);
+
+                                return new S3ObjectImpl(key,
+                                        new Date(path.toFile().lastModified()),
+                                        bucketName, path.toFile().length(),
+                                        new S3UserImpl(),
+                                        meta,
+                                        null, meta.get(S3Constants.CONTENT_TYPE),
+                                        meta.get(S3Constants.ETAG));
                             }
                     ).collect(Collectors.toList()));
         } catch (IOException e) {
@@ -375,8 +376,13 @@ public class FSRepository implements S3Repository {
     }
 
 
-    private void writeMetaFile(Path meta, S3CallContext callContext) throws IOException, JAXBException {
+    private void writeMetaFile(Path meta, S3CallContext callContext, String... additional) throws IOException, JAXBException {
         Map<String, String> header = callContext.getHeader().getFullHeader();
+        if (additional.length > 0 && additional.length % 2 == 0) {
+            for (int i = 0; i < additional.length; i = i + 2) {
+                header.put(additional[i], additional[i + 1]);
+            }
+        }
         Files.createDirectories(meta.getParent());
         try (OutputStream out = Files.newOutputStream(meta)) {
             Marshaller m = jaxbContext.createMarshaller();
@@ -385,14 +391,20 @@ public class FSRepository implements S3Repository {
         }
     }
 
-    private void loadMetaFile(Path meta, S3CallContext callContext) {
+    private void loadMetaFileIntoHeader(Path meta, S3CallContext callContext) {
+        S3Metadata userMetadata = loadMetaFile(meta);
+        S3ResponseHeader header = new S3ResponseHeaderImpl(userMetadata);
+        callContext.setResponseHeader(header);
+    }
+
+    private S3Metadata loadMetaFile(Path meta) {
         try (InputStream in = Files.newInputStream(meta)) {
             FSStorageMeta metaData = (FSStorageMeta) jaxbContext.createUnmarshaller().unmarshal(in);
-            S3Metadata userMetadata = new S3MetadataImpl(metaData.getMeta());
-            S3ResponseHeader header = new S3ResponseHeaderImpl(userMetadata);
-            callContext.setResponseHeader(header);
+            return new S3MetadataImpl(metaData.getMeta());
         } catch (IOException | JAXBException e) {
             logger.error("error reading meta file", e);
         }
+        return new S3MetadataImpl();
     }
+
 }

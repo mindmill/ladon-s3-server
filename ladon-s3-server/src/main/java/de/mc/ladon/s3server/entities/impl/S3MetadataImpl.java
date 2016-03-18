@@ -23,6 +23,8 @@ public class S3MetadataImpl extends HashMap<String, String> implements S3Metadat
         metadata.entrySet().stream()
                 .filter(e -> e.getKey().startsWith(S3Constants.X_AMZ_META_PREFIX))
                 .forEach(e -> put((String) e.getKey(), (String) e.getValue()));
+        String etag = metadata.get(S3Constants.ETAG);
+        if (etag != null) put(S3Constants.ETAG, etag);
     }
 
     @Override
