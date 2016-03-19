@@ -27,6 +27,7 @@
                             de.mc.ladon.s3server.servlet,
                             de.mc.ladon.s3server.repository.api,
                             de.mc.ladon.s3server.entities.*,
+                            de.mc.ladon.s3server.logging,
                             de.mc.ladon.s3server.exceptions,
                             de.mc.ladon.s3server.common,
                         </Export-Package>
