@@ -4,6 +4,7 @@
 
 package de.mc.ladon.s3server.osgi;
 
+import de.mc.ladon.s3server.logging.LoggingRepository;
 import de.mc.ladon.s3server.repository.api.S3Repository;
 import de.mc.ladon.s3server.servlet.S3Servlet;
 import org.osgi.framework.BundleActivator;
@@ -37,7 +38,7 @@ public class S3ServerActivator implements BundleActivator {
                     ServiceReference<S3Repository> repositoryReference = context.getServiceReference(S3Repository.class);
                     if (repositoryReference != null) {
                         S3Repository repository = context.getService(repositoryReference);
-                        s3Servlet.setRepository(repository);
+                        s3Servlet.setRepository(new LoggingRepository(repository));
                     }
                     httpService.registerServlet(CONTEXT_STRING, s3Servlet, null, null);
                 } catch (ServletException | NamespaceException e) {
