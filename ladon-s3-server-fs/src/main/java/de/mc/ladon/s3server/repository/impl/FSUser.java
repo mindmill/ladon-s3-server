@@ -6,6 +6,8 @@ package de.mc.ladon.s3server.repository.impl;
 
 import de.mc.ladon.s3server.entities.api.S3User;
 
+import java.util.Set;
+
 /**
  * @author Ralf Ulrich on 13.03.16.
  */
@@ -14,17 +16,17 @@ public class FSUser implements S3User {
     private String userName;
     private String secretKey;
     private String publicKey;
-    private String email;
+    private Set<String> roles;
 
     public FSUser() {
     }
 
-    public FSUser(String userId, String userName, String publicKey, String secretKey, String email) {
+    public FSUser(String userId, String userName, String publicKey, String secretKey, Set<String> roles) {
         this.userId = userId;
         this.userName = userName;
         this.secretKey = secretKey;
         this.publicKey = publicKey;
-        this.email = email;
+        this.roles = roles;
     }
 
     @Override
@@ -68,12 +70,12 @@ public class FSUser implements S3User {
     }
 
     @Override
-    public String getEmail() {
-        return email;
+    public Set<String> getRoles() {
+        return roles;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
     }
 
     @Override

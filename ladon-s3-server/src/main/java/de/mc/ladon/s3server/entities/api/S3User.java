@@ -4,6 +4,8 @@
 
 package de.mc.ladon.s3server.entities.api;
 
+import java.util.Set;
+
 /**
  * @author Ralf Ulrich on 17.02.16.
  */
@@ -17,6 +19,6 @@ public interface S3User {
 
     String getPublicKey();
 
-    String getEmail();
+    Set<String> getRoles();
 
 }

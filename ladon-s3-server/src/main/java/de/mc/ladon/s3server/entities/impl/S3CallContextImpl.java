@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
@@ -40,7 +41,7 @@ public class S3CallContextImpl implements S3CallContext {
         this.uri = request.getRequestURI();
         this.queryString = request.getQueryString();
         this.response = response;
-        this.user = new S3UserImpl(SYSTEM, SYSTEM, SYSTEM, SYSTEM, "SYSTEM@SYSTEM.COM");
+        this.user = new S3UserImpl(SYSTEM, SYSTEM, SYSTEM, SYSTEM, Collections.emptySet());
     }
 
     @Override
