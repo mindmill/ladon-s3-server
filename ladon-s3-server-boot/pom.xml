@@ -5,7 +5,7 @@
 
     <groupId>de.mindconsulting</groupId>
     <artifactId>ladon-s3-server-boot</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <packaging>jar</packaging>
 
     <name>s3-server-boot</name>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.9.11</version>
+            <version>1.10.54</version>
             <scope>test</scope>
         </dependency>
 
