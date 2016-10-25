@@ -51,6 +51,7 @@ public class S3Servlet extends HttpServlet {
 
     private S3Repository repository;
     private boolean securityEnabled = true;
+    private long requestTimeout  =  0L;
 
     private enum S3Call {
         listmybuckets,
@@ -103,6 +104,7 @@ public class S3Servlet extends HttpServlet {
         S3CallContext context = new S3CallContextImpl(req, resp, req.getParameterMap());
         S3RequestId requestId = context.getRequestId();
         AsyncContext asyncContext = req.startAsync(req, resp);
+        asyncContext.setTimeout(requestTimeout);
         executor.execute(bucketName + objectkey, () -> {
             try {
                 try {
@@ -284,6 +286,9 @@ public class S3Servlet extends HttpServlet {
         }
     }
 
+    public void setRequestTimeout(long requestTimeout) {
+        this.requestTimeout = requestTimeout;
+    }
 
     public void setRepository(S3Repository repository) {
         this.repository = repository;
