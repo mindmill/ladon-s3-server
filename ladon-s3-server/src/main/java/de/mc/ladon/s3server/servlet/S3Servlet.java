@@ -162,10 +162,10 @@ public class S3Servlet extends HttpServlet {
                             break;
                     }
                 } catch (JAXBException e) {
-                    logger.error("error procession xml " + requestId.get(), e);
+                    logger.error("error processing xml " + requestId.get(), e);
                     throw new InternalErrorException(objectkey, requestId);
                 } catch (IOException e) {
-                    logger.error("error procession stream " + requestId.get(), e);
+                    logger.error("error processing stream " + requestId.get(), e);
                     throw new InternalErrorException(objectkey, requestId);
                 }
             } catch (S3ServerException e) {
