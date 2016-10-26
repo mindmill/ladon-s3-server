@@ -8,6 +8,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.BaseEncoding;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 import de.mc.ladon.s3server.exceptions.InternalErrorException;
+import de.mc.ladon.s3server.exceptions.InvalidSecurityException;
 import de.mc.ladon.s3server.exceptions.S3ServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,7 @@ public class AwsSignatureVersion2 {
         } catch (InvalidKeyException e) {
             logger.error("invalid key", e);
         }
-        throw new InternalErrorException(pathPrefix, callContext.getRequestId());
+        throw new InvalidSecurityException(pathPrefix, callContext.getRequestId());
     }
 
 

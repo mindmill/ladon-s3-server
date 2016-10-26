@@ -6,6 +6,7 @@ package de.mc.ladon.s3server.auth;
 
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 import de.mc.ladon.s3server.exceptions.InternalErrorException;
+import de.mc.ladon.s3server.exceptions.InvalidSecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,7 +134,7 @@ public class AwsSignatureVersion4 {
         } catch (InvalidKeyException e) {
             logger.error("invalid key", e);
         }
-        throw new InternalErrorException(callContext.getUri(), callContext.getRequestId());
+        throw new InvalidSecurityException(callContext.getUri(), callContext.getRequestId());
 
     }
 }
