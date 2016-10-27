@@ -10,10 +10,7 @@ import de.mc.ladon.s3server.common.Validator;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 import de.mc.ladon.s3server.entities.api.S3RequestId;
 import de.mc.ladon.s3server.entities.impl.S3CallContextImpl;
-import de.mc.ladon.s3server.exceptions.InternalErrorException;
-import de.mc.ladon.s3server.exceptions.InvalidBucketName;
-import de.mc.ladon.s3server.exceptions.NotImplementedException;
-import de.mc.ladon.s3server.exceptions.S3ServerException;
+import de.mc.ladon.s3server.exceptions.*;
 import de.mc.ladon.s3server.executor.HashBasedExecutor;
 import de.mc.ladon.s3server.jaxb.entities.*;
 import de.mc.ladon.s3server.jaxb.entities.Error;
@@ -163,7 +160,7 @@ public class S3Servlet extends HttpServlet {
                     }
                 } catch (JAXBException e) {
                     logger.error("error processing xml " + requestId.get(), e);
-                    throw new InternalErrorException(objectkey, requestId);
+                    throw new MalformedXMLException(objectkey, requestId);
                 } catch (IOException e) {
                     logger.error("error processing stream " + requestId.get(), e);
                     throw new InternalErrorException(objectkey, requestId);

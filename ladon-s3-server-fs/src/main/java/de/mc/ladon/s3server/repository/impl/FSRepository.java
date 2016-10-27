@@ -2,6 +2,7 @@ package de.mc.ladon.s3server.repository.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
+import de.mc.ladon.s3server.common.Encoding;
 import de.mc.ladon.s3server.common.S3Constants;
 import de.mc.ladon.s3server.common.StreamUtils;
 import de.mc.ladon.s3server.entities.api.*;
@@ -144,11 +145,11 @@ public class FSRepository implements S3Repository {
             }
 
             DigestInputStream din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
-            try(OutputStream out = Files.newOutputStream(obj)){
+            try (OutputStream out = Files.newOutputStream(obj)) {
                 long bytesCopied = StreamUtils.copy(din, out);
                 byte[] md5bytes = din.getMessageDigest().digest();
                 String storageMd5base64 = BaseEncoding.base64().encode(md5bytes);
-                String storageMd5base16 = BaseEncoding.base16().encode(md5bytes);
+                String storageMd5base16 = Encoding.toHex(md5bytes);
 
                 if (contentLength != null && contentLength != bytesCopied
                         || md5 != null && !md5.equals(storageMd5base64)) {
