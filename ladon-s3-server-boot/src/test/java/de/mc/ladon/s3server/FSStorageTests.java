@@ -122,7 +122,7 @@ public class FSStorageTests {
         AWSCredentials credentials = new BasicAWSCredentials("SYSTEM", "SYSTEM");
         AmazonS3Client newClient = new AmazonS3Client(credentials,
                 new ClientConfiguration());
-        newClient.setS3ClientOptions(S3ClientOptions.builder().setPathStyleAccess(true).disableChunkedEncoding().build());
+        newClient.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
         newClient.setEndpoint("http://localhost:8080/api/s3");
         return newClient;
     }
