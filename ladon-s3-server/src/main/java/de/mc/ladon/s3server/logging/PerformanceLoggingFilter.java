@@ -4,15 +4,19 @@
 
 package de.mc.ladon.s3server.logging;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimaps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Enumeration;
 
 /**
  * Performance logging filter to measure each request
+ *
  * @author by Ralf Ulrich on 18.03.16.
  */
 public class PerformanceLoggingFilter implements Filter {
@@ -30,16 +34,26 @@ public class PerformanceLoggingFilter implements Filter {
 
         long startTime;
         long endTime;
-        String path = ((HttpServletRequest) request).getPathInfo();
-        String method = ((HttpServletRequest) request).getMethod();
-
+        HttpServletRequest servletRequest = ((HttpServletRequest) request);
+        String path = servletRequest.getPathInfo();
+        String method = servletRequest.getMethod();
+        String query = servletRequest.getQueryString();
+        Enumeration<String> headerNames = servletRequest.getHeaderNames();
+        StringBuilder builder = new StringBuilder(" Header: ");
+        if (headerNames != null) {
+            while (headerNames.hasMoreElements()) {
+                String name = headerNames.nextElement();
+                String header =    servletRequest.getHeader(name);
+                builder.append(name).append("=").append(header).append(", ");
+            }
+        }
 
         startTime = System.currentTimeMillis();
         chain.doFilter(request, response);
         endTime = System.currentTimeMillis();
 
         //Log the path and time taken
-        perfLogger.info(method + " - " + path + ", time: " + (endTime - startTime) + " ms");
+        perfLogger.info(method + " - " + path + "?" + query + builder.toString() + ", time: " + (endTime - startTime) + " ms");
     }
 
 
