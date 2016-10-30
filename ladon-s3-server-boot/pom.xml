@@ -5,7 +5,7 @@
 
     <groupId>de.mindconsulting</groupId>
     <artifactId>ladon-s3-server-boot</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
 
     <name>s3-server-boot</name>
