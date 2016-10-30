@@ -32,7 +32,7 @@ public class AwsSignatureVersion2 {
 
     public String computeV2(S3CallContext callContext, String pathPrefix) throws S3ServerException {
 
-        String canonicalString = RestUtils.makeS3CanonicalString(callContext.getMethod(), callContext.getUri(), callContext, null);
+        String canonicalString = RestUtils.makeS3CanonicalString(callContext, null);
         SecretKeySpec keySpec = new SecretKeySpec(callContext.getUser().getSecretKey().getBytes(), HMAC_SHA_1);
 
         try {

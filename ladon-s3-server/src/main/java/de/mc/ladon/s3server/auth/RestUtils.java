@@ -1,5 +1,6 @@
 package de.mc.ladon.s3server.auth;
 
+import com.google.common.base.Strings;
 import de.mc.ladon.s3server.common.S3Constants;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 
@@ -28,9 +29,9 @@ public class RestUtils {
      * <p>
      * When expires is non-null, it will be used instead of the Date header.
      */
-    public static String makeS3CanonicalString(String method, String resource, S3CallContext context, String expires) {
+    public static String makeS3CanonicalString(S3CallContext context, String expires) {
         StringBuilder buf = new StringBuilder();
-        buf.append(method).append("\n");
+        buf.append(context.getMethod()).append("\n");
 
         // Add all interesting headers to a list, then sort them.  "Interesting"
         // is defined as Content-MD5, Content-Type, Date, and x-amz-
@@ -94,7 +95,7 @@ public class RestUtils {
         }
 
         // Add all the interesting parameters
-        buf.append(resource);
+        buf.append(context.getUri());
         String[] parameterNames = context.getParams().getAllParams().keySet().toArray(
                 new String[context.getParams().getAllParams().size()]);
         Arrays.sort(parameterNames);
@@ -106,7 +107,7 @@ public class RestUtils {
             buf.append(separator);
             buf.append(parameterName);
             String parameterValue = context.getParams().getAllParams().get(parameterName);
-            if (parameterValue != null) {
+            if (!Strings.isNullOrEmpty(parameterValue)) {
                 buf.append("=").append(parameterValue);
             }
 

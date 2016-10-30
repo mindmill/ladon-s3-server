@@ -48,7 +48,7 @@ public class S3Servlet extends HttpServlet {
 
     private S3Repository repository;
     private boolean securityEnabled = true;
-    private long requestTimeout  =  0L;
+    private long requestTimeout = 0L;
 
     private enum S3Call {
         listmybuckets,
@@ -111,7 +111,7 @@ public class S3Servlet extends HttpServlet {
                     if (securityEnabled) {
                         Authorization.checkAuthHeader(context, repository);
                     }
-
+                    logger.debug("Executing {}", call);
                     switch (call) {
                         case listmybuckets:
                             writeXmlResponse(ResponseWrapper.listAllMyBucketsResult(context.getUser(),
@@ -167,6 +167,7 @@ public class S3Servlet extends HttpServlet {
                 }
             } catch (S3ServerException e) {
                 try {
+                    logger.warn("request failed", e);
                     writeXmlResponse(new Error(e), resp, e.getResponseStatus());
                 } catch (Exception e1) {
                     logger.error("Error writing error response " + requestId.get(), e1);
