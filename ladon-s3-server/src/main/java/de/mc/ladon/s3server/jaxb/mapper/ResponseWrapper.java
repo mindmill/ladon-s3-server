@@ -32,8 +32,8 @@ public class ResponseWrapper {
                         .collect(Collectors.toList()), list.isTruncated());
     }
 
-    public static ListVersionResult listVersionsResult(S3CallContext callContext, S3ListBucketResult list) {
-        return new ListVersionResult(callContext, list.getBucketName(),
+    public static ListVersionsResult listVersionsResult(S3CallContext callContext, S3ListBucketResult list) {
+        return new ListVersionsResult(callContext, list.getBucketName(),
                 list.getObjects().stream().map(o -> {
                     if (o.isDeleted()) {
                         return new DeleteMarker(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),

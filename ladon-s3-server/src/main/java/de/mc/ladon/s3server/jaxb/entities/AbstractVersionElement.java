@@ -8,13 +8,16 @@ import de.mc.ladon.s3server.jaxb.S3DateAdapter;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Date;
 
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
-public class AbstractVersionElement {
+@XmlRootElement
+@XmlSeeAlso({DeleteMarker.class,Version.class})
+public abstract class AbstractVersionElement {
     private Owner owner;
     private String key;
     private Date lastModified;
