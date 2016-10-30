@@ -60,7 +60,7 @@ public class S3RequestParamsImpl implements S3RequestParams {
 
     @Override
     public boolean acl() {
-        return false;
+        return allParams.get(S3Constants.ACL) != null;
     }
 
     @Override

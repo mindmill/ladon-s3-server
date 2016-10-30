@@ -222,6 +222,10 @@ public interface S3Constants {
     String VERSIONS = "versions";
 
     /**
+     *  Query param for acl requests
+     */
+    String ACL = "acl";
+    /**
      * Specifies whether the object is (true) or is not (false) the current version of an object.
      */
     String IS_LATEST = "IsLatest";
