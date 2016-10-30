@@ -4,6 +4,8 @@
 
 package de.mc.ladon.s3server.logging;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimaps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +16,7 @@ import java.util.Enumeration;
 
 /**
  * Performance logging filter to measure each request
+ *
  * @author by Ralf Ulrich on 18.03.16.
  */
 public class PerformanceLoggingFilter implements Filter {
