@@ -7,14 +7,15 @@ package de.mc.ladon.s3server.jaxb.entities;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 /**
  * @author Ralf Ulrich on 17.02.16.
  */
-@XmlRootElement(name = "ListBucketResult")
-public class ListVersionResult {
+@XmlRootElement(name = "ListVersionsResult")
+public class ListVersionsResult {
 
     private String name;
     private String prefix;
@@ -23,23 +24,23 @@ public class ListVersionResult {
     private String nextVersionIdMarker;
     private Integer maxKeys;
     private Boolean isTruncated;
-    private List<AbstractVersionElement> contentsList;
+    private List<AbstractVersionElement> versions;
 
-    public ListVersionResult() {
+    public ListVersionsResult() {
     }
 
-    public ListVersionResult(S3CallContext callContext,
-                             String bucketName,
-                             List<AbstractVersionElement> contentsList,
-                             boolean isTruncated,
-                             String nextKeyMarker,
-                             String nextVersionIdMarker) {
+    public ListVersionsResult(S3CallContext callContext,
+                              String bucketName,
+                              List<AbstractVersionElement> versions,
+                              boolean isTruncated,
+                              String nextKeyMarker,
+                              String nextVersionIdMarker) {
         this.name = bucketName;
         this.prefix = callContext.getParams().getPrefix();
         this.keyMarker = callContext.getParams().getKeyMarker();
         this.maxKeys = callContext.getParams().getMaxKeys();
         this.isTruncated = isTruncated;
-        this.contentsList = contentsList;
+        this.versions = versions;
         this.nextKeyMarker = nextKeyMarker;
         this.nextVersionIdMarker = nextVersionIdMarker;
     }
@@ -108,12 +109,12 @@ public class ListVersionResult {
         this.isTruncated = isTruncated;
     }
 
-    @XmlElement(name = "Contents")
-    public List<AbstractVersionElement> getContentsList() {
-        return contentsList;
+    @XmlElements({@XmlElement(name = "Version", type = Version.class), @XmlElement(name = "DeleteMarker", type = DeleteMarker.class)})
+    public List<AbstractVersionElement> getVersions() {
+        return versions;
     }
 
-    public void setContentsList(List<AbstractVersionElement> contentsList) {
-        this.contentsList = contentsList;
+    public void setVersions(List<AbstractVersionElement> versions) {
+        this.versions = versions;
     }
 }

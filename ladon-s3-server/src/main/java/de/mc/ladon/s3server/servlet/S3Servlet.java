@@ -71,9 +71,13 @@ public class S3Servlet extends HttpServlet {
             jaxbContext = JAXBContext.newInstance(
                     Bucket.class,
                     Contents.class,
+                    DeleteMarker.class,
+                    AbstractVersionElement.class,
+                    Version.class,
                     CreateBucketConfiguration.class,
                     Error.class,
                     ListAllMyBucketsResult.class,
+                    ListVersionsResult.class,
                     ListBucketResult.class,
                     Owner.class);
         } catch (JAXBException e) {
