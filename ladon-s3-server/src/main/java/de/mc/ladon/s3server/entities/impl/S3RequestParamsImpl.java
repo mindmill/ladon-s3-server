@@ -4,6 +4,7 @@
 
 package de.mc.ladon.s3server.entities.impl;
 
+import de.mc.ladon.s3server.common.S3Constants;
 import de.mc.ladon.s3server.entities.api.S3RequestParams;
 
 import java.util.HashMap;
@@ -20,18 +21,22 @@ public class S3RequestParamsImpl implements S3RequestParams {
     private String encodingType;
     private String marker;
     private Integer maxKeys;
+    private String keyMarker;
+    private String versionIdMarker;
     private String prefix;
-    private Map<String,String> allParams;
+    private Map<String, String> allParams;
 
     public S3RequestParamsImpl(Map<String, String[]> requestParams) {
         allParams = new HashMap<>(requestParams.size());
-        for (String p : requestParams.keySet()){
-            allParams.put(p,requestParams.get(p)[0]);
+        for (String p : requestParams.keySet()) {
+            allParams.put(p, requestParams.get(p)[0]);
         }
 
         this.delimiter = getFirstOrNull(DELIMITER, requestParams);
         this.encodingType = getFirstOrNull(ENCODING_TYPE, requestParams);
         this.marker = getFirstOrNull(MARKER, requestParams);
+        this.keyMarker = getFirstOrNull(KEY_MARKER, requestParams);
+        this.versionIdMarker = getFirstOrNull(VERSION_ID_MARKER, requestParams);
         try {
             this.maxKeys = Integer.parseInt(getFirstOrNull(MAX_KEYS, requestParams));
         } catch (NumberFormatException e) {
@@ -48,6 +53,15 @@ public class S3RequestParamsImpl implements S3RequestParams {
         return null;
     }
 
+    @Override
+    public boolean listVersions() {
+        return allParams.get(S3Constants.VERSIONS) != null;
+    }
+
+    @Override
+    public boolean acl() {
+        return false;
+    }
 
     @Override
     public String getDelimiter() {
@@ -62,6 +76,16 @@ public class S3RequestParamsImpl implements S3RequestParams {
     @Override
     public String getMarker() {
         return marker;
+    }
+
+    @Override
+    public String getKeyMarker() {
+        return keyMarker;
+    }
+
+    @Override
+    public String getVersionIdMarker() {
+        return versionIdMarker;
     }
 
     @Override

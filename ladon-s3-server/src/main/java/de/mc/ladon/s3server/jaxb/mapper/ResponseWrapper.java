@@ -32,5 +32,18 @@ public class ResponseWrapper {
                         .collect(Collectors.toList()), list.isTruncated());
     }
 
+    public static ListVersionResult listVersionsResult(S3CallContext callContext, S3ListBucketResult list) {
+        return new ListVersionResult(callContext, list.getBucketName(),
+                list.getObjects().stream().map(o -> {
+                    if (o.isDeleted()) {
+                        return new DeleteMarker(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
+                                o.getKey(), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
+                    } else {
+                        return new Version(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
+                                o.getKey(), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
+                    }
+                }).collect(Collectors.toList()), list.isTruncated(), list.nextKeyMarker(), list.nextVersionIdMarker());
+    }
+
 
 }

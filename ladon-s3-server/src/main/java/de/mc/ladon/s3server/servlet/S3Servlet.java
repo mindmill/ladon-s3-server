@@ -120,9 +120,15 @@ public class S3Servlet extends HttpServlet {
                                     HttpServletResponse.SC_OK);
                             break;
                         case listbucket:
-                            writeXmlResponse(ResponseWrapper.listBucketResult(context, repository.listBucket(context, bucketName)),
-                                    resp,
-                                    HttpServletResponse.SC_OK);
+                            if (context.getParams().listVersions()) {
+                                writeXmlResponse(ResponseWrapper.listVersionsResult(context, repository.listBucket(context, bucketName)),
+                                        resp,
+                                        HttpServletResponse.SC_OK);
+                            } else {
+                                writeXmlResponse(ResponseWrapper.listBucketResult(context, repository.listBucket(context, bucketName)),
+                                        resp,
+                                        HttpServletResponse.SC_OK);
+                            }
                             break;
                         case putbucket:
                             CreateBucketConfiguration config;

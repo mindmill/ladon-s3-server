@@ -17,6 +17,10 @@ public interface S3ListBucketResult {
 
     boolean isTruncated();
 
+    String nextKeyMarker();
+
+    String nextVersionIdMarker();
+
 
 
 

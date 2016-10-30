@@ -25,9 +25,23 @@ public class S3ObjectImpl implements S3Object {
     private S3Metadata metadata;
     private InputStream content;
     private String etag;
+    private String versionId;
+    private boolean deleted;
+    private boolean latest;
 
 
-    public S3ObjectImpl(String key, Date lastModified, String bucket, Long size, S3User owner, S3Metadata metadata, InputStream content, String mimeType, String etag) {
+    public S3ObjectImpl(String key,
+                        Date lastModified,
+                        String bucket,
+                        Long size,
+                        S3User owner,
+                        S3Metadata metadata,
+                        InputStream content,
+                        String mimeType,
+                        String etag,
+                        String versionId,
+                        boolean deleted,
+                        boolean latest) {
         this.key = key;
         this.lastModified = lastModified;
         this.bucket = bucket;
@@ -37,6 +51,9 @@ public class S3ObjectImpl implements S3Object {
         this.metadata = metadata;
         this.content = content;
         this.etag = etag;
+        this.versionId = versionId;
+        this.deleted = deleted;
+        this.latest = latest;
     }
 
     @Override
@@ -65,8 +82,23 @@ public class S3ObjectImpl implements S3Object {
     }
 
     @Override
+    public String getVersionId() {
+        return versionId;
+    }
+
+    @Override
     public Date getLastModified() {
         return lastModified;
+    }
+
+    @Override
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    @Override
+    public boolean isLatest() {
+        return latest;
     }
 
     @Override

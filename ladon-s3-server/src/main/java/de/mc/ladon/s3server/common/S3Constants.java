@@ -211,6 +211,30 @@ public interface S3Constants {
      */
     String PREFIX = "prefix";
 
+    /**
+     * Version ID of an object
+     */
+    String VERSION_ID = "VersionId";
+
+    /**
+     * Query param on version enabled requests
+     */
+    String VERSIONS = "versions";
+
+    /**
+     * Specifies whether the object is (true) or is not (false) the current version of an object.
+     */
+    String IS_LATEST = "IsLatest";
+
+    /**
+     * Specifies the object version you want to start listing from. Also, see key-marker.
+     */
+    String VERSION_ID_MARKER = "version-id-marker";
+
+    /**
+     * Specifies the key in the bucket that you want to start listing from. Also, see version-id-marker.
+     */
+    String KEY_MARKER = "key-marker";
 
     /**
      * Can be used to specify caching behavior along the request/reply chain.

@@ -50,6 +50,19 @@ public interface S3RequestParams {
      */
     String getMarker();
 
+    /**
+     * Specifies the key in the bucket that you want to start listing from. Also, see version-id-marker.
+     *
+     * @return the key to start listing from
+     */
+    String getKeyMarker();
+
+    /**
+     * Specifies the object version you want to start listing from. Also, see key-marker.
+     *
+     * @return the object version to start listing from
+     */
+    String getVersionIdMarker();
 
     /**
      * Sets the maximum number of keys returned in the response body. You can
@@ -76,6 +89,20 @@ public interface S3RequestParams {
      * @return the prefix to use or null
      */
     String getPrefix();
+
+    /**
+     * Convenience method for the  "versions" query param
+     *
+     * @return true if "versions" parameter is set, false otherwise
+     */
+    boolean listVersions();
+
+    /**
+     * Convenience method for the  "acl" query param
+     *
+     * @return true  if "acl" parameter is set, false otherwise
+     */
+    boolean acl();
 
     /**
      * Get all params as a simple Map. Notice: only the first value is added, multivalue is not supported

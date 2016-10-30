@@ -238,7 +238,7 @@ public class FSRepository implements S3Repository {
         try {
             Long count = getPathStream(bucketName, prefix, bucket, marker).limit(maxKeys + 1).count();
 
-            return new S3ListBucketResultImpl(count > maxKeys, bucketName, getPathStream(bucketName, prefix, bucket, marker)
+            return new S3ListBucketResultImpl(getPathStream(bucketName, prefix, bucket, marker)
                     .limit(maxKeys)
                     .map(path -> {
                                 String key = bucket.relativize(path).toString();
@@ -251,9 +251,9 @@ public class FSRepository implements S3Repository {
                                         new S3UserImpl(),
                                         meta,
                                         null, meta.get(S3Constants.CONTENT_TYPE),
-                                        meta.get(S3Constants.ETAG));
+                                        meta.get(S3Constants.ETAG), meta.get(S3Constants.VERSION_ID), false, true);
                             }
-                    ).collect(Collectors.toList()));
+                    ).collect(Collectors.toList()), count > maxKeys, bucketName, null, null);
         } catch (IOException e) {
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
         }
