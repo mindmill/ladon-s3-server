@@ -20,6 +20,8 @@ public interface S3Object {
 
     String getETag();
 
+    String getVersionId();
+
     Long getSize();
 
     String getMimeType();
@@ -28,8 +30,11 @@ public interface S3Object {
 
     String getBucket();
 
+    boolean isDeleted();
+
     S3Metadata getMetadata();
 
     InputStream getContent();
 
+    boolean isLatest();
 }

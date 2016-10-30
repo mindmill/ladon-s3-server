@@ -17,10 +17,18 @@ public class S3ListBucketResultImpl implements S3ListBucketResult {
     private boolean truncated;
     private String bucketName;
     private List<S3Object> objects;
+    private String nextKeyMarker;
+    private String nextVersionIdMarker;
 
-    public S3ListBucketResultImpl(boolean truncated, String bucketName, List<S3Object> objects) {
+    public S3ListBucketResultImpl(List<S3Object> objects,
+                                  boolean truncated,
+                                  String bucketName,
+                                  String nextKeyMarker,
+                                  String nextVersionIdMarker) {
         this.truncated = truncated;
         this.bucketName = bucketName;
+        this.nextKeyMarker = nextKeyMarker;
+        this.nextVersionIdMarker = nextVersionIdMarker;
         this.objects = objects;
     }
 
@@ -32,6 +40,16 @@ public class S3ListBucketResultImpl implements S3ListBucketResult {
     @Override
     public boolean isTruncated() {
         return truncated;
+    }
+
+    @Override
+    public String nextKeyMarker() {
+        return nextKeyMarker;
+    }
+
+    @Override
+    public String nextVersionIdMarker() {
+        return nextVersionIdMarker;
     }
 
     @Override
