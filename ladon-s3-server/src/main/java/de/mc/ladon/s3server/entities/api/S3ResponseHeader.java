@@ -49,6 +49,20 @@ public interface S3ResponseHeader {
 
 
     /**
+     * Sets the cache control and expires header
+     *
+     * @param expires the wanted cache duration in seconds, null if no cache
+     */
+    void setExpires(Long expires);
+
+    /**
+     * Used to set the Last-Modified header of the response
+     *
+     * @param lastModified date of the last modification
+     */
+    void setLastModified(Date lastModified);
+
+    /**
      * The entity tag is a hash of the object. The ETag reflects changes only to the
      * contents of an object, not its metadata. The ETag may or may not be an MD5
      * digest of the object data. Whether or not it is depends on how the object was
