@@ -22,8 +22,8 @@ public class AuthKeyGen {
         generator.init(240);
         byte[] awsSecretAccessKey = generator.generateKey().getEncoded();
         return new AwsKeyPair(
-                BaseEncoding.base64().encode(awsSecretAccessKey),
-                BaseEncoding.base64().encode(awsAccessKeyId)
+                BaseEncoding.base64Url().encode(awsSecretAccessKey),
+                BaseEncoding.base64Url().encode(awsAccessKeyId)
         );
 
     }
