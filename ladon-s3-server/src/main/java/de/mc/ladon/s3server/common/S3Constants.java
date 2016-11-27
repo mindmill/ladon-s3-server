@@ -214,7 +214,7 @@ public interface S3Constants {
     /**
      * Version ID of an object
      */
-    String VERSION_ID = "VersionId";
+    String VERSION_ID = "versionId";
 
     /**
      * Query param on version enabled requests
