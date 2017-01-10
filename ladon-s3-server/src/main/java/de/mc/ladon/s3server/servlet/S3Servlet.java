@@ -192,6 +192,7 @@ public class S3Servlet extends HttpServlet {
 
     private void writeXmlResponse(Object content, HttpServletResponse resp, int status) throws JAXBException, IOException {
         resp.setContentType("application/xml");
+        resp.setHeader("Connection", "close");
         resp.setStatus(status);
         resp.setCharacterEncoding(Charsets.UTF_8.displayName());
         getMarshaller().marshal(content, resp.getOutputStream());
