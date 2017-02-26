@@ -61,6 +61,19 @@ public interface S3Repository {
     void createObject(S3CallContext callContext, String bucketName, String objectKey);
 
     /**
+     * This implementation of the PUT operation creates a copy of an object that is already stored in Amazon S3.
+     * A PUT copy operation is the same as performing a GET and then a PUT.
+     * Adding the request header, x-amz-copy-source, makes the PUT operation copy the source object
+     * into the destination bucket.
+     * @param callContext the S3CallContext
+     * @param srcBucket name of the source bucket
+     * @param srcObjectKey key of the source object
+     * @param destBucket name of the destination bucket
+     * @param destObjectKey key of the destination object
+     */
+    void copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey);
+
+    /**
      * This implementation of the GET operation retrieves objects from Amazon S3. To use GET , you must have
      * READ access to the object.
      * <p>

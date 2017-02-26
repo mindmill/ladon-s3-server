@@ -54,6 +54,12 @@ public class LoggingRepository implements S3Repository {
     }
 
     @Override
+    public void copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey) {
+        logger.info("COPY OBJECT :: " + srcBucket + " / " + srcObjectKey + " -> " + destBucket + " / " + destObjectKey + " " + callContext);
+        delegate.copyObject(callContext, srcBucket, srcObjectKey, destBucket, destObjectKey);
+    }
+
+    @Override
     public void getObject(S3CallContext callContext, String bucketName, String objectKey, boolean head) {
         logger.info("GET OBJECT :: " + bucketName + " / " + objectKey + " " + callContext);
         delegate.getObject(callContext, bucketName, objectKey, head);
