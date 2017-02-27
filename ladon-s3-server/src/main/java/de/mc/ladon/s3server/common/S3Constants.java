@@ -262,6 +262,13 @@ public interface S3Constants {
 
 
     /**
+     * This implementation of the PUT operation creates a copy of an object that is already stored in Amazon S3.
+     * A PUT copy operation is the same as performing a GET and then a PUT. Adding the request header,
+     * x-amz-copy-source, makes the PUT operation copy the source object into the destination bucket.
+     */
+    String X_AMZ_COPY_SOURCE = "x-amz-copy-source";
+
+    /**
      * The date and time at which the object is no longer cacheable.
      */
     String EXPIRES = "Expires";

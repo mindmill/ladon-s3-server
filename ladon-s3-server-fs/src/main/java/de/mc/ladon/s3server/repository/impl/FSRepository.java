@@ -129,97 +129,59 @@ public class FSRepository implements S3Repository {
     @Override
     public void copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey) {
 
+        Path srcBucketData = Paths.get(fsrepoBaseUrl, srcBucket, DATA_FOLDER);
+        Path srcBucketMeta = Paths.get(fsrepoBaseUrl, srcBucket, META_FOLDER);
+        if (!Files.exists(srcBucketData))
+            throw new NoSuchBucketException(srcBucket, callContext.getRequestId());
+        Path srcObject = srcBucketData.resolve(srcBucketMeta);
+        Path srcObjectMeta = srcBucketMeta.resolve(srcObjectKey + META_XML_EXTENSION);
 
-//        Path srcBucketData = Paths.get(fsrepoBaseUrl, srcBucket, DATA_FOLDER);
-//        Path srcBucketMeta = Paths.get(fsrepoBaseUrl, srcBucket, META_FOLDER);
-//        if (!Files.exists(srcBucketData))
-//            throw new NoSuchBucketException(srcBucket, callContext.getRequestId());
-//        Path srcObject = srcBucketData.resolve(srcBucketMeta);
-//        Path srcObjectMeta = srcBucketMeta.resolve(srcObjectKey + META_XML_EXTENSION);
-//
-//        Path destDataBucket = Paths.get(fsrepoBaseUrl, destBucket, DATA_FOLDER);
-//        Path destMetaBucket = Paths.get(fsrepoBaseUrl, destBucket, META_FOLDER);
-//        if (!Files.exists(destDataBucket))
-//            throw new NoSuchBucketException(destBucket, callContext.getRequestId());
-//        Path destObject = destDataBucket.resolve(destObjectKey);
-//        Path destObjectMeta = destMetaBucket.resolve(destObjectKey + META_XML_EXTENSION);
-//
-//
-//        if (!Files.exists(srcObject))
-//            throw new NoSuchKeyException(srcObjectKey, callContext.getRequestId());
-//
-//        lock(srcBucketMeta, srcObjectKey, FSLock.LockType.read, callContext);
-//        S3Metadata srcMetadata = null;
-//        if (Files.exists(srcObjectMeta)) {
-//            srcMetadata = loadMetaFile(srcObjectMeta);
-//
-//        }
-//
-//        try {
-//
-//                callContext.setContent(Files.newInputStream(object));
-//
-//
-//
-//        } catch (IOException e) {
-//            logger.error("internal error", e);
-//            throw new InternalErrorException(objectKey, callContext.getRequestId());
-//        } finally {
-//            unlock(srcBucketMeta, srcObjectKey, callContext);
-//        }
-//        // ############################## end getObject
-//        // ############################## start putObject
-//
-//
-//
-//
-//        //Long contentLength = callContext.getHeader().getContentLength();
-//        //String md5 = callContext.getHeader().getContentMD5();
-//
-//        lock(destMetaBucket, destObjectKey, FSLock.LockType.write, callContext);
-//        try (InputStream in = callContext.getContent()) {
-//            if (!Files.exists(destObject)) {
-//                Files.createDirectories(destObject.getParent());
-//                Files.createFile(destObject);
-//            }
-//
-//            DigestInputStream din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
-//            try (OutputStream out = Files.newOutputStream(obj)) {
-//                long bytesCopied = StreamUtils.copy(din, out);
-//                byte[] md5bytes = din.getMessageDigest().digest();
-//                String storageMd5base64 = BaseEncoding.base64().encode(md5bytes);
-//                String storageMd5base16 = Encoding.toHex(md5bytes);
-//
-//
-//                // TODO response?
-//                S3ResponseHeader header = new S3ResponseHeaderImpl();
-//                header.setEtag(inQuotes(storageMd5base16));
-//                header.setDate(new Date(Files.getLastModifiedTime(destObject).toMillis()));
-//                callContext.setResponseHeader(header);
-//
-//                writeMetaFile(destObjectMeta, callContext,toArray(srcMetadata));
-//            }
-//
-//
-//        } catch (IOException | NoSuchAlgorithmException | JAXBException e) {
-//            logger.error("internal error", e);
-//            throw new InternalErrorException(destObjectKey, callContext.getRequestId());
-//        } catch (InterruptedException e) {
-//            logger.error("interrupted thread", e);
-//            throw new InternalErrorException(destObjectKey, callContext.getRequestId());
-//        } finally {
-//            unlock(destMetaBucket, destObjectKey, callContext);
-//        }
-//
-//        // ############################## end putObject
-//
+        Path destBucketData = Paths.get(fsrepoBaseUrl, destBucket, DATA_FOLDER);
+        Path destBucketMeta = Paths.get(fsrepoBaseUrl, destBucket, META_FOLDER);
+        if (!Files.exists(destBucketData))
+            throw new NoSuchBucketException(destBucket, callContext.getRequestId());
+        Path destObject = destBucketData.resolve(destObjectKey);
+        Path destObjectMeta = destBucketMeta.resolve(destObjectKey + META_XML_EXTENSION);
 
+
+        if (!Files.exists(srcObject))
+            throw new NoSuchKeyException(srcObjectKey, callContext.getRequestId());
+
+        lock(srcBucketMeta, srcObjectKey, FSLock.LockType.read, callContext);
+        lock(destBucketMeta, destObjectKey, FSLock.LockType.write, callContext);
+
+        S3Metadata srcMetadata = null;
+        if (Files.exists(srcObjectMeta)) {
+            srcMetadata = loadMetaFile(srcObjectMeta);
+        }
+
+        try (InputStream in = Files.newInputStream(srcObject)) {
+            if (!Files.exists(destObject)) {
+                Files.createDirectories(destObject.getParent());
+                Files.createFile(destObject);
+            }
+            try (OutputStream out = Files.newOutputStream(destObject)) {
+                long bytesCopied = StreamUtils.copy(in, out);
+
+
+                writeMetaFile(destObjectMeta, callContext, toArray(srcMetadata));
+            }
+        } catch (IOException | JAXBException e) {
+            logger.error("internal error", e);
+            throw new InternalErrorException(destObjectKey, callContext.getRequestId());
+        } catch (InterruptedException e) {
+            logger.error("interrupted thread", e);
+            throw new InternalErrorException(destObjectKey, callContext.getRequestId());
+        } finally {
+            unlock(srcBucketMeta, srcObjectKey, callContext);
+            unlock(destBucketMeta, destObjectKey, callContext);
+        }
 
     }
 
     private String[] toArray(S3Metadata srcObjectMeta) {
         List<String> result = new ArrayList<String>();
-        ((S3MetadataImpl) srcObjectMeta).forEach((k,v) -> {
+        ((S3MetadataImpl) srcObjectMeta).forEach((k, v) -> {
             result.add(k);
             result.add(v);
         });

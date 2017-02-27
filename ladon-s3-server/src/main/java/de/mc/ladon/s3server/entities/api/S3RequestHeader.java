@@ -59,6 +59,15 @@ public interface S3RequestHeader {
 
     String getConnection();
 
+
+    /**
+     * Convenience method for the "x-amz-copy-source" header
+     *
+     * @return String array with bucket name at index 0 and object key at index 1, null if not present
+     */
+    String[] getCopySource();
+
+
     /**
      * The current date and time according to the requester. Example:
      * Wed, 01 Mar 2006 12:00:00 GMT . When you specify the Au-

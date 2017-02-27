@@ -144,7 +144,12 @@ public class S3Servlet extends HttpServlet {
                             repository.createBucket(context, bucketName, config.getLocationConstraint());
                             break;
                         case putobject:
-                            repository.createObject(context, bucketName, objectkey);
+                            String[] copySource = context.getHeader().getCopySource();
+                            if (copySource != null) {
+                                repository.copyObject(context, bucketName, objectkey, copySource[0], copySource[1]);
+                            } else {
+                                repository.createObject(context, bucketName, objectkey);
+                            }
                             break;
                         case postbucket:
                             throw new NotImplementedException(bucketName, requestId);

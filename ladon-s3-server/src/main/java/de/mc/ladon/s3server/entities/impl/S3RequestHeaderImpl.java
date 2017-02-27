@@ -69,6 +69,17 @@ public class S3RequestHeaderImpl implements S3RequestHeader {
     }
 
     @Override
+    public String[] getCopySource() {
+        String copySourceHeader = getHeader(X_AMZ_COPY_SOURCE);
+        if(copySourceHeader == null) return null;
+        if(copySourceHeader.startsWith("/")) {
+            copySourceHeader = copySourceHeader.substring(1);
+        }
+        String[] parts = copySourceHeader.split("/");
+        return new String[]{parts[0], parts[1]};
+    }
+
+    @Override
     public String getDate() {
         return getHeader(DATE);
     }
