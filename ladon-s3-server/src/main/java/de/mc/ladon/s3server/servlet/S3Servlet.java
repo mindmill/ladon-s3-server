@@ -146,7 +146,8 @@ public class S3Servlet extends HttpServlet {
                         case putobject:
                             String[] copySource = context.getHeader().getCopySource();
                             if (copySource != null) {
-                                repository.copyObject(context, bucketName, objectkey, copySource[0], copySource[1]);
+                                repository.copyObject(context, bucketName, objectkey, copySource[0], copySource[1],
+                                        context.getHeader().copyMetadata());
                             } else {
                                 repository.createObject(context, bucketName, objectkey);
                             }

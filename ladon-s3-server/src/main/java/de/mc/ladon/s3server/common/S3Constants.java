@@ -222,7 +222,7 @@ public interface S3Constants {
     String VERSIONS = "versions";
 
     /**
-     *  Query param for acl requests
+     * Query param for acl requests
      */
     String ACL = "acl";
     /**
@@ -267,6 +267,17 @@ public interface S3Constants {
      * x-amz-copy-source, makes the PUT operation copy the source object into the destination bucket.
      */
     String X_AMZ_COPY_SOURCE = "x-amz-copy-source";
+
+
+    /**
+     * Specifies whether the metadata is copied from the source object or replaced with metadata provided in the request.
+     * Type: String
+     * Default: COPY
+     * Valid values: COPY | REPLACE
+     */
+    String X_AMZ_METADATA_DIRECTIVE = "x-amz-metadata-directive";
+    String X_AMZ_METADATA_DIRECTIVE_REPLACE = "replace";
+    String X_AMZ_METADATA_DIRECTIVE_COPY = "copy";
 
     /**
      * The date and time at which the object is no longer cacheable.

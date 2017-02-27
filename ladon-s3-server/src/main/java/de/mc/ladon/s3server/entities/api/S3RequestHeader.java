@@ -69,6 +69,13 @@ public interface S3RequestHeader {
 
 
     /**
+     * Specifies whether the metadata is copied from the source object or replaced with metadata provided in the request.
+     *
+     * @return true if metadata should be copied, false if the metadata should be taken from the request only
+     */
+    boolean copyMetadata();
+
+    /**
      * The current date and time according to the requester. Example:
      * Wed, 01 Mar 2006 12:00:00 GMT . When you specify the Au-
      * thorization header, you must specify either the x-amz-date or

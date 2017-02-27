@@ -127,7 +127,7 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public void copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey) {
+    public void copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey, boolean copyMetadata) {
 
         Path srcBucketData = Paths.get(fsrepoBaseUrl, srcBucket, DATA_FOLDER);
         Path srcBucketMeta = Paths.get(fsrepoBaseUrl, srcBucket, META_FOLDER);
