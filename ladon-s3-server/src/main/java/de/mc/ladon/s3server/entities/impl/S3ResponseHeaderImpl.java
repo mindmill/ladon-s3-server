@@ -21,6 +21,8 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
     private String contentType;
     private Connection connection;
     private Date date;
+    private Long expires;
+    private Date lastModified;
     private String etag;
     private String server;
     private Boolean xamzDeleteMarker;
@@ -53,6 +55,16 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
     @Override
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    @Override
+    public void setExpires(Long expires) {
+        this.expires = expires;
+    }
+
+    @Override
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
     }
 
     @Override
@@ -91,7 +103,19 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
         if (header.contentLength != null)
             response.setContentLengthLong(header.contentLength);
         if (header.contentType != null)
-            response.setContentType(header.contentType.toString());
+            response.setContentType(header.contentType);
+        if (header.expires == null) {
+            response.setHeader("Pragma", "No-cache");
+            response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
+            response.setDateHeader("Expires", 1);
+        } else {
+            long now = System.currentTimeMillis();
+            response.addHeader("Cache-Control", "max-age=" + header.expires);
+            response.addHeader("Cache-Control", "must-revalidate");
+            response.setDateHeader("Expires", now + (header.expires * 1000));
+        }
+        if (header.lastModified != null)
+            response.setDateHeader("Last-Modified", header.lastModified.getTime());
         if (header.connection != null)
             response.setHeader(CONNECTION, header.connection.name());
         if (header.date != null)

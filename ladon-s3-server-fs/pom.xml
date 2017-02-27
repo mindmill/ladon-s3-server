@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.mindconsulting</groupId>
     <artifactId>ladon-s3-server-fs</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.0</version>
     <build>
         <plugins>
             <plugin>
@@ -24,7 +25,7 @@
                         <Bundle-SymbolicName>${groupId}.${artifactId}</Bundle-SymbolicName>
                         <Export-Package>de.mc.ladon.s3server</Export-Package>
                         <Bundle-Name>Mind Consulting :: Ladon S3 Server :: File System Repository</Bundle-Name>
-                        <Bundle-Description>${description}</Bundle-Description>
+                        <Bundle-Description>${project.description}</Bundle-Description>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-Activator>de.mc.ladon.s3server.osgi.Activator</Bundle-Activator>
                         <Bundle-Vendor>Mind Consulting UG</Bundle-Vendor>
@@ -63,6 +64,5 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
 
 </project>

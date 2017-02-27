@@ -5,7 +5,7 @@
 
     <groupId>de.mindconsulting</groupId>
     <artifactId>ladon-s3-server-osgi-starter</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.0</version>
     <build>
         <plugins>
             <plugin>
@@ -24,7 +24,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${groupId}.${artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>Mind Consulting :: Ladon S3 Server :: OSGI Servlet Activator</Bundle-Name>
-                        <Bundle-Description>${description}</Bundle-Description>
+                        <Bundle-Description>${project.description}</Bundle-Description>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-Activator>de.mc.ladon.s3server.osgi.S3ServerActivator</Bundle-Activator>
                         <Bundle-Vendor>Mind Consulting UG</Bundle-Vendor>
