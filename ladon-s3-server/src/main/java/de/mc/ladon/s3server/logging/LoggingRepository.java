@@ -4,10 +4,7 @@
 
 package de.mc.ladon.s3server.logging;
 
-import de.mc.ladon.s3server.entities.api.S3Bucket;
-import de.mc.ladon.s3server.entities.api.S3CallContext;
-import de.mc.ladon.s3server.entities.api.S3ListBucketResult;
-import de.mc.ladon.s3server.entities.api.S3User;
+import de.mc.ladon.s3server.entities.api.*;
 import de.mc.ladon.s3server.repository.api.S3Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +51,9 @@ public class LoggingRepository implements S3Repository {
     }
 
     @Override
-    public void copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey, boolean copyMetadata) {
-        logger.info("COPY OBJECT :: " + srcBucket + " / " + srcObjectKey + " -> " + destBucket + " / " + destObjectKey + " , meta " + copyMetadata+ " " + callContext);
-        delegate.copyObject(callContext, srcBucket, srcObjectKey, destBucket, destObjectKey, copyMetadata);
+    public S3Object copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey, boolean copyMetadata) {
+        logger.info("COPY OBJECT :: " + srcBucket + " / " + srcObjectKey + " -> " + destBucket + " / " + destObjectKey + " , meta " + copyMetadata + " " + callContext);
+        return delegate.copyObject(callContext, srcBucket, srcObjectKey, destBucket, destObjectKey, copyMetadata);
     }
 
     @Override

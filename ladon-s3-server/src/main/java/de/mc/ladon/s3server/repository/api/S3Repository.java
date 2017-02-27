@@ -4,10 +4,7 @@
 
 package de.mc.ladon.s3server.repository.api;
 
-import de.mc.ladon.s3server.entities.api.S3Bucket;
-import de.mc.ladon.s3server.entities.api.S3CallContext;
-import de.mc.ladon.s3server.entities.api.S3ListBucketResult;
-import de.mc.ladon.s3server.entities.api.S3User;
+import de.mc.ladon.s3server.entities.api.*;
 
 import java.util.List;
 
@@ -72,8 +69,9 @@ public interface S3Repository {
      * @param destBucket    name of the destination bucket
      * @param destObjectKey key of the destination object
      * @param copyMetadata  flag whether the source metadata should be copied or not
+     * @return the resulting copied S3Object
      */
-    void copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey, boolean copyMetadata);
+    S3Object copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey, boolean copyMetadata);
 
     /**
      * This implementation of the GET operation retrieves objects from Amazon S3. To use GET , you must have

@@ -53,6 +53,7 @@ public class FSRepository implements S3Repository {
     private final String fsrepoBaseUrl;
     private final ConcurrentMap<String, S3User> userMap;
 
+
     public FSRepository(String fsrepoBaseUrl) {
         this.fsrepoBaseUrl = fsrepoBaseUrl;
         try {
@@ -127,13 +128,13 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public void copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey, boolean copyMetadata) {
+    public S3Object copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey, boolean copyMetadata) {
 
         Path srcBucketData = Paths.get(fsrepoBaseUrl, srcBucket, DATA_FOLDER);
         Path srcBucketMeta = Paths.get(fsrepoBaseUrl, srcBucket, META_FOLDER);
         if (!Files.exists(srcBucketData))
             throw new NoSuchBucketException(srcBucket, callContext.getRequestId());
-        Path srcObject = srcBucketData.resolve(srcBucketMeta);
+        Path srcObject = srcBucketData.resolve(srcObjectKey);
         Path srcObjectMeta = srcBucketMeta.resolve(srcObjectKey + META_XML_EXTENSION);
 
         Path destBucketData = Paths.get(fsrepoBaseUrl, destBucket, DATA_FOLDER);
@@ -150,11 +151,7 @@ public class FSRepository implements S3Repository {
         lock(srcBucketMeta, srcObjectKey, FSLock.LockType.read, callContext);
         lock(destBucketMeta, destObjectKey, FSLock.LockType.write, callContext);
 
-        S3Metadata srcMetadata = null;
-        if (Files.exists(srcObjectMeta)) {
-            srcMetadata = loadMetaFile(srcObjectMeta);
-        }
-
+        S3Metadata srcMetadata = loadMetaFile(srcObjectMeta);
         try (InputStream in = Files.newInputStream(srcObject)) {
             if (!Files.exists(destObject)) {
                 Files.createDirectories(destObject.getParent());
@@ -162,10 +159,22 @@ public class FSRepository implements S3Repository {
             }
             try (OutputStream out = Files.newOutputStream(destObject)) {
                 long bytesCopied = StreamUtils.copy(in, out);
-
-
-                writeMetaFile(destObjectMeta, callContext, toArray(srcMetadata));
+                if (copyMetadata) {
+                    if (Files.exists(srcObjectMeta)) {
+                        writeMetaFile(destObjectMeta, callContext, toArray(srcMetadata));
+                    }
+                } else {
+                    writeMetaFile(destObjectMeta, callContext);
+                }
             }
+            S3Metadata destMetadata = loadMetaFile(destObjectMeta);
+            return new S3ObjectImpl(destObjectKey,
+                    new Date(destObject.toFile().lastModified()),
+                    destBucket, destObject.toFile().length(),
+                    new S3UserImpl(),
+                    destMetadata,
+                    null, destMetadata.get(S3Constants.CONTENT_TYPE),
+                    destMetadata.get(S3Constants.ETAG), destMetadata.get(S3Constants.VERSION_ID), false, true);
         } catch (IOException | JAXBException e) {
             logger.error("internal error", e);
             throw new InternalErrorException(destObjectKey, callContext.getRequestId());

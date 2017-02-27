@@ -8,13 +8,13 @@ import com.google.common.base.Charsets;
 import de.mc.ladon.s3server.auth.Authorization;
 import de.mc.ladon.s3server.common.Validator;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
+import de.mc.ladon.s3server.entities.api.S3Object;
 import de.mc.ladon.s3server.entities.api.S3RequestId;
 import de.mc.ladon.s3server.entities.impl.S3CallContextImpl;
 import de.mc.ladon.s3server.exceptions.*;
 import de.mc.ladon.s3server.executor.HashBasedExecutor;
 import de.mc.ladon.s3server.jaxb.entities.*;
 import de.mc.ladon.s3server.jaxb.entities.Error;
-import de.mc.ladon.s3server.jaxb.mapper.ResponseWrapper;
 import de.mc.ladon.s3server.repository.api.S3Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +31,8 @@ import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+
+import static de.mc.ladon.s3server.jaxb.mapper.ResponseWrapper.*;
 
 /**
  * Dispatcher Servlet for the S3 API.
@@ -78,6 +80,7 @@ public class S3Servlet extends HttpServlet {
                     Error.class,
                     ListAllMyBucketsResult.class,
                     ListVersionsResult.class,
+                    CopyObjectResult.class,
                     ListBucketResult.class,
                     Owner.class);
         } catch (JAXBException e) {
@@ -118,18 +121,18 @@ public class S3Servlet extends HttpServlet {
                     logger.debug("Executing {}", call);
                     switch (call) {
                         case listmybuckets:
-                            writeXmlResponse(ResponseWrapper.listAllMyBucketsResult(context.getUser(),
+                            writeXmlResponse(listAllMyBucketsResult(context.getUser(),
                                     repository.listAllBuckets(context)),
                                     resp,
                                     HttpServletResponse.SC_OK);
                             break;
                         case listbucket:
                             if (context.getParams().listVersions()) {
-                                writeXmlResponse(ResponseWrapper.listVersionsResult(context, repository.listBucket(context, bucketName)),
+                                writeXmlResponse(listVersionsResult(context, repository.listBucket(context, bucketName)),
                                         resp,
                                         HttpServletResponse.SC_OK);
                             } else {
-                                writeXmlResponse(ResponseWrapper.listBucketResult(context, repository.listBucket(context, bucketName)),
+                                writeXmlResponse(listBucketResult(context, repository.listBucket(context, bucketName)),
                                         resp,
                                         HttpServletResponse.SC_OK);
                             }
@@ -146,8 +149,9 @@ public class S3Servlet extends HttpServlet {
                         case putobject:
                             String[] copySource = context.getHeader().getCopySource();
                             if (copySource != null) {
-                                repository.copyObject(context, bucketName, objectkey, copySource[0], copySource[1],
+                                S3Object result = repository.copyObject(context, copySource[0], copySource[1], bucketName, objectkey,
                                         context.getHeader().copyMetadata());
+                                writeXmlResponse(copyObjectResult(result), resp, HttpServletResponse.SC_OK);
                             } else {
                                 repository.createObject(context, bucketName, objectkey);
                             }
@@ -198,7 +202,6 @@ public class S3Servlet extends HttpServlet {
 
     private void writeXmlResponse(Object content, HttpServletResponse resp, int status) throws JAXBException, IOException {
         resp.setContentType("application/xml");
-        //resp.setHeader("Connection", "close");
         resp.setStatus(status);
         resp.setCharacterEncoding(Charsets.UTF_8.displayName());
         getMarshaller().marshal(content, resp.getOutputStream());

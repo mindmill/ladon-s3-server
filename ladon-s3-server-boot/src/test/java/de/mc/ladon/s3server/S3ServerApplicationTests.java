@@ -130,6 +130,16 @@ public class S3ServerApplicationTests {
 
     }
 
+    @Test
+    public void testCopyObject() throws IOException {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        ObjectMetadata meta = new ObjectMetadata();
+        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
+        client.copyObject(b.getName(),"test.txt", b.getName(),"test2.txt");
+
+    }
+
     @Test(expected = AmazonS3Exception.class)
     public void testPutObjectWrongMd5() throws IOException {
         AmazonS3Client client = getClient();

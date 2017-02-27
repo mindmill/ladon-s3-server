@@ -4,10 +4,7 @@
 
 package de.mc.ladon.s3server.jaxb.mapper;
 
-import de.mc.ladon.s3server.entities.api.S3Bucket;
-import de.mc.ladon.s3server.entities.api.S3CallContext;
-import de.mc.ladon.s3server.entities.api.S3ListBucketResult;
-import de.mc.ladon.s3server.entities.api.S3User;
+import de.mc.ladon.s3server.entities.api.*;
 import de.mc.ladon.s3server.jaxb.entities.*;
 
 import java.util.List;
@@ -30,6 +27,10 @@ public class ResponseWrapper {
                 list.getObjects().stream().map(o -> new Contents(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
                         o.getKey(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass()))
                         .collect(Collectors.toList()), list.isTruncated());
+    }
+
+    public static CopyObjectResult copyObjectResult(S3Object copiedObject) {
+        return new CopyObjectResult(copiedObject.getLastModified(), copiedObject.getETag());
     }
 
     public static ListVersionsResult listVersionsResult(S3CallContext callContext, S3ListBucketResult list) {
