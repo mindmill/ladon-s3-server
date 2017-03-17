@@ -12,7 +12,7 @@ s3server.fsrepo.root=${user.home}/.s3server
 ```
 
 # License
-Copyright (C) 2016 Mind Consulting
+Copyright (C) 2017 Mind Consulting
 
 Free for private use, easy commercial licensing available
 
