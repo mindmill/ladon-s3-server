@@ -7,6 +7,7 @@ package de.mc.ladon.s3server.jaxb.mapper;
 import de.mc.ladon.s3server.entities.api.*;
 import de.mc.ladon.s3server.jaxb.entities.*;
 
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +26,7 @@ public class ResponseWrapper {
     public static ListBucketResult listBucketResult(S3CallContext callContext, S3ListBucketResult list) {
         return new ListBucketResult(callContext, list.getBucketName(),
                 list.getObjects().stream().map(o -> new Contents(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
-                        o.getKey(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass()))
+                        URLEncoder.encode(o.getKey()), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass()))
                         .collect(Collectors.toList()), list.isTruncated());
     }
 
@@ -38,12 +39,12 @@ public class ResponseWrapper {
                 list.getObjects().stream().map(o -> {
                     if (o.isDeleted()) {
                         return new DeleteMarker(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
-                                o.getKey(), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
+                                URLEncoder.encode(o.getKey()), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
                     } else {
                         return new Version(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
-                                o.getKey(), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
+                                URLEncoder.encode(o.getKey()), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
                     }
-                }).collect(Collectors.toList()), list.isTruncated(), list.nextKeyMarker(), list.nextVersionIdMarker());
+                }).collect(Collectors.toList()), list.isTruncated(), URLEncoder.encode(list.nextKeyMarker()), URLEncoder.encode(list.nextVersionIdMarker()));
     }
 
 
