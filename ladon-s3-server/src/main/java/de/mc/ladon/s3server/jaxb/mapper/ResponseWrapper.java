@@ -44,7 +44,9 @@ public class ResponseWrapper {
                         return new Version(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
                                 URLEncoder.encode(o.getKey()), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
                     }
-                }).collect(Collectors.toList()), list.isTruncated(), URLEncoder.encode(list.nextKeyMarker()), URLEncoder.encode(list.nextVersionIdMarker()));
+                }).collect(Collectors.toList()), list.isTruncated(),
+                list.nextKeyMarker() == null ? null : URLEncoder.encode(list.nextKeyMarker()),
+                list.nextVersionIdMarker() == null ? null : URLEncoder.encode(list.nextVersionIdMarker()));
     }
 
 
