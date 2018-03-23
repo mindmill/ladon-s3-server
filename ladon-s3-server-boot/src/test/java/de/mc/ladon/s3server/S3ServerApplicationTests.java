@@ -15,6 +15,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.IntegrationTest;
@@ -131,12 +132,52 @@ public class S3ServerApplicationTests {
     }
 
     @Test
+    @Ignore
+    public void testPutBigObjectAndVerifyGet() throws IOException {
+        final long TEST_LENGTH = 1024 * 1024 * 1024 * 6L; // 6 GB
+
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        ObjectMetadata meta = new ObjectMetadata();
+        meta.setContentLength(TEST_LENGTH);
+
+        class BigInput extends InputStream {
+            final long l;
+            long counter = 0L;
+
+            BigInput(long length) {
+                l = length;
+            }
+
+            @Override
+            public int read() throws IOException {
+                return counter++ >= l ? -1 : 'M';
+            }
+        }
+        client.putObject(b.getName(), "test.txt", new BigInput(TEST_LENGTH), meta);
+
+        try (S3ObjectInputStream content = client.getObject(b.getName(), "test.txt").getObjectContent()) {
+            long readCounter = 0L;
+            int byteRead = 0;
+
+            while ((byteRead = content.read()) != -1) {
+                assertEquals('M', byteRead);
+                readCounter++;
+            }
+            assertEquals(TEST_LENGTH, readCounter);
+        } catch (AmazonClientException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
     public void testCopyObject() throws IOException {
         AmazonS3Client client = getClient();
         Bucket b = client.createBucket(UUID.randomUUID().toString());
         ObjectMetadata meta = new ObjectMetadata();
         client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
-        client.copyObject(b.getName(),"test.txt", b.getName(),"test2.txt");
+        client.copyObject(b.getName(), "test.txt", b.getName(), "test2.txt");
 
     }
 
