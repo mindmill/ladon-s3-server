@@ -8,7 +8,7 @@ mvn package && java -jar target/s3-server-{version}.jar
 
 
 ### License
-Copyright (C) 2017 Mind Consulting
+Copyright (C) 2018 Mind Consulting
 
 Free for private use, easy commercial licensing available
 
