@@ -63,5 +63,11 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
+    <distributionManagement>
+        <repository>
+            <id>mind</id>
+            <name>Mind</name>
+            <url>${repo.internal.url}</url>
+        </repository>
+    </distributionManagement>
 </project>
