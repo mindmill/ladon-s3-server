@@ -40,7 +40,7 @@ Supported so far is only access via REST API, no ACL, no policies, no torrent ..
 
 To see what you can build with it have a look at the [wiki](https://github.com/mindmill/ladon-s3-server/wiki) where you can download a full Ladon application. 
 ### License
-Copyright (C) 2017 Mind Consulting
+Copyright (C) 2018 Mind Consulting
 
 Free for private use, easy commercial licensing available
 
