@@ -2,6 +2,7 @@ package de.mc.ladon.s3server.repository.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
+import de.mc.ladon.s3server.common.DelimiterUtil;
 import de.mc.ladon.s3server.common.Encoding;
 import de.mc.ladon.s3server.common.S3Constants;
 import de.mc.ladon.s3server.common.StreamUtils;
@@ -25,10 +26,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Predicate;
@@ -303,14 +301,14 @@ public class FSRepository implements S3Repository {
         String marker = callContext.getParams().getMarker();
         String prefix = callContext.getParams().getPrefix() != null ?
                 callContext.getParams().getPrefix() : "";
+        String delimiter = callContext.getParams().getDelimiter();
 
         Path bucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
         Path bucketMeta = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
 
         try {
             Long count = getPathStream(bucketName, prefix, bucket, marker).limit(maxKeys + 1).count();
-
-            return new S3ListBucketResultImpl(getPathStream(bucketName, prefix, bucket, marker)
+            Stream<S3Object> listing = getPathStream(bucketName, prefix, bucket, marker)
                     .limit(maxKeys)
                     .map(path -> {
                                 String key = bucket.relativize(path).toString();
@@ -325,7 +323,22 @@ public class FSRepository implements S3Repository {
                                         null, meta.get(S3Constants.CONTENT_TYPE),
                                         meta.get(S3Constants.ETAG), meta.get(S3Constants.VERSION_ID), false, true);
                             }
-                    ).collect(Collectors.toList()), count > maxKeys, bucketName, null, null);
+                    );
+
+            if(delimiter == null){
+                return new S3ListBucketResultImpl(listing.collect(Collectors.toList()), null, count > maxKeys, bucketName, null, null);
+            }else{
+                if(!delimiter.equals("/")) throw new InvalidTokenException(delimiter,callContext.getRequestId());
+                Set<String> prefixes = new HashSet<>();
+                List<S3Object> objects = new ArrayList<>();
+                listing.forEach(obj -> {
+                    String commonPrefix = DelimiterUtil.getCommonPrefix(obj.getKey(),prefix,"/");
+                    if(commonPrefix != null) prefixes.add(commonPrefix);
+                });
+
+                return new S3ListBucketResultImpl(objects, new ArrayList<>(prefixes), count > maxKeys, bucketName, null, null);
+            }
+
         } catch (IOException e) {
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
         }

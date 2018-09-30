@@ -27,7 +27,9 @@ public class ResponseWrapper {
         return new ListBucketResult(callContext, list.getBucketName(),
                 list.getObjects().stream().map(o -> new Contents(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
                         URLEncoder.encode(o.getKey()), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass()))
-                        .collect(Collectors.toList()), list.isTruncated());
+                        .collect(Collectors.toList()),
+                list.getCommonPrefixes() != null ? new CommonPrefixes(list.getCommonPrefixes()) : null,
+                list.isTruncated());
     }
 
     public static CopyObjectResult copyObjectResult(S3Object copiedObject) {

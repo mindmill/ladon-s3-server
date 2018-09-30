@@ -17,10 +17,11 @@ public class S3ListBucketResultImpl implements S3ListBucketResult {
     private boolean truncated;
     private String bucketName;
     private List<S3Object> objects;
+    private List<String> commonPrefixes;
     private String nextKeyMarker;
     private String nextVersionIdMarker;
 
-    public S3ListBucketResultImpl(List<S3Object> objects,
+    public S3ListBucketResultImpl(List<S3Object> objects,List<String> prefixes,
                                   boolean truncated,
                                   String bucketName,
                                   String nextKeyMarker,
@@ -30,6 +31,7 @@ public class S3ListBucketResultImpl implements S3ListBucketResult {
         this.nextKeyMarker = nextKeyMarker;
         this.nextVersionIdMarker = nextVersionIdMarker;
         this.objects = objects;
+        this.commonPrefixes = prefixes;
     }
 
     @Override
@@ -55,5 +57,10 @@ public class S3ListBucketResultImpl implements S3ListBucketResult {
     @Override
     public List<S3Object> getObjects() {
         return objects;
+    }
+
+    @Override
+    public List<String> getCommonPrefixes() {
+        return commonPrefixes;
     }
 }

@@ -20,19 +20,27 @@ public class ListBucketResult {
     private String prefix;
     private String marker;
     private Integer maxKeys;
+    private String delimiter;
     private Boolean isTruncated;
     private List<Contents> contentsList;
+    private CommonPrefixes commonPrefixes;
 
     public ListBucketResult() {
     }
 
-    public ListBucketResult(S3CallContext callContext, String bucketName, List<Contents> contentsList, boolean isTruncated) {
+    public ListBucketResult(S3CallContext callContext,
+                            String bucketName,
+                            List<Contents> contentsList,
+                            CommonPrefixes commonPrefixes,
+                            boolean isTruncated) {
         this.name = bucketName;
         this.prefix = callContext.getParams().getPrefix();
         this.marker = callContext.getParams().getMarker();
         this.maxKeys = callContext.getParams().getMaxKeys();
+        this.delimiter = callContext.getParams().getDelimiter();
         this.isTruncated = isTruncated;
         this.contentsList = contentsList;
+        this.commonPrefixes = commonPrefixes;
     }
 
     @XmlElement(name = "Name")
@@ -71,6 +79,14 @@ public class ListBucketResult {
         this.maxKeys = maxKeys;
     }
 
+    @XmlElement(name = "Delimiter")
+    public String getDelimiter() {
+        return delimiter;
+    }
+
+    public void setDelimiter(String delimiter) {
+        this.delimiter = delimiter;
+    }
     @XmlElement(name = "IsTruncated")
     public Boolean getIsTruncated() {
         return isTruncated;
@@ -87,5 +103,15 @@ public class ListBucketResult {
 
     public void setContentsList(List<Contents> contentsList) {
         this.contentsList = contentsList;
+    }
+
+
+    @XmlElement(name = "CommonPrefixes")
+    public CommonPrefixes getCommonPrefixes() {
+        return commonPrefixes;
+    }
+
+    public void setCommonPrefixesList(CommonPrefixes commonPrefixes) {
+        this.commonPrefixes = commonPrefixes;
     }
 }

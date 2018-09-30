@@ -81,6 +81,7 @@ public class S3Servlet extends HttpServlet {
                     ListAllMyBucketsResult.class,
                     ListVersionsResult.class,
                     CopyObjectResult.class,
+                    CommonPrefixes.class,
                     ListBucketResult.class,
                     Owner.class);
         } catch (JAXBException e) {

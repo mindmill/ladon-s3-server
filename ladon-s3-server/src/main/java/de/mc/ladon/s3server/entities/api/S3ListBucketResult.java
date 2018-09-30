@@ -13,6 +13,8 @@ public interface S3ListBucketResult {
 
     List<S3Object> getObjects();
 
+    List<String> getCommonPrefixes();
+
     String getBucketName();
 
     boolean isTruncated();
