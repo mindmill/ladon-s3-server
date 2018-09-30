@@ -10,21 +10,26 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * Generates a new KeyPair
+ *
  * @author Ralf Ulrich 21.10.16.
  */
 public class AuthKeyGen {
 
 
     public static AwsKeyPair generateKeypair() throws NoSuchAlgorithmException {
-        KeyGenerator generator = KeyGenerator.getInstance(AwsSignatureVersion2.HMAC_SHA_1);
-        generator.init(120);
-        byte[] awsAccessKeyId = generator.generateKey().getEncoded();
-        generator.init(240);
-        byte[] awsSecretAccessKey = generator.generateKey().getEncoded();
-        return new AwsKeyPair(
-                BaseEncoding.base64Url().encode(awsSecretAccessKey),
-                BaseEncoding.base64Url().encode(awsAccessKeyId)
-        );
+        String accessKey = "-";
+        String secretKey = "-";
+        while (accessKey.contains("-") || accessKey.contains("_")
+                || secretKey.contains("-") || secretKey.contains("_")) {
+            KeyGenerator generator = KeyGenerator.getInstance(AwsSignatureVersion2.HMAC_SHA_1);
+            generator.init(120);
+            byte[] awsAccessKeyId = generator.generateKey().getEncoded();
+            accessKey = BaseEncoding.base64Url().encode(awsAccessKeyId);
+            generator.init(240);
+            byte[] awsSecretAccessKey = generator.generateKey().getEncoded();
+            secretKey = BaseEncoding.base64Url().encode(awsSecretAccessKey);
+        }
+        return new AwsKeyPair(secretKey, accessKey);
 
     }
 
