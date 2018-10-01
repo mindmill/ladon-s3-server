@@ -38,7 +38,7 @@ For other configuration options have a look at the [application.properties](./la
 
 Supported so far is only access via REST API, no ACL, no policies, no torrent ....
 
-To see what you can build with it have a look at the [wiki](https://github.com/mindmill/ladon-s3-server/wiki) where you can download a full Ladon application. 
+To see what you can build with it have a look at  [Ladon Data Center Edition](https://github.com/mindmill/ladon-data-center-edition) where you can see a full Ladon application. 
 ### License
 Copyright (C) 2018 Mind Consulting
 
