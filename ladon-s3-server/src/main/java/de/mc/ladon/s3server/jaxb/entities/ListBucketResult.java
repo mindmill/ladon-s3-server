@@ -10,6 +10,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
+import static de.mc.ladon.s3server.common.EncodingUtil.getEncoded;
+
 /**
  * @author Ralf Ulrich on 17.02.16.
  */
@@ -34,10 +36,10 @@ public class ListBucketResult {
                             CommonPrefixes commonPrefixes,
                             boolean isTruncated) {
         this.name = bucketName;
-        this.prefix = callContext.getParams().getPrefix();
-        this.marker = callContext.getParams().getMarker();
+        this.prefix = getEncoded(callContext,callContext.getParams().getPrefix());
+        this.marker = getEncoded(callContext,callContext.getParams().getMarker());
         this.maxKeys = callContext.getParams().getMaxKeys();
-        this.delimiter = callContext.getParams().getDelimiter();
+        this.delimiter = getEncoded(callContext,callContext.getParams().getDelimiter());
         this.isTruncated = isTruncated;
         this.contentsList = contentsList;
         this.commonPrefixes = commonPrefixes;

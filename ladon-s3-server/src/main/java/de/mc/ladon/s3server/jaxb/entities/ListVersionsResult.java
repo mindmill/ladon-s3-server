@@ -4,12 +4,15 @@
 
 package de.mc.ladon.s3server.jaxb.entities;
 
+import de.mc.ladon.s3server.common.EncodingUtil;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
+
+import static de.mc.ladon.s3server.common.EncodingUtil.*;
 
 /**
  * @author Ralf Ulrich on 17.02.16.
@@ -23,8 +26,10 @@ public class ListVersionsResult {
     private String nextKeyMarker;
     private String nextVersionIdMarker;
     private Integer maxKeys;
+    private String delimiter;
     private Boolean isTruncated;
     private List<AbstractVersionElement> versions;
+    private CommonPrefixes commonPrefixes;
 
     public ListVersionsResult() {
     }
@@ -32,17 +37,20 @@ public class ListVersionsResult {
     public ListVersionsResult(S3CallContext callContext,
                               String bucketName,
                               List<AbstractVersionElement> versions,
+                              CommonPrefixes commonPrefixes,
                               boolean isTruncated,
                               String nextKeyMarker,
                               String nextVersionIdMarker) {
         this.name = bucketName;
-        this.prefix = callContext.getParams().getPrefix();
+        this.prefix = getEncoded(callContext, callContext.getParams().getPrefix());
         this.keyMarker = callContext.getParams().getKeyMarker();
         this.maxKeys = callContext.getParams().getMaxKeys();
+        this.delimiter = getEncoded(callContext,callContext.getParams().getDelimiter());
         this.isTruncated = isTruncated;
         this.versions = versions;
         this.nextKeyMarker = nextKeyMarker;
         this.nextVersionIdMarker = nextVersionIdMarker;
+        this.commonPrefixes = commonPrefixes;
     }
 
     @XmlElement(name = "Name")
@@ -116,5 +124,14 @@ public class ListVersionsResult {
 
     public void setVersions(List<AbstractVersionElement> versions) {
         this.versions = versions;
+    }
+
+    @XmlElement(name = "CommonPrefixes")
+    public CommonPrefixes getCommonPrefixes() {
+        return commonPrefixes;
+    }
+
+    public void setCommonPrefixesList(CommonPrefixes commonPrefixes) {
+        this.commonPrefixes = commonPrefixes;
     }
 }

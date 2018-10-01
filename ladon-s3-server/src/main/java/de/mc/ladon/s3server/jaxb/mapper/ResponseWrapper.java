@@ -7,9 +7,10 @@ package de.mc.ladon.s3server.jaxb.mapper;
 import de.mc.ladon.s3server.entities.api.*;
 import de.mc.ladon.s3server.jaxb.entities.*;
 
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static de.mc.ladon.s3server.common.EncodingUtil.getEncoded;
 
 /**
  * @author Ralf Ulrich on 17.02.16.
@@ -26,7 +27,7 @@ public class ResponseWrapper {
     public static ListBucketResult listBucketResult(S3CallContext callContext, S3ListBucketResult list) {
         return new ListBucketResult(callContext, list.getBucketName(),
                 list.getObjects().stream().map(o -> new Contents(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
-                        URLEncoder.encode(o.getKey()), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass()))
+                        getEncoded(callContext, o.getKey()), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass()))
                         .collect(Collectors.toList()),
                 list.getCommonPrefixes() != null ? new CommonPrefixes(list.getCommonPrefixes()) : null,
                 list.isTruncated());
@@ -41,14 +42,14 @@ public class ResponseWrapper {
                 list.getObjects().stream().map(o -> {
                     if (o.isDeleted()) {
                         return new DeleteMarker(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
-                                URLEncoder.encode(o.getKey()), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
+                                getEncoded(callContext, o.getKey()), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
                     } else {
                         return new Version(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
-                                URLEncoder.encode(o.getKey()), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
+                                getEncoded(callContext, o.getKey()), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
                     }
-                }).collect(Collectors.toList()), list.isTruncated(),
-                list.nextKeyMarker() == null ? null : URLEncoder.encode(list.nextKeyMarker()),
-                list.nextVersionIdMarker() == null ? null : URLEncoder.encode(list.nextVersionIdMarker()));
+                }).collect(Collectors.toList()), list.getCommonPrefixes() != null ? new CommonPrefixes(list.getCommonPrefixes()) : null, list.isTruncated(),
+                getEncoded(callContext, list.nextKeyMarker()),
+                getEncoded(callContext, list.nextVersionIdMarker()));
     }
 
 
