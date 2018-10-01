@@ -25,44 +25,45 @@ public class S3ServerActivator implements BundleActivator {
     private static final String CONTEXT_STRING = "/api/s3";
     private S3Servlet s3Servlet;
 
-    public void start(BundleContext context) throws Exception {
+    public void start(BundleContext context) {
 
 
-        httpTracker = new ServiceTracker(context, HttpService.class, new ServiceTrackerCustomizer() {
-            @Override
-            public Object addingService(ServiceReference reference) {
-                HttpService httpService = (HttpService) context.getService(reference);
+        httpTracker = new ServiceTracker<>(context, HttpService.class,
+                new ServiceTrackerCustomizer<HttpService, Object>() {
+                    @Override
+                    public HttpService addingService(ServiceReference<HttpService> reference) {
+                        HttpService httpService = context.getService(reference);
 
-                try {
-                    s3Servlet = new S3Servlet(4);
-                    ServiceReference<S3Repository> repositoryReference = context.getServiceReference(S3Repository.class);
-                    if (repositoryReference != null) {
-                        S3Repository repository = context.getService(repositoryReference);
-                        s3Servlet.setRepository(new LoggingRepository(repository));
+                        try {
+                            s3Servlet = new S3Servlet(4);
+                            ServiceReference<S3Repository> repositoryReference = context.getServiceReference(S3Repository.class);
+                            if (repositoryReference != null) {
+                                S3Repository repository = context.getService(repositoryReference);
+                                s3Servlet.setRepository(new LoggingRepository(repository));
+                            }
+                            httpService.registerServlet(CONTEXT_STRING, s3Servlet, null, null);
+                        } catch (ServletException | NamespaceException e) {
+                            //ignore
+                        }
+                        return null;
                     }
-                    httpService.registerServlet(CONTEXT_STRING, s3Servlet, null, null);
-                } catch (ServletException | NamespaceException e) {
-                    //ignore
-                }
-                return null;
-            }
 
-            @Override
-            public void modifiedService(ServiceReference reference, Object service) {
-            }
+                    @Override
+                    public void modifiedService(ServiceReference<HttpService> reference, Object service) {
+                    }
 
-            @Override
-            public void removedService(ServiceReference reference, Object service) {
-                HttpService httpService = (HttpService) context.getService(reference);
-                httpService.unregister(CONTEXT_STRING);
-            }
+                    @Override
+                    public void removedService(ServiceReference<HttpService> reference, Object service) {
+                        HttpService httpService = context.getService(reference);
+                        httpService.unregister(CONTEXT_STRING);
+                    }
 
-        });
+                });
 
         httpTracker.open();
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(BundleContext context) {
         httpTracker.close();
     }
 
