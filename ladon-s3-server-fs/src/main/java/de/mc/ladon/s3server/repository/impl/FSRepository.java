@@ -325,18 +325,23 @@ public class FSRepository implements S3Repository {
                             }
                     );
 
-            if(delimiter == null){
+            if (delimiter == null) {
                 return new S3ListBucketResultImpl(listing.collect(Collectors.toList()), null, count > maxKeys, bucketName, null, null);
-            }else{
-                if(!delimiter.equals("/")) throw new InvalidTokenException(delimiter,callContext.getRequestId());
+            } else {
+                if (!delimiter.equals("/")) throw new InvalidTokenException(delimiter, callContext.getRequestId());
                 Set<String> prefixes = new HashSet<>();
                 List<S3Object> objects = new ArrayList<>();
                 listing.forEach(obj -> {
-                    String commonPrefix = DelimiterUtil.getCommonPrefix(obj.getKey(),prefix,"/");
-                    if(commonPrefix != null) prefixes.add(commonPrefix);
+                    String commonPrefix = DelimiterUtil.getCommonPrefix(obj.getKey(), prefix, "/");
+                    if (commonPrefix != null) {
+                        prefixes.add(commonPrefix);
+                    } else {
+                        objects.add(obj);
+                    }
                 });
-
-                return new S3ListBucketResultImpl(objects, new ArrayList<>(prefixes), count > maxKeys, bucketName, null, null);
+                List<String> prefList = new ArrayList<>(prefixes);
+                //Collections.sort(prefList);
+                return new S3ListBucketResultImpl(objects, prefList, objects.size() > maxKeys, bucketName, null, null);
             }
 
         } catch (IOException e) {

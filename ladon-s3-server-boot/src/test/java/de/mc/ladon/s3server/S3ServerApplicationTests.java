@@ -261,4 +261,29 @@ public class S3ServerApplicationTests {
     }
 
 
+    @Test
+    public void testDelimiter() {
+        AmazonS3Client client = getClient();
+        String bucket = UUID.randomUUID().toString();
+        client.createBucket(bucket);
+        List<S3ObjectSummary> objectSummaries = client.listObjects(new ListObjectsRequest(bucket, null, null, null, null)).getObjectSummaries();
+       assertEquals(0, objectSummaries.size());
+
+        ObjectMetadata meta = new ObjectMetadata();
+        client.putObject(bucket, "one/one.txt", new ByteArrayInputStream("test".getBytes()), meta);
+        client.putObject(bucket, "two/two.txt", new ByteArrayInputStream("test".getBytes()), meta);
+        client.putObject(bucket, "three/four/four.txt", new ByteArrayInputStream("test".getBytes()), meta);
+
+        objectSummaries = client.listObjects(new ListObjectsRequest(bucket, null, null, null, null)).getObjectSummaries();
+        assertEquals(3, objectSummaries.size());
+
+
+        ObjectListing ol = client.listObjects(new ListObjectsRequest(bucket, null, null, "/", null));
+        assertEquals(0,ol.getObjectSummaries().size());
+        System.out.println(ol.getCommonPrefixes());
+        assertEquals(3,ol.getCommonPrefixes().size());
+
+    }
+
+
 }
