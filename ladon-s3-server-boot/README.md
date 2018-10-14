@@ -12,5 +12,5 @@ Copyright (C) 2018 Mind Consulting
 
 Free for private use, easy commercial licensing available
 
-<a href="http://mind-consulting.de/"><img src="http://mind-consulting.de/img/logo_no_bg.png"  height="100" width="250" ></a>
+<a href="https://ladon.org/"><img src="https://ladon.org/img/logo_no_bg.png" height="100" width="250" ></a>
 
