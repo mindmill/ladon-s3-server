@@ -162,6 +162,7 @@ public class S3Servlet extends HttpServlet {
                             break;
                         case ladonupdatemeta:
                             repository.updateMetadata(context, bucketName, objectkey);
+                            break;
                         case postbucket:
                             throw new NotImplementedException(bucketName, requestId);
                         case postobject:
