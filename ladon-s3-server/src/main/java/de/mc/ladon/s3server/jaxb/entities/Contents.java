@@ -7,9 +7,11 @@ package de.mc.ladon.s3server.jaxb.entities;
 import de.mc.ladon.s3server.jaxb.S3DateAdapter;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author Ralf Ulrich on 20.02.16.
@@ -22,17 +24,19 @@ public class Contents {
     private String etag;
     private Long size;
     private String storageClass;
+    private Metadata meta;
 
     public Contents() {
     }
 
-    public Contents(Owner owner, String key, Date lastModified, String etag, Long size, String storageClass) {
+    public Contents(Owner owner, String key, Date lastModified, String etag, Long size, String storageClass, Metadata meta) {
         this.owner = owner;
         this.key = key;
         this.lastModified = lastModified;
         this.etag = etag;
         this.size = size;
         this.storageClass = storageClass;
+        this.meta = meta;
     }
 
     @XmlElement(name = "Owner")
@@ -88,5 +92,14 @@ public class Contents {
 
     public void setStorageClass(String storageClass) {
         this.storageClass = storageClass;
+    }
+
+    @XmlElement(name = "Metadata")
+    public Metadata getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Metadata meta) {
+        this.meta = meta;
     }
 }

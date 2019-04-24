@@ -13,8 +13,8 @@ import de.mc.ladon.s3server.entities.api.S3RequestId;
 import de.mc.ladon.s3server.entities.impl.S3CallContextImpl;
 import de.mc.ladon.s3server.exceptions.*;
 import de.mc.ladon.s3server.executor.HashBasedExecutor;
-import de.mc.ladon.s3server.jaxb.entities.*;
 import de.mc.ladon.s3server.jaxb.entities.Error;
+import de.mc.ladon.s3server.jaxb.entities.*;
 import de.mc.ladon.s3server.repository.api.S3Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +57,8 @@ public class S3Servlet extends HttpServlet {
         listbucket,
         putbucket,
         putobject,
+        //custom extension
+        ladonupdatemeta,
         postbucket,
         postobject,
         getobject,
@@ -73,6 +75,7 @@ public class S3Servlet extends HttpServlet {
             jaxbContext = JAXBContext.newInstance(
                     Bucket.class,
                     Contents.class,
+                    Metadata.class,
                     DeleteMarker.class,
                     AbstractVersionElement.class,
                     Version.class,
@@ -157,6 +160,8 @@ public class S3Servlet extends HttpServlet {
                                 repository.createObject(context, bucketName, objectkey);
                             }
                             break;
+                        case ladonupdatemeta:
+                            repository.updateMetadata(context, bucketName, objectkey);
                         case postbucket:
                             throw new NotImplementedException(bucketName, requestId);
                         case postobject:
@@ -218,6 +223,10 @@ public class S3Servlet extends HttpServlet {
         return jaxbContext.createMarshaller();
     }
 
+    private Boolean isUpdateMeta(HttpServletRequest req) {
+        String query = req.getQueryString();
+        return query != null && query.contains("ladonupdatemeta");
+    }
 
     private String getBucketName(HttpServletRequest req) {
         String pathInfo = req.getPathInfo();
@@ -273,11 +282,16 @@ public class S3Servlet extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String bucket = getBucketName(req);
         String objectKey = getObjectKey(req);
+        boolean updateMeta = isUpdateMeta(req);
         if (bucket != null) {
             if (objectKey == null) {
                 dispatch(S3Call.putbucket, req, resp, bucket, null);
             } else {
-                dispatch(S3Call.putobject, req, resp, bucket, objectKey);
+                if (updateMeta) {
+                    dispatch(S3Call.ladonupdatemeta, req, resp, bucket, objectKey);
+                } else {
+                    dispatch(S3Call.putobject, req, resp, bucket, objectKey);
+                }
             }
         }
 

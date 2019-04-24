@@ -51,6 +51,12 @@ public class LoggingRepository implements S3Repository {
     }
 
     @Override
+    public void updateMetadata(S3CallContext callContext, String bucketName, String objectKey) {
+        logger.info("UPDATE META :: " + bucketName + " / " + objectKey + " " + callContext);
+        delegate.updateMetadata(callContext, bucketName, objectKey);
+    }
+
+    @Override
     public S3Object copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey, boolean copyMetadata) {
         logger.info("COPY OBJECT :: " + srcBucket + " / " + srcObjectKey + " -> " + destBucket + " / " + destObjectKey + " , meta " + copyMetadata + " " + callContext);
         return delegate.copyObject(callContext, srcBucket, srcObjectKey, destBucket, destObjectKey, copyMetadata);

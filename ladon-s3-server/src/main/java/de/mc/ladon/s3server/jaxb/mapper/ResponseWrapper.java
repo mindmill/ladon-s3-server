@@ -5,6 +5,7 @@
 package de.mc.ladon.s3server.jaxb.mapper;
 
 import de.mc.ladon.s3server.entities.api.*;
+import de.mc.ladon.s3server.entities.impl.S3MetadataImpl;
 import de.mc.ladon.s3server.jaxb.entities.*;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class ResponseWrapper {
     public static ListBucketResult listBucketResult(S3CallContext callContext, S3ListBucketResult list) {
         return new ListBucketResult(callContext, list.getBucketName(),
                 list.getObjects().stream().map(o -> new Contents(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
-                        getEncoded(callContext, o.getKey()), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass()))
+                        getEncoded(callContext, o.getKey()), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass(), new Metadata((S3MetadataImpl) o.getMetadata())))
                         .collect(Collectors.toList()),
                 list.getCommonPrefixes() != null ? new CommonPrefixes(list.getCommonPrefixes()) : null,
                 list.isTruncated());

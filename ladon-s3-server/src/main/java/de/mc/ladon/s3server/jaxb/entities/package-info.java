@@ -5,6 +5,12 @@
 /**
  * @author Ralf Ulrich on 17.02.16.
  */
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://s3.amazonaws.com/doc/2006-03-01/", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED, xmlns = { @javax.xml.bind.annotation.XmlNs(namespaceURI = "http://s3.amazonaws.com/doc/2006-03-01/", prefix = "") })
+@XmlSchema(namespace = "http://s3.amazonaws.com/doc/2006-03-01/",
+        elementFormDefault = XmlNsForm.QUALIFIED,
+        xmlns = {@XmlNs(namespaceURI = "http://s3.amazonaws.com/doc/2006-03-01/", prefix = "")})
 package de.mc.ladon.s3server.jaxb.entities;
+
+import javax.xml.bind.annotation.XmlNs;
+import javax.xml.bind.annotation.XmlNsForm;
+import javax.xml.bind.annotation.XmlSchema;
 

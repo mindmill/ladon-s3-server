@@ -58,6 +58,14 @@ public interface S3Repository {
     void createObject(S3CallContext callContext, String bucketName, String objectKey);
 
     /**
+     * only updates the metadata of an Object, content stays the same
+     * @param callContext
+     * @param bucketName
+     * @param objectKey
+     */
+    void updateMetadata(S3CallContext callContext, String bucketName, String objectKey);
+
+    /**
      * This implementation of the PUT operation creates a copy of an object that is already stored in Amazon S3.
      * A PUT copy operation is the same as performing a GET and then a PUT.
      * Adding the request header, x-amz-copy-source, makes the PUT operation copy the source object

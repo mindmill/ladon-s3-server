@@ -249,6 +249,19 @@ public class FSRepository implements S3Repository {
         }
     }
 
+    @Override
+    public void updateMetadata(S3CallContext callContext, String bucketName, String objectKey) {
+        try {
+            Path metaBucket = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
+            Path meta = metaBucket.resolve(objectKey + META_XML_EXTENSION);
+            S3Metadata s3Metadata = loadMetaFile(meta);
+            writeMetaFile(meta, callContext, S3Constants.ETAG, s3Metadata.get(S3Constants.ETAG));
+        } catch (IOException | JAXBException e) {
+            logger.error("internal error", e);
+            throw new InternalErrorException(objectKey, callContext.getRequestId());
+        }
+    }
+
     private String inQuotes(String etag) {
         return "\"" + etag + "\"";
     }
