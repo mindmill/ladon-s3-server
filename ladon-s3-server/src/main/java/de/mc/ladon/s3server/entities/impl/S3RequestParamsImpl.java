@@ -59,8 +59,8 @@ public class S3RequestParamsImpl implements S3RequestParams {
     }
 
     @Override
-    public boolean orderdByTimestamp() {
-        return allParams.get("ladonOrderedByTimestamp") != null;
+    public String ladonChangesSince() {
+        return allParams.get("ladonChangesSince");
     }
 
     @Override

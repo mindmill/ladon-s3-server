@@ -97,7 +97,7 @@ public interface S3RequestParams {
      */
     boolean listVersions();
 
-    boolean orderdByTimestamp();
+    String ladonChangesSince();
 
     /**
      * Convenience method for the  "acl" query param

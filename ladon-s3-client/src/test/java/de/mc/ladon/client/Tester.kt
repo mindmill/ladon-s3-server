@@ -5,13 +5,13 @@ import java.util.*
 
 fun main() {
 
-    val client = LadonS3Client("http://localhost:8080/api/s3/", "SYSTEM", "SYSTEM")
+    val client = LadonS3Client("http://localhost:8080/services/s3/", "tBMYxafsAEpmu6ARR2BO", "bMRT4cNwBs61OJKcVejszXKmteis4Dzbv1iKXfxT")
 
 
     val b = UUID.randomUUID().toString()
     client.createBucket(b)
 
-    println(client.listBuckets().bucketList.map { it.name })
+//    println(client.listBuckets().bucketList.map { it.name })
     println(client.listObjects(b).next().contentsList?.size)
     for (i in 1..100) {
         client.createObject(b, "test$i.txt", "geht".toByteArray().inputStream(), mapOf("head1" to "geht auch"))
@@ -32,8 +32,6 @@ fun main() {
             client.deleteObject(b, it.key)
         }
     }
-
-
     client.deleteBucket(b)
-    // client.deleteBucket("79c1aa02-6c23-4619-ac19-29fd2bab0634")
+//    client.deleteBucket("79c1aa02-6c23-4619-ac19-29fd2bab0634")
 }

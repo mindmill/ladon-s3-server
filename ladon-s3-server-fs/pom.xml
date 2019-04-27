@@ -5,7 +5,7 @@
 
     <groupId>de.mindconsulting</groupId>
     <artifactId>ladon-s3-server-fs</artifactId>
-    <version>2.0.0-EXT</version>
+    <version>2.0.1-EXT</version>
     <build>
         <plugins>
             <plugin>

@@ -8,6 +8,7 @@ import org.glassfish.jersey.client.ClientProperties
 import java.io.InputStream
 import javax.ws.rs.client.ClientBuilder
 import javax.ws.rs.client.Entity
+import javax.ws.rs.client.Invocation
 import javax.ws.rs.client.WebTarget
 import javax.ws.rs.core.MediaType
 
@@ -27,31 +28,20 @@ class LadonS3Client(url: String,
 
     fun listBuckets(): ListAllMyBucketsResult {
         val builder = target.request()
-        val ds = getDateString()
-        builder.header("Date", ds)
-        val signature = computeV2(secretKey, "GET", target.uri.path, hashMapOf("date" to ds))
-        val authHeader = "AWS $accessKey:$signature"
-        builder.header("Authorization", authHeader)
+        addAuthHeader(builder, target.uri.path, "GET")
         return builder.get(ListAllMyBucketsResult::class.java)
     }
 
     fun createBucket(name: String) {
         val builder = target.path(name).request()
-        val ds = getDateString()
-        builder.header("Date", ds)
-        val signature = computeV2(secretKey, "PUT", target.path(name).uri.path, hashMapOf("date" to ds))
-        val authHeader = "AWS $accessKey:$signature"
-        builder.header("Authorization", authHeader).put(null)
+        addAuthHeader(builder, target.path(name).uri.path, "PUT", mapOf("content-type" to "application/octet-stream"))
+        builder.put(Entity.entity("", MediaType.APPLICATION_OCTET_STREAM))
     }
 
     fun deleteBucket(name: String) {
         val builder = target.path(name).request()
-        val ds = getDateString()
-        builder.header("Date", ds)
-        val signature = computeV2(secretKey, "DELETE", target.path(name).uri.path, hashMapOf("date" to ds))
-        val authHeader = "AWS $accessKey:$signature"
-        builder.header("Authorization", authHeader)
-        target.path(name).request().delete()
+        addAuthHeader(builder, target.path(name).uri.path, "DELETE")
+        builder.delete()
     }
 
     private fun WebTarget.andIf(cond: Boolean, body: WebTarget.() -> WebTarget): WebTarget {
@@ -62,7 +52,7 @@ class LadonS3Client(url: String,
                     prefix: String? = null,
                     delimiter: Boolean = false,
                     limit: Int? = null,
-                    order: ListOrder = ListOrder.DEFAULT): Iterator<ListBucketResult> {
+                    since: Long? = null): Iterator<ListBucketResult> {
         return object : Iterator<ListBucketResult> {
             var result: ListBucketResult? = null
             override fun hasNext(): Boolean {
@@ -79,14 +69,10 @@ class LadonS3Client(url: String,
                             queryParam("max-keys", limit)
                         }.andIf(result != null && result!!.isTruncated) {
                             queryParam("marker", result!!.marker)
-                        }.andIf(order == ListOrder.TIMESTAMP) {
-                            queryParam("ladonOrderedByTimestamp", "true")
+                        }.andIf(since != null) {
+                            queryParam("ladonChangesSince", since)
                         }.request()
-                val ds = getDateString()
-                request.header("Date", ds)
-                val signature = computeV2(secretKey, "GET", target.path(bucket).uri.path, hashMapOf("date" to ds))
-                val authHeader = "AWS $accessKey:$signature"
-                request.header("Authorization", authHeader)
+                addAuthHeader(request, target.path(bucket).uri.path, "GET")
                 result = request.get(ListBucketResult::class.java)
                 return result!!
             }
@@ -97,32 +83,38 @@ class LadonS3Client(url: String,
         val request = target.path(bucket)
                 .queryParam(S3Constants.VERSIONS, "")
                 .request()
+        addAuthHeader(request, target.path(bucket).uri.path + "?versions", "GET")
         return request.get(ListVersionsResult::class.java)
     }
 
+
     fun createObject(bucket: String, key: String, content: InputStream, userMeta: Map<String, String> = hashMapOf()) {
         val request = target.path("$bucket/$key").request()
-        userMeta.entries.map { S3Constants.X_AMZ_META_PREFIX + it.key to it.value }.forEach {
-            request.header(it.first, it.second)
-        }
+        val headerMap = userMeta.entries.map { S3Constants.X_AMZ_META_PREFIX + it.key to it.value }
+        headerMap.forEach { request.header(it.first, it.second) }
+        addAuthHeader(request, target.path("$bucket/$key").uri.path, "PUT",
+                (headerMap + ("content-type" to "application/octet-stream")).toMap())
         request.put(Entity.entity(content, MediaType.APPLICATION_OCTET_STREAM))
     }
 
     fun updateMetadata(bucket: String, key: String, userMeta: Map<String, String> = hashMapOf()) {
         val request = target.path("$bucket/$key").queryParam("ladonupdatemeta", "true").request()
-        userMeta.entries.map { S3Constants.X_AMZ_META_PREFIX + it.key to it.value }.forEach {
-            request.header(it.first, it.second)
-        }
+        val metaMap = userMeta.entries.map { S3Constants.X_AMZ_META_PREFIX + it.key to it.value }
+        metaMap.forEach { request.header(it.first, it.second) }
+        addAuthHeader(request, target.path("$bucket/$key").uri.path, "PUT",
+                mapOf("content-type" to "application/octet-stream") + metaMap.toMap())
         request.put(Entity.entity("", MediaType.APPLICATION_OCTET_STREAM))
     }
 
     fun getObject(bucket: String, key: String): InputStream {
         val request = target.path("$bucket/$key").request()
+        addAuthHeader(request, target.path("$bucket/$key").uri.path, "GET")
         return request.get(InputStream::class.java)
     }
 
     fun getObjectMeta(bucket: String, key: String): Map<String, String> {
         val request = target.path("$bucket/$key").request()
+        addAuthHeader(request, target.path("$bucket/$key").uri.path, "HEAD")
         return request.head().headers.filter { it.key.startsWith(S3Constants.X_AMZ_META_PREFIX) }
                 .map {
                     it.key.substringAfter(S3Constants.X_AMZ_META_PREFIX) to (it.value.firstOrNull()?.toString() ?: "")
@@ -131,10 +123,17 @@ class LadonS3Client(url: String,
 
     fun deleteObject(bucket: String, key: String) {
         val request = target.path("$bucket/$key").request()
+        addAuthHeader(request, target.path("$bucket/$key").uri.path, "DELETE")
         request.delete()
     }
 
-
+    private fun addAuthHeader(request: Invocation.Builder, url: String, method: String, additionalHeaders: Map<String, String> = hashMapOf()) {
+        val ds = getDateString()
+        request.header("Date", ds)
+        val signature = computeV2(secretKey, method, url, hashMapOf("date" to ds, "content-md5" to "") + additionalHeaders)
+        val authHeader = "AWS $accessKey:$signature"
+        request.header("Authorization", authHeader)
+    }
 }
 
 
