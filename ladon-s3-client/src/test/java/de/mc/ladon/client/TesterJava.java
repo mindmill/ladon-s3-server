@@ -9,7 +9,6 @@ public class TesterJava {
 
         String b = UUID.randomUUID().toString();
         client.createBucket(b);
-
       //  System.out.println(client.listBuckets());
       //  System.out.println(client.listObjects(b));
        // System.out.println(client.listVersions(b));

@@ -1,6 +1,7 @@
 package de.mc.ladon.client
 
 import de.mc.ladon.s3server.common.S3Constants
+import de.mc.ladon.s3server.jaxb.entities.Error
 import de.mc.ladon.s3server.jaxb.entities.ListAllMyBucketsResult
 import de.mc.ladon.s3server.jaxb.entities.ListBucketResult
 import de.mc.ladon.s3server.jaxb.entities.ListVersionsResult
@@ -11,6 +12,7 @@ import javax.ws.rs.client.Entity
 import javax.ws.rs.client.Invocation
 import javax.ws.rs.client.WebTarget
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 class LadonS3Client(url: String,
                     private val accessKey: String,
@@ -35,13 +37,13 @@ class LadonS3Client(url: String,
     fun createBucket(name: String) {
         val builder = target.path(name).request()
         addAuthHeader(builder, target.path(name).uri.path, "PUT", mapOf("content-type" to "application/octet-stream"))
-        builder.put(Entity.entity("", MediaType.APPLICATION_OCTET_STREAM))
+        builder.put(Entity.entity("", MediaType.APPLICATION_OCTET_STREAM)).checkResponse()
     }
 
     fun deleteBucket(name: String) {
         val builder = target.path(name).request()
         addAuthHeader(builder, target.path(name).uri.path, "DELETE")
-        builder.delete()
+        builder.delete().checkResponse()
     }
 
     private fun WebTarget.andIf(cond: Boolean, body: WebTarget.() -> WebTarget): WebTarget {
@@ -103,7 +105,7 @@ class LadonS3Client(url: String,
         metaMap.forEach { request.header(it.first, it.second) }
         addAuthHeader(request, target.path("$bucket/$key").uri.path, "PUT",
                 mapOf("content-type" to "application/octet-stream") + metaMap.toMap())
-        request.put(Entity.entity("", MediaType.APPLICATION_OCTET_STREAM))
+        request.put(Entity.entity("", MediaType.APPLICATION_OCTET_STREAM)).checkResponse()
     }
 
     fun getObject(bucket: String, key: String): InputStream {
@@ -115,7 +117,7 @@ class LadonS3Client(url: String,
     fun getObjectMeta(bucket: String, key: String): Map<String, String> {
         val request = target.path("$bucket/$key").request()
         addAuthHeader(request, target.path("$bucket/$key").uri.path, "HEAD")
-        return request.head().headers.filter { it.key.startsWith(S3Constants.X_AMZ_META_PREFIX) }
+        return request.head().checkResponse().headers.filter { it.key.startsWith(S3Constants.X_AMZ_META_PREFIX) }
                 .map {
                     it.key.substringAfter(S3Constants.X_AMZ_META_PREFIX) to (it.value.firstOrNull()?.toString() ?: "")
                 }.toMap()
@@ -124,8 +126,17 @@ class LadonS3Client(url: String,
     fun deleteObject(bucket: String, key: String) {
         val request = target.path("$bucket/$key").request()
         addAuthHeader(request, target.path("$bucket/$key").uri.path, "DELETE")
-        request.delete()
+        request.delete().checkResponse()
+
     }
+
+    fun Response.checkResponse(): Response {
+        if (status !in 200..205) {
+            throw LadonClientException(this.readEntity(Error::class.java))
+        }
+        return this
+    }
+
 
     private fun addAuthHeader(request: Invocation.Builder, url: String, method: String, additionalHeaders: Map<String, String> = hashMapOf()) {
         val ds = getDateString()

@@ -32,6 +32,12 @@ fun main() {
             client.deleteObject(b, it.key)
         }
     }
+
+    client.listObjects(bucket = b, limit = 10,prefix = "test93",  since = Date().time - 10000).forEach {
+        it.contentsList?.forEach {
+            println("latest: " + it.key)
+        }
+    }
     client.deleteBucket(b)
 //    client.deleteBucket("79c1aa02-6c23-4619-ac19-29fd2bab0634")
 }
