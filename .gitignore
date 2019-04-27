@@ -1,6 +1,7 @@
 .idea/
 */target/
 *.iml
+target
 *.ipr
 .mvn
 mvnw

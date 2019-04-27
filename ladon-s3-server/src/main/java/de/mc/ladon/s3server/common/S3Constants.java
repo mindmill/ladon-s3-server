@@ -222,11 +222,7 @@ public interface S3Constants {
     String VERSIONS = "versions";
 
     /**
-<<<<<<< HEAD
-     * Query param for acl requests
-=======
      *  Query param for acl requests
->>>>>>> master
      */
     String ACL = "acl";
     /**

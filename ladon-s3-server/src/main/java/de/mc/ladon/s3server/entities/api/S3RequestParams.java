@@ -97,6 +97,8 @@ public interface S3RequestParams {
      */
     boolean listVersions();
 
+    boolean orderdByTimestamp();
+
     /**
      * Convenience method for the  "acl" query param
      *
