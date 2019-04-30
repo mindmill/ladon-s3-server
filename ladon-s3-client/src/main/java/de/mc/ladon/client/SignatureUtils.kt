@@ -6,9 +6,9 @@ import com.google.common.io.BaseEncoding
 import de.mc.ladon.s3server.auth.AwsSignatureVersion2.HMAC_SHA_1
 import de.mc.ladon.s3server.auth.ResponseHeaderOverrides
 import de.mc.ladon.s3server.common.S3Constants
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
 import java.util.*
+import java.util.Locale
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
@@ -19,7 +19,7 @@ fun computeV2(secretKey: String,
               headers: Map<String, String> = hashMapOf(),
               queryParams: Map<String, String> = hashMapOf()): String {
 
-    val canonicalString = makeS3CanonicalString(method, uri, headers , queryParams)
+    val canonicalString = makeS3CanonicalString(method, uri, headers, queryParams)
     val keySpec = SecretKeySpec(secretKey.toByteArray(), HMAC_SHA_1)
 
     val mac = Mac.getInstance(HMAC_SHA_1)
@@ -29,8 +29,13 @@ fun computeV2(secretKey: String,
 
 }
 
-fun getDateString() = ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME)
-
+fun getDateString(): String {
+    val calendar = Calendar.getInstance()
+    val dateFormat = SimpleDateFormat(
+            "EEE, dd MMM yyyy HH:mm:ss z", Locale.US)
+    dateFormat.timeZone = TimeZone.getTimeZone("GMT")
+    return dateFormat.format(calendar.time)
+}
 
 
 private fun makeS3CanonicalString(method: String,
