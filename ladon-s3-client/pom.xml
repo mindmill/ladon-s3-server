@@ -33,7 +33,7 @@
         <dependency>
             <groupId>de.mindconsulting</groupId>
             <artifactId>ladon-s3-server</artifactId>
-            <version>2.0.0</version>
+            <version>${parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
