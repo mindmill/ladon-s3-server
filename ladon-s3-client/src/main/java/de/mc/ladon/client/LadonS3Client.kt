@@ -141,7 +141,8 @@ class LadonS3Client(url: String,
     private fun addAuthHeader(request: Invocation.Builder, url: String, method: String, additionalHeaders: Map<String, String> = hashMapOf()) {
         val ds = getDateString()
         request.header("Date", ds)
-        val signature = computeV2(secretKey, method, url, hashMapOf("date" to ds, "content-md5" to "") + additionalHeaders)
+        val signature = computeV2(secretKey, method, url, hashMapOf("date" to ds, "content-md5" to "") +
+                additionalHeaders.mapKeys { it.key.toLowerCase() })
         val authHeader = "AWS $accessKey:$signature"
         request.header("Authorization", authHeader)
     }
