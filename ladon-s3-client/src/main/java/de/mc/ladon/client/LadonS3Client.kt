@@ -5,7 +5,6 @@ import de.mc.ladon.s3server.jaxb.entities.Error
 import de.mc.ladon.s3server.jaxb.entities.ListAllMyBucketsResult
 import de.mc.ladon.s3server.jaxb.entities.ListBucketResult
 import de.mc.ladon.s3server.jaxb.entities.ListVersionsResult
-import org.glassfish.jersey.client.ClientProperties
 import java.io.InputStream
 import javax.ws.rs.client.ClientBuilder
 import javax.ws.rs.client.Entity
@@ -23,7 +22,6 @@ class LadonS3Client(url: String,
 
     init {
         val client = ClientBuilder.newClient()
-        client.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true)
         target = client.target(url)
     }
 
