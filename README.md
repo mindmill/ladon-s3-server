@@ -42,7 +42,7 @@ To see what you can build with it have a look at  [Ladon Data Center Edition](ht
 ### License
 Copyright (C) 2018 Mind Consulting
 
-Free for private use, easy commercial licensing available
+Free for private use, easy commercial licensing available [here](https://elopage.com/s/mind/ladon-s3-server/payment?locale=en)
 
 <a href="https://ladon.org/"><img src="https://ladon.org/img/logo_no_bg.png" height="100" width="250" ></a>
 
