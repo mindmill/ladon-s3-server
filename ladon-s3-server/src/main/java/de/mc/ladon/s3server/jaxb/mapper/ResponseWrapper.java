@@ -27,8 +27,8 @@ public class ResponseWrapper {
 
     public static ObjectListing listObjectListing(S3CallContext callContext, S3ListBucketResult list) {
         return new ObjectListing(callContext, list.getBucketName(),
-                list.getObjects().stream().map(o -> new ObjectSummary(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
-                        getEncoded(callContext, o.getKey()), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass(), new Metadata((S3MetadataImpl) o.getMetadata())))
+                list.getObjects().stream().map(o -> new ObjectSummary(o.getBucket(), getEncoded(callContext, o.getKey()),
+                        new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass(), new Metadata((S3MetadataImpl) o.getMetadata())))
                         .collect(Collectors.toList()),
                 list.getCommonPrefixes() != null ? new CommonPrefixes(list.getCommonPrefixes()) : null,
                 list.isTruncated());

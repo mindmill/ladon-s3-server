@@ -7,19 +7,18 @@ package de.mc.ladon.s3server.jaxb.entities;
 import de.mc.ladon.s3server.jaxb.S3DateAdapter;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
 @XmlRootElement(name = "ObjectSummary")
 public class ObjectSummary {
-    private Owner owner;
+    private String bucketName;
     private String key;
+    private Owner owner;
     private Date lastModified;
     private String etag;
     private Long size;
@@ -29,9 +28,10 @@ public class ObjectSummary {
     public ObjectSummary() {
     }
 
-    public ObjectSummary(Owner owner, String key, Date lastModified, String etag, Long size, String storageClass, Metadata meta) {
-        this.owner = owner;
+    public ObjectSummary(String bucketName, String key, Owner owner, Date lastModified, String etag, Long size, String storageClass, Metadata meta) {
+        this.bucketName = bucketName;
         this.key = key;
+        this.owner = owner;
         this.lastModified = lastModified;
         this.etag = etag;
         this.size = size;
@@ -39,13 +39,13 @@ public class ObjectSummary {
         this.meta = meta;
     }
 
-    @XmlElement(name = "Owner")
-    public Owner getOwner() {
-        return owner;
+    @XmlElement(name = "BucketName")
+    public String getBucketName() {
+        return bucketName;
     }
 
-    public void setOwner(Owner owner) {
-        this.owner = owner;
+    public void setBucketName(String bucketName) {
+        this.bucketName = bucketName;
     }
 
     @XmlElement(name = "Key")
@@ -55,6 +55,15 @@ public class ObjectSummary {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    @XmlElement(name = "Owner")
+    public Owner getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Owner owner) {
+        this.owner = owner;
     }
 
     @XmlElement(name = "LastModified")
