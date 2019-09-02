@@ -27,10 +27,10 @@ public abstract class AbstractVersionSummary {
     private String versionId;
     private boolean isLatest;
 
-    public AbstractVersionSummary() {
+    AbstractVersionSummary() {
     }
 
-    public AbstractVersionSummary(Owner owner,
+    AbstractVersionSummary(Owner owner,
                                   String key,
                                   String versionId,
                                   boolean isLatest,

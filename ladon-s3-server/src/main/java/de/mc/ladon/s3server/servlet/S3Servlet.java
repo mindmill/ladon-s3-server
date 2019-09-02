@@ -94,7 +94,7 @@ public class S3Servlet extends HttpServlet {
 
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         String bucket = getBucketName(req);
         String objectKey = getObjectKey(req);
         if (bucket == null) {
@@ -257,7 +257,7 @@ public class S3Servlet extends HttpServlet {
 
 
     @Override
-    protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doHead(HttpServletRequest req, HttpServletResponse resp) {
         String bucket = getBucketName(req);
         String objectKey = getObjectKey(req);
         if (bucket != null) {
@@ -270,7 +270,7 @@ public class S3Servlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         String bucket = getBucketName(req);
         String objectKey = getObjectKey(req);
         if (bucket != null) {
@@ -280,7 +280,7 @@ public class S3Servlet extends HttpServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
         String bucket = getBucketName(req);
         String objectKey = getObjectKey(req);
         boolean updateMeta = isUpdateMeta(req);
@@ -299,7 +299,7 @@ public class S3Servlet extends HttpServlet {
     }
 
     @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
         String bucket = getBucketName(req);
         String objectKey = getObjectKey(req);
         if (bucket != null) {
