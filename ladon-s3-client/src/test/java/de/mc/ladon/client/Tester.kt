@@ -18,7 +18,7 @@ fun main() {
     }
     client.putObject(b, "test.txt", "geht".toByteArray().inputStream(), mapOf("head1" to "geht auch"))
     println(client.listObjects(b).next().objectSummaryList.size)
-    println(client.listObjects(b).next().objectSummaryList?.map { it.meta })
+    println(client.listObjects(b).next().objectSummaryList?.map { it.userMetadata })
     println(client.listVersions(b).versionSummaries.size)
     println(client.getObjectContent(b, "test.txt").reader().readText())
     println(client.getUserMetadata(b, "test.txt"))

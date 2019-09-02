@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.AsyncContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -75,7 +74,7 @@ public class S3Servlet extends HttpServlet {
             jaxbContext = JAXBContext.newInstance(
                     Bucket.class,
                     ObjectSummary.class,
-                    Metadata.class,
+                    UserMetadata.class,
                     DeleteMarker.class,
                     AbstractVersionSummary.class,
                     VersionSummary.class,

@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-@XmlRootElement(name = "Metadata")
-public class Metadata extends HashMap<String, String> {
-    public Metadata() {
+@XmlRootElement(name = "UserMetadata")
+public class UserMetadata extends HashMap<String, String> {
+    public UserMetadata() {
         super();
     }
 
-    public Metadata(Map<? extends String, ? extends String> map) {
+    public UserMetadata(Map<? extends String, ? extends String> map) {
         super(map);
     }
 

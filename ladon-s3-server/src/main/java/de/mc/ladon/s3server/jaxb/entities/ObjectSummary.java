@@ -23,12 +23,12 @@ public class ObjectSummary {
     private String etag;
     private Long size;
     private String storageClass;
-    private Metadata meta;
+    private UserMetadata userMetadata;
 
     public ObjectSummary() {
     }
 
-    public ObjectSummary(String bucketName, String key, Owner owner, Date lastModified, String etag, Long size, String storageClass, Metadata meta) {
+    public ObjectSummary(String bucketName, String key, Owner owner, Date lastModified, String etag, Long size, String storageClass, UserMetadata userMetadata) {
         this.bucketName = bucketName;
         this.key = key;
         this.owner = owner;
@@ -36,7 +36,7 @@ public class ObjectSummary {
         this.etag = etag;
         this.size = size;
         this.storageClass = storageClass;
-        this.meta = meta;
+        this.userMetadata = userMetadata;
     }
 
     @XmlElement(name = "BucketName")
@@ -103,12 +103,12 @@ public class ObjectSummary {
         this.storageClass = storageClass;
     }
 
-    @XmlElement(name = "Metadata")
-    public Metadata getMeta() {
-        return meta;
+    @XmlElement(name = "UserMetadata")
+    public UserMetadata getUserMetadata() {
+        return userMetadata;
     }
 
-    public void setMeta(Metadata meta) {
-        this.meta = meta;
+    public void setUserMetadata(UserMetadata userMetadata) {
+        this.userMetadata = userMetadata;
     }
 }
