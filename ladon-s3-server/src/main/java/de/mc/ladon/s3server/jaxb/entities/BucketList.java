@@ -12,18 +12,18 @@ import java.util.List;
 /**
  * @author Ralf Ulrich on 17.02.16.
  */
-@XmlRootElement(name = "ListAllMyBucketsResult")
-public class ListAllMyBucketsResult {
+@XmlRootElement(name = "BucketList")
+public class BucketList {
 
 
     private Owner owner;
     private List<Bucket> bucketList;
 
 
-    public ListAllMyBucketsResult() {
+    public BucketList() {
     }
 
-    public ListAllMyBucketsResult(Owner owner) {
+    public BucketList(Owner owner) {
         this.owner = owner;
     }
 

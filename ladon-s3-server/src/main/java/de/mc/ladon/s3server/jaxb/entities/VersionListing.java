@@ -4,7 +4,6 @@
 
 package de.mc.ladon.s3server.jaxb.entities;
 
-import de.mc.ladon.s3server.common.EncodingUtil;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -17,8 +16,8 @@ import static de.mc.ladon.s3server.common.EncodingUtil.*;
 /**
  * @author Ralf Ulrich on 17.02.16.
  */
-@XmlRootElement(name = "ListVersionsResult")
-public class ListVersionsResult {
+@XmlRootElement(name = "VersionListing")
+public class VersionListing {
 
     private String name;
     private String prefix;
@@ -28,26 +27,26 @@ public class ListVersionsResult {
     private Integer maxKeys;
     private String delimiter;
     private Boolean isTruncated;
-    private List<AbstractVersionElement> versions;
+    private List<AbstractVersionSummary> versionSummaries;
     private CommonPrefixes commonPrefixes;
 
-    public ListVersionsResult() {
+    public VersionListing() {
     }
 
-    public ListVersionsResult(S3CallContext callContext,
-                              String bucketName,
-                              List<AbstractVersionElement> versions,
-                              CommonPrefixes commonPrefixes,
-                              boolean isTruncated,
-                              String nextKeyMarker,
-                              String nextVersionIdMarker) {
+    public VersionListing(S3CallContext callContext,
+                          String bucketName,
+                          List<AbstractVersionSummary> versionSummaries,
+                          CommonPrefixes commonPrefixes,
+                          boolean isTruncated,
+                          String nextKeyMarker,
+                          String nextVersionIdMarker) {
         this.name = bucketName;
         this.prefix = getEncoded(callContext, callContext.getParams().getPrefix());
         this.keyMarker = callContext.getParams().getKeyMarker();
         this.maxKeys = callContext.getParams().getMaxKeys();
         this.delimiter = getEncoded(callContext,callContext.getParams().getDelimiter());
         this.isTruncated = isTruncated;
-        this.versions = versions;
+        this.versionSummaries = versionSummaries;
         this.nextKeyMarker = nextKeyMarker;
         this.nextVersionIdMarker = nextVersionIdMarker;
         this.commonPrefixes = commonPrefixes;
@@ -117,13 +116,13 @@ public class ListVersionsResult {
         this.isTruncated = isTruncated;
     }
 
-    @XmlElements({@XmlElement(name = "Version", type = Version.class), @XmlElement(name = "DeleteMarker", type = DeleteMarker.class)})
-    public List<AbstractVersionElement> getVersions() {
-        return versions;
+    @XmlElements({@XmlElement(name = "VersionSummary", type = VersionSummary.class), @XmlElement(name = "DeleteMarker", type = DeleteMarker.class)})
+    public List<AbstractVersionSummary> getVersionSummaries() {
+        return versionSummaries;
     }
 
-    public void setVersions(List<AbstractVersionElement> versions) {
-        this.versions = versions;
+    public void setVersionSummaries(List<AbstractVersionSummary> versionSummaries) {
+        this.versionSummaries = versionSummaries;
     }
 
     @XmlElement(name = "CommonPrefixes")

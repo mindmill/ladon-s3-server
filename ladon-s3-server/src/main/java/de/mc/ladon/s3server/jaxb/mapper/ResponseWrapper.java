@@ -18,16 +18,16 @@ import static de.mc.ladon.s3server.common.EncodingUtil.getEncoded;
  */
 public class ResponseWrapper {
 
-    public static ListAllMyBucketsResult listAllMyBucketsResult(S3User user, List<S3Bucket> buckets) {
-        ListAllMyBucketsResult result = new ListAllMyBucketsResult(new Owner(user.getUserId(), user.getUserName()));
+    public static BucketList listBucketList(S3User user, List<S3Bucket> buckets) {
+        BucketList result = new BucketList(new Owner(user.getUserId(), user.getUserName()));
         result.setBucketList(buckets.stream().map(b -> new Bucket(b.getBucketName(), b.getCreationDate())).collect(Collectors.toList()));
         return result;
 
     }
 
-    public static ListBucketResult listBucketResult(S3CallContext callContext, S3ListBucketResult list) {
-        return new ListBucketResult(callContext, list.getBucketName(),
-                list.getObjects().stream().map(o -> new Contents(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
+    public static ObjectListing listObjectListing(S3CallContext callContext, S3ListBucketResult list) {
+        return new ObjectListing(callContext, list.getBucketName(),
+                list.getObjects().stream().map(o -> new ObjectSummary(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
                         getEncoded(callContext, o.getKey()), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass(), new Metadata((S3MetadataImpl) o.getMetadata())))
                         .collect(Collectors.toList()),
                 list.getCommonPrefixes() != null ? new CommonPrefixes(list.getCommonPrefixes()) : null,
@@ -38,14 +38,14 @@ public class ResponseWrapper {
         return new CopyObjectResult(copiedObject.getLastModified(), copiedObject.getETag());
     }
 
-    public static ListVersionsResult listVersionsResult(S3CallContext callContext, S3ListBucketResult list) {
-        return new ListVersionsResult(callContext, list.getBucketName(),
+    public static VersionListing listVersionListing(S3CallContext callContext, S3ListBucketResult list) {
+        return new VersionListing(callContext, list.getBucketName(),
                 list.getObjects().stream().map(o -> {
                     if (o.isDeleted()) {
                         return new DeleteMarker(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
                                 getEncoded(callContext, o.getKey()), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
                     } else {
-                        return new Version(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
+                        return new VersionSummary(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
                                 getEncoded(callContext, o.getKey()), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
                     }
                 }).collect(Collectors.toList()), list.getCommonPrefixes() != null ? new CommonPrefixes(list.getCommonPrefixes()) : null, list.isTruncated(),

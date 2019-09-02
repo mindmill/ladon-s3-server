@@ -16,8 +16,8 @@ import java.util.Date;
  * @author Ralf Ulrich on 20.02.16.
  */
 @XmlRootElement
-@XmlSeeAlso({DeleteMarker.class,Version.class})
-public abstract class AbstractVersionElement {
+@XmlSeeAlso({DeleteMarker.class, VersionSummary.class})
+public abstract class AbstractVersionSummary {
     private Owner owner;
     private String key;
     private Date lastModified;
@@ -27,10 +27,10 @@ public abstract class AbstractVersionElement {
     private String versionId;
     private boolean isLatest;
 
-    public AbstractVersionElement() {
+    public AbstractVersionSummary() {
     }
 
-    public AbstractVersionElement(Owner owner,
+    public AbstractVersionSummary(Owner owner,
                                   String key,
                                   String versionId,
                                   boolean isLatest,

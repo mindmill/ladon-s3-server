@@ -7,14 +7,14 @@ import java.util.Date;
  * @author Ralf Ulrich
  *         30.10.16
  */
-@XmlRootElement(name = "Version")
-public class Version extends AbstractVersionElement {
+@XmlRootElement(name = "VersionSummary")
+public class VersionSummary extends AbstractVersionSummary {
 
-    public Version() {
+    public VersionSummary() {
         super();
     }
 
-    public Version(Owner owner, String key, String versionId, boolean isLatest, Date lastModified, String etag, Long size, String storageClass) {
+    public VersionSummary(Owner owner, String key, String versionId, boolean isLatest, Date lastModified, String etag, Long size, String storageClass) {
         super(owner, key, versionId, isLatest, lastModified, etag, size, storageClass);
     }
 }

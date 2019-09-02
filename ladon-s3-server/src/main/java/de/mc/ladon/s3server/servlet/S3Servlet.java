@@ -74,18 +74,18 @@ public class S3Servlet extends HttpServlet {
         try {
             jaxbContext = JAXBContext.newInstance(
                     Bucket.class,
-                    Contents.class,
+                    ObjectSummary.class,
                     Metadata.class,
                     DeleteMarker.class,
-                    AbstractVersionElement.class,
-                    Version.class,
+                    AbstractVersionSummary.class,
+                    VersionSummary.class,
                     CreateBucketConfiguration.class,
                     Error.class,
-                    ListAllMyBucketsResult.class,
-                    ListVersionsResult.class,
+                    BucketList.class,
+                    VersionListing.class,
                     CopyObjectResult.class,
                     CommonPrefixes.class,
-                    ListBucketResult.class,
+                    ObjectListing.class,
                     Owner.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
@@ -125,18 +125,18 @@ public class S3Servlet extends HttpServlet {
                     logger.debug("Executing {}", call);
                     switch (call) {
                         case listmybuckets:
-                            writeXmlResponse(listAllMyBucketsResult(context.getUser(),
+                            writeXmlResponse(listBucketList(context.getUser(),
                                     repository.listAllBuckets(context)),
                                     resp,
                                     HttpServletResponse.SC_OK);
                             break;
                         case listbucket:
                             if (context.getParams().listVersions()) {
-                                writeXmlResponse(listVersionsResult(context, repository.listBucket(context, bucketName)),
+                                writeXmlResponse(listVersionListing(context, repository.listBucket(context, bucketName)),
                                         resp,
                                         HttpServletResponse.SC_OK);
                             } else {
-                                writeXmlResponse(listBucketResult(context, repository.listBucket(context, bucketName)),
+                                writeXmlResponse(listObjectListing(context, repository.listBucket(context, bucketName)),
                                         resp,
                                         HttpServletResponse.SC_OK);
                             }

@@ -2,9 +2,9 @@ package de.mc.ladon.client
 
 import de.mc.ladon.s3server.common.S3Constants
 import de.mc.ladon.s3server.jaxb.entities.Error
-import de.mc.ladon.s3server.jaxb.entities.ListAllMyBucketsResult
-import de.mc.ladon.s3server.jaxb.entities.ListBucketResult
-import de.mc.ladon.s3server.jaxb.entities.ListVersionsResult
+import de.mc.ladon.s3server.jaxb.entities.BucketList
+import de.mc.ladon.s3server.jaxb.entities.ObjectListing
+import de.mc.ladon.s3server.jaxb.entities.VersionListing
 import java.io.InputStream
 import javax.ws.rs.client.ClientBuilder
 import javax.ws.rs.client.Entity
@@ -13,9 +13,9 @@ import javax.ws.rs.client.WebTarget
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 
-class LadonS3Client(url: String,
-                    private val accessKey: String,
-                    private val secretKey: String) {
+class LadonRestClient(url: String,
+                      private val accessKey: String,
+                      private val secretKey: String) {
 
     private val target: WebTarget
 
@@ -26,10 +26,10 @@ class LadonS3Client(url: String,
     }
 
 
-    fun listBuckets(): ListAllMyBucketsResult {
+    fun listBuckets(): BucketList {
         val builder = target.request()
         addAuthHeader(builder, target.uri.path, "GET")
-        return builder.get(ListAllMyBucketsResult::class.java)
+        return builder.get(BucketList::class.java)
     }
 
     fun createBucket(name: String) {
@@ -52,14 +52,14 @@ class LadonS3Client(url: String,
                     prefix: String? = null,
                     delimiter: Boolean = false,
                     limit: Int? = null,
-                    since: Long? = null): Iterator<ListBucketResult> {
-        return object : Iterator<ListBucketResult> {
-            var result: ListBucketResult? = null
+                    since: Long? = null): Iterator<ObjectListing> {
+        return object : Iterator<ObjectListing> {
+            var result: ObjectListing? = null
             override fun hasNext(): Boolean {
                 return result?.isTruncated ?: true
             }
 
-            override fun next(): ListBucketResult {
+            override fun next(): ObjectListing {
                 val request = target.path(bucket)
                         .andIf(delimiter) {
                             queryParam("delimiter", "/")
@@ -73,46 +73,46 @@ class LadonS3Client(url: String,
                             queryParam("ladonChangesSince", since)
                         }.request()
                 addAuthHeader(request, target.path(bucket).uri.path, "GET")
-                result = request.get(ListBucketResult::class.java)
+                result = request.get(ObjectListing::class.java)
                 return result!!
             }
         }
     }
 
-    fun listVersions(bucket: String): ListVersionsResult {
+    fun listVersions(bucket: String): VersionListing {
         val request = target.path(bucket)
                 .queryParam(S3Constants.VERSIONS, "")
                 .request()
         addAuthHeader(request, target.path(bucket).uri.path + "?versions", "GET")
-        return request.get(ListVersionsResult::class.java)
+        return request.get(VersionListing::class.java)
     }
 
 
-    fun createObject(bucket: String, key: String, content: InputStream, userMeta: Map<String, String> = hashMapOf()) {
+    fun putObject(bucket: String, key: String, content: InputStream, userMetadata: Map<String, String> = hashMapOf()) {
         val request = target.path("$bucket/$key").request()
-        val headerMap = userMeta.entries.map { S3Constants.X_AMZ_META_PREFIX + it.key to it.value }
+        val headerMap = userMetadata.entries.map { S3Constants.X_AMZ_META_PREFIX + it.key to it.value }
         headerMap.forEach { request.header(it.first, it.second) }
         addAuthHeader(request, target.path("$bucket/$key").uri.path, "PUT",
                 (headerMap + ("content-type" to "application/octet-stream")).toMap())
         request.put(Entity.entity(content, MediaType.APPLICATION_OCTET_STREAM))
     }
 
-    fun updateMetadata(bucket: String, key: String, userMeta: Map<String, String> = hashMapOf()) {
+    fun putUserMetadata(bucket: String, key: String, userMetadata: Map<String, String> = hashMapOf()) {
         val request = target.path("$bucket/$key").queryParam("ladonupdatemeta", "true").request()
-        val metaMap = userMeta.entries.map { S3Constants.X_AMZ_META_PREFIX + it.key to it.value }
+        val metaMap = userMetadata.entries.map { S3Constants.X_AMZ_META_PREFIX + it.key to it.value }
         metaMap.forEach { request.header(it.first, it.second) }
         addAuthHeader(request, target.path("$bucket/$key").uri.path, "PUT",
                 mapOf("content-type" to "application/octet-stream") + metaMap.toMap())
         request.put(Entity.entity("", MediaType.APPLICATION_OCTET_STREAM)).checkResponse()
     }
 
-    fun getObject(bucket: String, key: String): InputStream {
+    fun getObjectContent(bucket: String, key: String): InputStream {
         val request = target.path("$bucket/$key").request()
         addAuthHeader(request, target.path("$bucket/$key").uri.path, "GET")
         return request.get(InputStream::class.java)
     }
 
-    fun getObjectMeta(bucket: String, key: String): Map<String, String> {
+    fun getUserMetadata(bucket: String, key: String): Map<String, String> {
         val request = target.path("$bucket/$key").request()
         addAuthHeader(request, target.path("$bucket/$key").uri.path, "HEAD")
         return request.head().checkResponse().headers.filter { it.key.startsWith(S3Constants.X_AMZ_META_PREFIX) }

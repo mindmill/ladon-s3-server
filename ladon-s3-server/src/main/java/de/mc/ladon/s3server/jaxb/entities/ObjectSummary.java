@@ -16,8 +16,8 @@ import java.util.Map;
 /**
  * @author Ralf Ulrich on 20.02.16.
  */
-@XmlRootElement(name = "Contents")
-public class Contents {
+@XmlRootElement(name = "ObjectSummary")
+public class ObjectSummary {
     private Owner owner;
     private String key;
     private Date lastModified;
@@ -26,10 +26,10 @@ public class Contents {
     private String storageClass;
     private Metadata meta;
 
-    public Contents() {
+    public ObjectSummary() {
     }
 
-    public Contents(Owner owner, String key, Date lastModified, String etag, Long size, String storageClass, Metadata meta) {
+    public ObjectSummary(Owner owner, String key, Date lastModified, String etag, Long size, String storageClass, Metadata meta) {
         this.owner = owner;
         this.key = key;
         this.lastModified = lastModified;

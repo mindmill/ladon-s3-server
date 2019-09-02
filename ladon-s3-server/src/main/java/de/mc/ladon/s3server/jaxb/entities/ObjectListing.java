@@ -15,43 +15,43 @@ import static de.mc.ladon.s3server.common.EncodingUtil.getEncoded;
 /**
  * @author Ralf Ulrich on 17.02.16.
  */
-@XmlRootElement(name = "ListBucketResult")
-public class ListBucketResult {
+@XmlRootElement(name = "ObjectListing")
+public class ObjectListing {
 
-    private String name;
+    private String bucketName;
     private String prefix;
     private String marker;
     private Integer maxKeys;
     private String delimiter;
     private Boolean isTruncated;
-    private List<Contents> contentsList;
+    private List<ObjectSummary> objectSummaryList;
     private CommonPrefixes commonPrefixes;
 
-    public ListBucketResult() {
+    public ObjectListing() {
     }
 
-    public ListBucketResult(S3CallContext callContext,
-                            String bucketName,
-                            List<Contents> contentsList,
-                            CommonPrefixes commonPrefixes,
-                            boolean isTruncated) {
-        this.name = bucketName;
+    public ObjectListing(S3CallContext callContext,
+                         String bucketName,
+                         List<ObjectSummary> objectSummaryList,
+                         CommonPrefixes commonPrefixes,
+                         boolean isTruncated) {
+        this.bucketName = bucketName;
         this.prefix = getEncoded(callContext,callContext.getParams().getPrefix());
         this.marker = getEncoded(callContext,callContext.getParams().getMarker());
         this.maxKeys = callContext.getParams().getMaxKeys();
         this.delimiter = getEncoded(callContext,callContext.getParams().getDelimiter());
         this.isTruncated = isTruncated;
-        this.contentsList = contentsList;
+        this.objectSummaryList = objectSummaryList;
         this.commonPrefixes = commonPrefixes;
     }
 
-    @XmlElement(name = "Name")
-    public String getName() {
-        return name;
+    @XmlElement(name = "BucketName")
+    public String getBucketName() {
+        return bucketName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setBucketName(String bucketName) {
+        this.bucketName = bucketName;
     }
 
     @XmlElement(name = "Prefix")
@@ -98,13 +98,13 @@ public class ListBucketResult {
         this.isTruncated = isTruncated;
     }
 
-    @XmlElement(name = "Contents")
-    public List<Contents> getContentsList() {
-        return contentsList;
+    @XmlElement(name = "ObjectSummaryList")
+    public List<ObjectSummary> getObjectSummaryList() {
+        return objectSummaryList;
     }
 
-    public void setContentsList(List<Contents> contentsList) {
-        this.contentsList = contentsList;
+    public void setObjectSummaryList(List<ObjectSummary> objectSummaryList) {
+        this.objectSummaryList = objectSummaryList;
     }
 
 

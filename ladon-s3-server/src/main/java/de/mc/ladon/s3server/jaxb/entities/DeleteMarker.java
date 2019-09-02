@@ -8,7 +8,7 @@ import java.util.Date;
  *         30.10.16
  */
 @XmlRootElement(name = "DeleteMarker")
-public class DeleteMarker extends AbstractVersionElement {
+public class DeleteMarker extends AbstractVersionSummary {
 
     public DeleteMarker() {
         super();
