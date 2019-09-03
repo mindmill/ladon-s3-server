@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ladon-s3-client</artifactId>
+    <artifactId>ladon-rest-client</artifactId>
     <properties>
         <kotlin.version>1.3.21</kotlin.version>
     </properties>
