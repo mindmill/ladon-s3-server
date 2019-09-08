@@ -4,7 +4,7 @@
 Build your own S3 Server and keep your data safe! 
 
 ### Installation:
-The Ladon S3 Server is built using Java 8 and Maven
+The Ladon S3 Server is built using Java 8-13 and Maven
 ```bash
     mvn package && java -jar ladon-s3-server-boot/target/ladon-s3-server-boot-2.1.0.jar
 ```
