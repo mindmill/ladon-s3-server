@@ -63,7 +63,7 @@ Supported so far is only access via REST API, no ACL, no policies, no torrent ..
 
 To see what you can build with it have a look at  [Ladon Data Center Edition](https://ladon.org)  
 ### License
-Copyright (C) 2021 Mind Consulting
+Copyright (C) 2024 Mind Consulting
 
 Free for private use, easy commercial licensing available [here](https://elopage.com/s/mind/ladon-s3-server/payment?locale=en)
 
