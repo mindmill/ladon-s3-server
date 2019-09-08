@@ -14,10 +14,8 @@ import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -35,9 +33,8 @@ import static org.junit.Assert.assertEquals;
  * @author Ralf Ulrich
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = S3ServerApplication.class)
-@WebAppConfiguration
-@IntegrationTest("server.port:8080")
+@SpringBootTest(classes = S3ServerApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class FSStorageTests {
 
     private ExecutorService service;
@@ -58,9 +55,9 @@ public class FSStorageTests {
 
         for (int j = 0; j < 10; j++) {
             final int finalJ = j;
-            executeOnBucket(meta1, b, finalJ,"1111111111");
-            executeOnBucket(meta1, b, finalJ,"2222222222");
-            executeOnBucket(meta1, b, finalJ,"3333333333");
+            executeOnBucket(meta1, b, finalJ, "1111111111");
+            executeOnBucket(meta1, b, finalJ, "2222222222");
+            executeOnBucket(meta1, b, finalJ, "3333333333");
         }
 
 
@@ -77,9 +74,9 @@ public class FSStorageTests {
     private void executeOnBucket(ObjectMetadata meta1, Bucket b, int finalJ, String content) {
         service.execute(() -> {
             AmazonS3Client c = getClient();
-            Random random  = new Random(System.currentTimeMillis());
+            Random random = new Random(System.currentTimeMillis());
             for (int i = 0; i < 10; i++) {
-                c.putObject(b.getName(), "test"+ finalJ +".txt", new ByteArrayInputStream(content.getBytes()), meta1);
+                c.putObject(b.getName(), "test" + finalJ + ".txt", new ByteArrayInputStream(content.getBytes()), meta1);
                 try {
                     Thread.sleep(random.nextInt(10));
                 } catch (InterruptedException e) {
@@ -87,7 +84,7 @@ public class FSStorageTests {
                 }
                 try {
                     if (i > 0)
-                        assertEquals(10, Streams.asString(c.getObject(b.getName(), "test"+ finalJ +".txt").getObjectContent()).chars().count());
+                        assertEquals(10, Streams.asString(c.getObject(b.getName(), "test" + finalJ + ".txt").getObjectContent()).chars().count());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -100,11 +97,11 @@ public class FSStorageTests {
         AmazonS3Client client = getClient();
         int count = 0;
         ObjectListing listing = client.listObjects("test");
-        count+= listing.getObjectSummaries().size();
+        count += listing.getObjectSummaries().size();
         printListing(listing);
-        while(listing.isTruncated()){
+        while (listing.isTruncated()) {
             listing = client.listNextBatchOfObjects(listing);
-            count+= listing.getObjectSummaries().size();
+            count += listing.getObjectSummaries().size();
             printListing(listing);
         }
 

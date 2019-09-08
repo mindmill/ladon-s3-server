@@ -17,10 +17,8 @@ import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -37,9 +35,8 @@ import static org.junit.Assert.assertTrue;
  * @author Ralf Ulrich
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = S3ServerApplication.class)
-@WebAppConfiguration
-@IntegrationTest("server.port:8080")
+@SpringBootTest(classes = S3ServerApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class S3ServerApplicationTests {
 
     @Before
@@ -136,7 +133,7 @@ public class S3ServerApplicationTests {
         Bucket b = client.createBucket(UUID.randomUUID().toString());
         ObjectMetadata meta = new ObjectMetadata();
         client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
-        client.copyObject(b.getName(),"test.txt", b.getName(),"test2.txt");
+        client.copyObject(b.getName(), "test.txt", b.getName(), "test2.txt");
 
     }
 
