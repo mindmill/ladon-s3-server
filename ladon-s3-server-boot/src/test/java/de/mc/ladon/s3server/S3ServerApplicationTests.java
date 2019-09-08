@@ -18,10 +18,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,9 +36,8 @@ import static org.junit.Assert.assertTrue;
  * @author Ralf Ulrich
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = S3ServerApplication.class)
-@WebAppConfiguration
-@IntegrationTest("server.port:8080")
+@SpringBootTest(classes = S3ServerApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class S3ServerApplicationTests {
 
     @Before

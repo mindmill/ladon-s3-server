@@ -12,8 +12,8 @@ import de.mc.ladon.s3server.servlet.S3Servlet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.embedded.FilterRegistrationBean;
-import org.springframework.boot.context.embedded.ServletRegistrationBean;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -52,7 +52,7 @@ public class BeanConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(value = "s3server.loggingEnabled" , havingValue = "true")
+    @ConditionalOnProperty(value = "s3server.loggingEnabled", havingValue = "true")
     FilterRegistrationBean filterRegistrationBean() {
         FilterRegistrationBean filterBean = new FilterRegistrationBean();
         filterBean.setFilter(new PerformanceLoggingFilter());

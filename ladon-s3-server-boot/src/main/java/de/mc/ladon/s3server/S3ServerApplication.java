@@ -6,8 +6,6 @@ package de.mc.ladon.s3server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
 
 
 /**
@@ -15,7 +13,7 @@ import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
  *
  * @author Ralf Ulrich
  */
-@SpringBootApplication(exclude = {DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class})
+@SpringBootApplication
 public class S3ServerApplication {
 
     public static void main(String[] args) {
