@@ -6,9 +6,12 @@ Build your own S3 Server and keep your data safe!
 ### Installation:
 The Ladon S3 Server is built using Java 8 and Maven
 ```bash
-mvn package && java -jar ladon-s3-server-boot/target/ladon-s3-server-boot-{version}.jar
+    mvn package && java -jar ladon-s3-server-boot/target/ladon-s3-server-boot-1.1.0.jar
 ```
-
+Or run Docker:
+```bash
+mvn package &&  docker run -i --network=host  mindconsulting/ladon:1.1.0
+```
 ### Customize:
 The core functions of S3 are mapped to a class called S3Repository.
 All you have to do is provide a bean of this type.
@@ -39,9 +42,9 @@ For other configuration options have a look at the [application.properties](./la
 Supported so far is only access via REST API, no ACL, no policies, no torrent ....
 
 ### License
-Copyright (C) 2016 Mind Consulting
+Copyright (C) 2019 Mind Consulting
 
-Free for private use, easy commercial licensing available
+[Free for private use, easy commercial licensing available](https://elopage.com/s/mind/ladon-s3-server/payment?locale=en)
 
-<a href="http://mind-consulting.de/"><img src="http://mind-consulting.de/img/logo_no_bg.png"  height="100" width="250" ></a>
+<a href="http://mind-consulting.de/"><img src="http://ladon.org/img/logo_no_bg.png"  height="100" width="250" ></a>
 
