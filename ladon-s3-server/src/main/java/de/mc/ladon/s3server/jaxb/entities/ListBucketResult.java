@@ -18,7 +18,7 @@ import static de.mc.ladon.s3server.common.EncodingUtil.getEncoded;
 @XmlRootElement(name = "ListBucketResult")
 public class ListBucketResult {
 
-    private String name;
+    private String bucketName;
     private String prefix;
     private String marker;
     private Integer maxKeys;
@@ -35,7 +35,7 @@ public class ListBucketResult {
                             List<Contents> contentsList,
                             CommonPrefixes commonPrefixes,
                             boolean isTruncated) {
-        this.name = bucketName;
+        this.bucketName = bucketName;
         this.prefix = getEncoded(callContext,callContext.getParams().getPrefix());
         this.marker = getEncoded(callContext,callContext.getParams().getMarker());
         this.maxKeys = callContext.getParams().getMaxKeys();
@@ -46,12 +46,12 @@ public class ListBucketResult {
     }
 
     @XmlElement(name = "Name")
-    public String getName() {
-        return name;
+    public String getBucketName() {
+        return bucketName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setBucketName(String bucketName) {
+        this.bucketName = bucketName;
     }
 
     @XmlElement(name = "Prefix")

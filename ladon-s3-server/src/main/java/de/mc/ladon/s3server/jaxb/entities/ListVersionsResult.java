@@ -4,7 +4,6 @@
 
 package de.mc.ladon.s3server.jaxb.entities;
 
-import de.mc.ladon.s3server.common.EncodingUtil;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -20,7 +19,7 @@ import static de.mc.ladon.s3server.common.EncodingUtil.*;
 @XmlRootElement(name = "ListVersionsResult")
 public class ListVersionsResult {
 
-    private String name;
+    private String bucketName;
     private String prefix;
     private String keyMarker;
     private String nextKeyMarker;
@@ -41,7 +40,7 @@ public class ListVersionsResult {
                               boolean isTruncated,
                               String nextKeyMarker,
                               String nextVersionIdMarker) {
-        this.name = bucketName;
+        this.bucketName = bucketName;
         this.prefix = getEncoded(callContext, callContext.getParams().getPrefix());
         this.keyMarker = callContext.getParams().getKeyMarker();
         this.maxKeys = callContext.getParams().getMaxKeys();
@@ -54,12 +53,12 @@ public class ListVersionsResult {
     }
 
     @XmlElement(name = "Name")
-    public String getName() {
-        return name;
+    public String getBucketName() {
+        return bucketName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setBucketName(String bucketName) {
+        this.bucketName = bucketName;
     }
 
     @XmlElement(name = "Prefix")
