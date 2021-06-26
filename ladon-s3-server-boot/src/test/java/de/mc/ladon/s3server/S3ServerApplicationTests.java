@@ -11,14 +11,10 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.*;
-import de.mc.ladon.s3server.common.StreamUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -29,7 +25,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Example Integration Test
@@ -53,7 +50,7 @@ public class S3ServerApplicationTests {
     }
 
     public AmazonS3Client getClient() {
-        AWSCredentials credentials = new BasicAWSCredentials("rHUYeAk58Ilhg6iUEFtr", "IVimdW7BIQLq9PLyVpXzZUq8zS4nLfrsoiZSJanu");
+        AWSCredentials credentials = new BasicAWSCredentials("SYSTEM", "SYSTEM");
         AmazonS3Client newClient = new AmazonS3Client(credentials,
                 new ClientConfiguration());
         newClient.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
@@ -117,17 +114,9 @@ public class S3ServerApplicationTests {
     public void testGetObject() throws IOException {
         AmazonS3Client client = getClient();
         InputStream in = client.getObject("test", "test1.txt").getObjectContent();
-        String bucketName = client.listObjects("test", "test1.txt").getObjectSummaries().get(0).getBucketName();
-
+        String bucketName =  client.listObjects("test", "test1.txt").getObjectSummaries().get(0).getBucketName();
         assertEquals("test1", Streams.asString(in));
         assertEquals("test", bucketName);
-    }
-
-    @Test
-    public void testPutFolder() throws IOException {
-        AmazonS3Client client = getClient();
-        client.putObject("test", "testfolder/", "");
-        assertFalse(client.listObjects("test").getCommonPrefixes().isEmpty());
     }
 
     @Test
@@ -180,28 +169,13 @@ public class S3ServerApplicationTests {
     }
 
     @Test
-    public void testCopyObject() throws IOException {
+    public void testCopyObject() {
         AmazonS3Client client = getClient();
         Bucket b = client.createBucket(UUID.randomUUID().toString());
         ObjectMetadata meta = new ObjectMetadata();
         client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
         client.copyObject(b.getName(), "test.txt", b.getName(), "test2.txt");
-        byte[] content = new byte[4];
-        try(InputStream in =  client.getObject(b.getName(), "test.txt").getObjectContent()) {
-            StreamUtils.readByteArray(in, content);
-        }
-        assertEquals("test", new String(content));
-    }
 
-    @Test
-    public void testContentLengthHeader() {
-        AmazonS3Client client = getClient();
-        Bucket b = client.createBucket(UUID.randomUUID().toString());
-        ObjectMetadata meta = new ObjectMetadata();
-        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
-        ObjectMetadata s3meta = client.getObjectMetadata(b.getName(), "test.txt");
-        long contentLength = s3meta.getContentLength();
-        assertEquals(4,contentLength);
     }
 
     @Test
