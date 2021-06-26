@@ -14,12 +14,10 @@ import com.amazonaws.services.s3.model.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,20 +25,20 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Example Integration Test
  *
  * @author Ralf Ulrich
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = S3ServerApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class S3ServerApplicationTests {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         AmazonS3Client client = getClient();
         client.createBucket("test");
@@ -131,7 +129,7 @@ public class S3ServerApplicationTests {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testPutBigObjectAndVerifyGet() throws IOException {
         final long TEST_LENGTH = 1024 * 1024 * 1024 * 6L; // 6 GB
 
@@ -171,7 +169,7 @@ public class S3ServerApplicationTests {
     }
 
     @Test
-    public void testCopyObject() throws IOException {
+    public void testCopyObject() {
         AmazonS3Client client = getClient();
         Bucket b = client.createBucket(UUID.randomUUID().toString());
         ObjectMetadata meta = new ObjectMetadata();
@@ -180,27 +178,31 @@ public class S3ServerApplicationTests {
 
     }
 
-    @Test(expected = AmazonS3Exception.class)
-    public void testPutObjectWrongMd5() throws IOException {
-        AmazonS3Client client = getClient();
-        Bucket b = client.createBucket(UUID.randomUUID().toString());
-        String md5 = Base64.encodeBase64String(DigestUtils.md5("test1"));
-        ObjectMetadata meta = new ObjectMetadata();
-        meta.setContentMD5(md5);
-        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
+    @Test
+    public void testPutObjectWrongMd5() {
+        Assertions.assertThrows(AmazonS3Exception.class, () -> {
+            AmazonS3Client client = getClient();
+            Bucket b = client.createBucket(UUID.randomUUID().toString());
+            String md5 = Base64.encodeBase64String(DigestUtils.md5("test1"));
+            ObjectMetadata meta = new ObjectMetadata();
+            meta.setContentMD5(md5);
+            client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
+        });
 
     }
 
-    @Test(expected = AmazonClientException.class)
+    @Test
     public void testPutObjectWrongLengthRightMd5() throws IOException {
-        AmazonS3Client client = getClient();
-        Bucket b = client.createBucket(UUID.randomUUID().toString());
-        String md5 = Base64.encodeBase64String(DigestUtils.md5("test"));
-        ObjectMetadata meta = new ObjectMetadata();
-        meta.setContentMD5(md5);
-        meta.setContentLength(5);
-        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
+        Assertions.assertThrows(AmazonClientException.class, () -> {
+            AmazonS3Client client = getClient();
+            Bucket b = client.createBucket(UUID.randomUUID().toString());
+            String md5 = Base64.encodeBase64String(DigestUtils.md5("test"));
+            ObjectMetadata meta = new ObjectMetadata();
+            meta.setContentMD5(md5);
+            meta.setContentLength(5);
+            client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
 
+        });
     }
 
     @Test
@@ -266,7 +268,7 @@ public class S3ServerApplicationTests {
         String bucket = UUID.randomUUID().toString();
         client.createBucket(bucket);
         List<S3ObjectSummary> objectSummaries = client.listObjects(new ListObjectsRequest(bucket, null, null, null, null)).getObjectSummaries();
-       assertEquals(0, objectSummaries.size());
+        assertEquals(0, objectSummaries.size());
 
         ObjectMetadata meta = new ObjectMetadata();
         client.putObject(bucket, "one/one.txt", new ByteArrayInputStream("test".getBytes()), meta);
@@ -278,9 +280,9 @@ public class S3ServerApplicationTests {
 
 
         ObjectListing ol = client.listObjects(new ListObjectsRequest(bucket, null, null, "/", null));
-        assertEquals(0,ol.getObjectSummaries().size());
+        assertEquals(0, ol.getObjectSummaries().size());
         System.out.println(ol.getCommonPrefixes());
-        assertEquals(3,ol.getCommonPrefixes().size());
+        assertEquals(3, ol.getCommonPrefixes().size());
 
     }
 
