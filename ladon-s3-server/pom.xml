@@ -30,7 +30,7 @@
                             de.mc.ladon.s3server.logging,
                             de.mc.ladon.s3server.exceptions,
                             de.mc.ladon.s3server.common,
-
+                            de.mc.ladon.s3server.auth,
                         </Export-Package>
                         <Private-Package>de.mc.ladon.s3server.*</Private-Package>
                         <Bundle-Name>Mind Consulting :: Ladon S3 Server</Bundle-Name>
