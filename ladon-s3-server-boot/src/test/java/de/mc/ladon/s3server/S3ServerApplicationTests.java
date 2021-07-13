@@ -50,7 +50,7 @@ public class S3ServerApplicationTests {
     }
 
     public AmazonS3Client getClient() {
-        AWSCredentials credentials = new BasicAWSCredentials("SYSTEM", "SYSTEM");
+        AWSCredentials credentials = new BasicAWSCredentials("rHUYeAk58Ilhg6iUEFtr", "IVimdW7BIQLq9PLyVpXzZUq8zS4nLfrsoiZSJanu");
         AmazonS3Client newClient = new AmazonS3Client(credentials,
                 new ClientConfiguration());
         newClient.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
