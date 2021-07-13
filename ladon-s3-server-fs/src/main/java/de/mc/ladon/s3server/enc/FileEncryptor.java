@@ -21,10 +21,10 @@ import java.security.*;
  */
 public class FileEncryptor {
 
-    public static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
-    public static final String ALGORITHM = "AES";
+    private static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
+    private static final String ALGORITHM = "AES";
     private static final int KEYSIZE = 16;
-    public final byte[] secret;
+    private final byte[] secret;
 
     public FileEncryptor(byte[] secret) {
         this.secret = get128BitKey(secret);
