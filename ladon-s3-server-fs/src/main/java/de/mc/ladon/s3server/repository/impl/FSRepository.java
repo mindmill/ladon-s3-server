@@ -6,6 +6,7 @@ import de.mc.ladon.s3server.common.DelimiterUtil;
 import de.mc.ladon.s3server.common.Encoding;
 import de.mc.ladon.s3server.common.S3Constants;
 import de.mc.ladon.s3server.common.StreamUtils;
+import de.mc.ladon.s3server.enc.FileEncryptor;
 import de.mc.ladon.s3server.entities.api.*;
 import de.mc.ladon.s3server.entities.impl.*;
 import de.mc.ladon.s3server.exceptions.*;
@@ -21,6 +22,7 @@ import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLConnection;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.DigestInputStream;
@@ -50,10 +52,12 @@ public class FSRepository implements S3Repository {
     private static final String META_FOLDER = "meta";
     private final String fsrepoBaseUrl;
     private final ConcurrentMap<String, S3User> userMap;
+    private final FileEncryptor fileEncryptor;
 
 
-    public FSRepository(String fsrepoBaseUrl) {
+    public FSRepository(String fsrepoBaseUrl, String encSecret) {
         this.fsrepoBaseUrl = fsrepoBaseUrl;
+        fileEncryptor = new FileEncryptor(encSecret.getBytes());
         try {
             jaxbContext = JAXBContext.newInstance(FSStorageMeta.class, FSUserData.class);
             userMap = new ConcurrentHashMap<>(loadUserFile());
@@ -215,7 +219,7 @@ public class FSRepository implements S3Repository {
             }
 
             DigestInputStream din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
-            try (OutputStream out = Files.newOutputStream(obj)) {
+            try (OutputStream out = fileEncryptor.getEncryptedOutputStream(obj)) {
                 long bytesCopied = StreamUtils.copy(din, out);
                 byte[] md5bytes = din.getMessageDigest().digest();
                 String storageMd5base64 = BaseEncoding.base64().encode(md5bytes);
@@ -273,11 +277,11 @@ public class FSRepository implements S3Repository {
 
         try {
             S3ResponseHeader header = new S3ResponseHeaderImpl();
-            header.setContentLength(Files.size(object));
+            //header.setContentLength(Files.size(object));
             header.setContentType(getMimeType(object));
             callContext.setResponseHeader(header);
             if (!head)
-                callContext.setContent(Files.newInputStream(object));
+                callContext.setContent(fileEncryptor.getDecryptedInputStream(object));
         } catch (IOException e) {
             logger.error("internal error", e);
             throw new InternalErrorException(objectKey, callContext.getRequestId());
@@ -365,7 +369,7 @@ public class FSRepository implements S3Repository {
     }
 
     private String getMimeType(Path path) throws IOException {
-        String mime = Files.probeContentType(path);
+        String mime = URLConnection.guessContentTypeFromName(path.toString());
         return mime != null ? mime : "application/octet-stream";
     }
 
@@ -466,7 +470,12 @@ public class FSRepository implements S3Repository {
         try (OutputStream out = Files.newOutputStream(userFile)) {
             Marshaller m = jaxbContext.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            m.marshal(new FSUserData(ImmutableMap.of(SYSTEM_DEFAULT_USER, new FSUser(SYSTEM_DEFAULT_USER, SYSTEM_DEFAULT_USER, SYSTEM_DEFAULT_USER, SYSTEM_DEFAULT_USER, null))), out);
+            m.marshal(new FSUserData(ImmutableMap.of("rHUYeAk58Ilhg6iUEFtr",
+                    new FSUser(SYSTEM_DEFAULT_USER,
+                            SYSTEM_DEFAULT_USER,
+                            "rHUYeAk58Ilhg6iUEFtr",
+                            "IVimdW7BIQLq9PLyVpXzZUq8zS4nLfrsoiZSJanu",
+                            null))), out);
         }
 
     }

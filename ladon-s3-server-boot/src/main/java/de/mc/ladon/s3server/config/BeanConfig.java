@@ -27,11 +27,13 @@ public class BeanConfig {
 
     @Value("${s3server.fsrepo.root}")
     String fsRepoRoot;
+    @Value("${s3server.fsrepo.secret")
+    String encSecret;
 
     @ConditionalOnMissingBean
     @Bean
     S3Repository s3Repository() {
-        return new FSRepository(fsRepoRoot);
+        return new FSRepository(fsRepoRoot, encSecret);
     }
 
     @Bean
