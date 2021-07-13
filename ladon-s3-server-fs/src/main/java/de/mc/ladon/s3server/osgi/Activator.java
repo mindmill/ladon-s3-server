@@ -22,7 +22,7 @@ public class Activator implements BundleActivator {
 
         Dictionary<String, String> props = new Hashtable<>();
         String home = System.getProperty("user.home");
-        context.registerService(S3Repository.class, new FSRepository(home + "/.s3server"), props);
+        context.registerService(S3Repository.class, new FSRepository(home + "/.s3server" , "4aWji2M7heiCuPsJu9UQ78UE"), props);
 
     }
 
