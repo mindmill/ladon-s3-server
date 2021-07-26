@@ -4,8 +4,8 @@
 
 package de.mc.ladon.s3server.auth;
 
+import com.google.common.net.PercentEscaper;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
-import de.mc.ladon.s3server.exceptions.InternalErrorException;
 import de.mc.ladon.s3server.exceptions.InvalidSecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.hash.Hashing.sha256;
@@ -33,6 +34,7 @@ public class AwsSignatureVersion4 {
             Pattern.compile("AWS4-HMAC-SHA256 Credential=([^/]+)/([^/]+)/([^/]+)/s3/aws4_request, SignedHeaders=([^,"
                     + "]+), Signature=(.+)");
     public static final String HMAC_SHA_256 = "HmacSHA256";
+    private static final PercentEscaper QUERY_PARAM_ESCAPER = new PercentEscaper("-_.~", false);
 
     public boolean isV4(S3CallContext callContext) {
         return buildMatcher(callContext).matches();
@@ -97,8 +99,17 @@ public class AwsSignatureVersion4 {
         canonicalRequest.append("\n");
         canonicalRequest.append(callContext.getUri());
         canonicalRequest.append("\n");
-        if (callContext.getQueryString() != null)
-            canonicalRequest.append(callContext.getQueryString());
+        if (callContext.getQueryString() != null) {
+            Map<String, String> allParams = callContext.getParams().getAllParams();
+            String qString = allParams.entrySet()
+                    .stream()
+                    .map(e -> QUERY_PARAM_ESCAPER.escape(e.getKey())
+                            + "=" +
+                            QUERY_PARAM_ESCAPER.escape(e.getValue()))
+                    .collect(Collectors.joining("&"));
+            canonicalRequest.append(qString);
+        }
+
         canonicalRequest.append("\n");
 
         assert aws4Header != null;

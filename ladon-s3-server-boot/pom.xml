@@ -49,7 +49,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.10.54</version>
+            <version>1.11.1033</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

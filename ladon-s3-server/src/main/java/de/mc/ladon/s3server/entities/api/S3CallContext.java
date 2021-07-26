@@ -4,6 +4,7 @@
 
 package de.mc.ladon.s3server.entities.api;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -27,6 +28,8 @@ public interface S3CallContext {
     String getUri();
 
     String getQueryString();
+
+    HttpServletRequest getRawRequest();
 
     InputStream getContent() throws IOException;
 
