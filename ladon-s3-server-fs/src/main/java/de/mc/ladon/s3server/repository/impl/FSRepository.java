@@ -257,7 +257,11 @@ public class FSRepository implements S3Repository {
     }
 
     private boolean isChunked(S3CallContext callContext) {
-        return callContext.getHeader().getAuthorization().startsWith("AWS4");
+        try {
+            return callContext.getHeader().getAuthorization().startsWith("AWS4");
+        } catch (NullPointerException e){
+            return false;
+        }
     }
 
     private String inQuotes(String etag) {
