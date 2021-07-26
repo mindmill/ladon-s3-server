@@ -34,4 +34,21 @@ public class StreamUtils {
         return byteCount;
     }
 
+    /**
+     * Read the given byte[] from the stream. Leaves the stream open when done.
+     *
+     * @param in    {@link InputStream} to read from
+     * @param bytes byte[] to put the read data into
+     * @throws IOException in case of I/O errors
+     */
+    public static void readByteArray(InputStream in, byte[] bytes) throws IOException {
+        int size = bytes.length;
+        int index = 0;
+        int read;
+        while (index < size && (read = in.read()) != -1) {
+            bytes[index++] = (byte) read;
+        }
+        if (index != size) throw new IOException("stream ended before reading full byte[]");
+    }
+
 }

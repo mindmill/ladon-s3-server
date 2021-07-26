@@ -2,10 +2,7 @@ package de.mc.ladon.s3server.repository.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
-import de.mc.ladon.s3server.common.DelimiterUtil;
-import de.mc.ladon.s3server.common.Encoding;
-import de.mc.ladon.s3server.common.S3Constants;
-import de.mc.ladon.s3server.common.StreamUtils;
+import de.mc.ladon.s3server.common.*;
 import de.mc.ladon.s3server.enc.FileEncryptor;
 import de.mc.ladon.s3server.entities.api.*;
 import de.mc.ladon.s3server.entities.impl.*;
@@ -210,6 +207,7 @@ public class FSRepository implements S3Repository {
 
         Long contentLength = callContext.getHeader().getContentLength();
         String md5 = callContext.getHeader().getContentMD5();
+        boolean isChunked = isChunked(callContext);
 
         lock(metaBucket, objectKey, FSLock.LockType.write, callContext);
         try (InputStream in = callContext.getContent()) {
@@ -217,15 +215,20 @@ public class FSRepository implements S3Repository {
                 Files.createDirectories(obj.getParent());
                 Files.createFile(obj);
             }
+            DigestInputStream din;
+            if (isChunked) {
+                din = new DigestInputStream(new S3ChunkedInputStream(in), MessageDigest.getInstance("MD5"));
+            } else {
+                din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
+            }
 
-            DigestInputStream din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
             try (OutputStream out = fileEncryptor.getEncryptedOutputStream(obj)) {
                 long bytesCopied = StreamUtils.copy(din, out);
                 byte[] md5bytes = din.getMessageDigest().digest();
                 String storageMd5base64 = BaseEncoding.base64().encode(md5bytes);
                 String storageMd5base16 = Encoding.toHex(md5bytes);
 
-                if (contentLength != null && contentLength != bytesCopied
+                if (!isChunked && contentLength != null && contentLength != bytesCopied
                         || md5 != null && !md5.equals(storageMd5base64)) {
                     Files.delete(obj);
                     Files.deleteIfExists(meta);
@@ -251,6 +254,10 @@ public class FSRepository implements S3Repository {
         } finally {
             unlock(metaBucket, objectKey, callContext);
         }
+    }
+
+    private boolean isChunked(S3CallContext callContext) {
+        return callContext.getHeader().getAuthorization().startsWith("AWS4");
     }
 
     private String inQuotes(String etag) {

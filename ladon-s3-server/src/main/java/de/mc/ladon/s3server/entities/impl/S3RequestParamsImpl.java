@@ -7,8 +7,10 @@ package de.mc.ladon.s3server.entities.impl;
 import de.mc.ladon.s3server.common.S3Constants;
 import de.mc.ladon.s3server.entities.api.S3RequestParams;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static de.mc.ladon.s3server.common.S3Constants.*;
 
@@ -27,7 +29,7 @@ public class S3RequestParamsImpl implements S3RequestParams {
     private Map<String, String> allParams;
 
     public S3RequestParamsImpl(Map<String, String[]> requestParams) {
-        allParams = new HashMap<>(requestParams.size());
+        allParams = new TreeMap<>(Comparator.naturalOrder());
         for (String p : requestParams.keySet()) {
             allParams.put(p, requestParams.get(p)[0]);
         }

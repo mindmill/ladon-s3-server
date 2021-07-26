@@ -115,6 +115,7 @@ public class S3ServerApplicationTests {
         AmazonS3Client client = getClient();
         InputStream in = client.getObject("test", "test1.txt").getObjectContent();
         String bucketName =  client.listObjects("test", "test1.txt").getObjectSummaries().get(0).getBucketName();
+
         assertEquals("test1", Streams.asString(in));
         assertEquals("test", bucketName);
     }

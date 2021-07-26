@@ -100,6 +100,11 @@ public class S3CallContextImpl implements S3CallContext {
         return queryString;
     }
 
+    @Override
+    public HttpServletRequest getRawRequest() {
+        return request;
+    }
+
     public void setUser(S3User user) {
         this.user = user;
     }

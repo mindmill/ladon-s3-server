@@ -204,6 +204,7 @@ public class S3Servlet extends HttpServlet {
     private void writeXmlResponse(Object content, HttpServletResponse resp, int status) throws JAXBException, IOException {
         resp.setContentType("application/xml");
         resp.setStatus(status);
+      //  resp.setDateHeader("Expires", System.currentTimeMillis() + 60000);
         resp.setCharacterEncoding(Charsets.UTF_8.displayName());
         getMarshaller().marshal(content, resp.getOutputStream());
         resp.flushBuffer();
