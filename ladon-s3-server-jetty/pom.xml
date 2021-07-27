@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>s3-server</artifactId>
+        <groupId>de.mindconsulting</groupId>
+        <version>2.2.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>ladon-s3-server-jetty</artifactId>
+
+    <description>Ladon S3 Jetty Example</description>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <jetty.version>9.4.41.v20210516</jetty.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>de.mindconsulting</groupId>
+            <artifactId>ladon-s3-server</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.mindconsulting</groupId>
+            <artifactId>ladon-s3-server-fs</artifactId>
+            <version>2.2.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.32</version>
+        </dependency>
+    </dependencies>
+    <developers>
+        <developer>
+            <name>Ralf Ulrich</name>
+            <email>ralf.ulrich@mind-consulting.de</email>
+            <organization>Mind Consulting UG</organization>
+            <organizationUrl>http://mind-consulting.de</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:mindmill/s3-java-server.git</connection>
+        <developerConnection>scm:git:git@github.com:mindmill/s3-java-server.git</developerConnection>
+        <url>git@github.com:mindmill/s3-java-server.git</url>
+    </scm>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>de.mc.ladon.s3server.jetty.S3JettyServer</mainClass>
+                        </manifest>
+                    </archive>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>assemble-all</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>mind</id>
+            <name>Mind</name>
+            <url>${repo.internal.url}</url>
+        </repository>
+    </distributionManagement>
+</project>
