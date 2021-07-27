@@ -1,10 +1,19 @@
 [![Build Status](https://travis-ci.org/mindmill/ladon-s3-server.svg?branch=master)](https://travis-ci.org/mindmill/ladon-s3-server)
 
 # Ladon S3 Server
-Build your own S3 Server and keep your data safe! 
+Build your own S3 Server and keep your data safe!
 
-### Installation:
 The Ladon S3 Server is built using Java 8-13 and Maven
+### Jetty Example
+
+If you prefer to run it with Jetty have a look at the [Jetty example](./ladon-s3-server-jetty/src/main/java/de/mc/ladon/s3server/jetty/S3JettyServer.java )
+
+```bash
+    mvn package && java -jar ladon-s3-server-jetty/target/ladon-s3-server-jetty-2.2.0.jar
+```
+
+### Spring Boot:
+
 ```bash
     mvn package && java -jar ladon-s3-server-boot/target/ladon-s3-server-boot-2.2.0.jar
 ```
@@ -39,12 +48,7 @@ s3server.fsrepo.root=${user.home}/.s3server
 ```
 For other configuration options have a look at the [application.properties](./ladon-s3-server-boot/src/main/resources/application.properties ) 
 
-### Jetty Example 
 
-If you prefer to run it without Spring Boot have a look at the [Jetty example](./ladon-s3-server-jetty/src/main/java/de/mc/ladon/s3server/jetty/S3JettyServer.java )
-```bash
-    mvn package && java -jar ladon-s3-server-jetty/target/ladon-s3-server-jetty-2.2.0.jar
-```
 Supported so far is only access via REST API, no ACL, no policies, no torrent ....
 
 To see what you can build with it have a look at  [Ladon Data Center Edition](https://ladon.org)  
