@@ -39,9 +39,15 @@ s3server.fsrepo.root=${user.home}/.s3server
 ```
 For other configuration options have a look at the [application.properties](./ladon-s3-server-boot/src/main/resources/application.properties ) 
 
+### Jetty Example 
+
+If you prefer to run it without Spring Boot have a look at the [Jetty example](./ladon-s3-server-jetty/src/main/java/de/mc/ladon/s3server/jetty/S3JettyServer.java )
+```bash
+    mvn package && java -jar ladon-s3-server-jetty/target/ladon-s3-server-jetty-2.2.0.jar
+```
 Supported so far is only access via REST API, no ACL, no policies, no torrent ....
 
-To see what you can build with it have a look at  [Ladon Data Center Edition](https://github.com/mindmill/ladon-data-center-edition) where you can see a full Ladon application. 
+To see what you can build with it have a look at  [Ladon Data Center Edition](https://ladon.org)  
 ### License
 Copyright (C) 2021 Mind Consulting
 
