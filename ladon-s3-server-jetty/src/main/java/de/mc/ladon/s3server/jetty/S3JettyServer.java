@@ -6,18 +6,25 @@ import de.mc.ladon.s3server.servlet.S3Servlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
 /**
  * ladon S3 server example using Jetty
+ *
  * @author Ralf Ulrich 27/07/2021
  */
 public class S3JettyServer {
 
+    private static Logger logger = LoggerFactory.getLogger(S3JettyServer.class);
+
     public static void main(String[] args) throws Exception {
         Server server = new Server(8080);
-        String s3Data = System.getProperty("user.home") + File.separator + ".s3server";
+        String defaultS3DataDir = System.getProperty("user.home") + File.separator + ".s3server";
+        String s3Data = System.getProperty("s3server.fsrepo.root", defaultS3DataDir);
+        logger.info("Storing data in " + s3Data);
         ServletHandler handler = new ServletHandler();
         server.setHandler(handler);
         S3Servlet s3Servlet = new S3Servlet(10);
