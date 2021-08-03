@@ -21,6 +21,14 @@ Or run Docker:
 ```bash
 mvn package &&  docker run -i --network=host  mindconsulting/ladon:2.2.0
 ```
+
+### Example credentials
+
+```java
+  AWSCredentials credentials = new BasicAWSCredentials(
+                "rHUYeAk58Ilhg6iUEFtr",
+                "IVimdW7BIQLq9PLyVpXzZUq8zS4nLfrsoiZSJanu");
+```
 ### Customize:
 The core functions of S3 are mapped to a class called S3Repository.
 All you have to do is provide a bean of this type.
