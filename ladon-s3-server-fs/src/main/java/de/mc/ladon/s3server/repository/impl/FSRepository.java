@@ -68,7 +68,7 @@ public class FSRepository implements S3Repository {
      * Will be deleted when {@link #deleteBucket(S3CallContext, String)}  is called.
      *
      * @param bucketName name of the bucket
-     * @return filesystem path of the bucket folder
+     * @return filesystem path of the bucket meta file
      */
     protected Path getBucketMetaFile(String bucketName) {
         return Paths.get(fsrepoBaseUrl, bucketName + metaFileSuffix());
@@ -181,7 +181,8 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public S3Object copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey, boolean copyMetadata) {
+    public S3Object copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey,
+                               String destBucket, String destObjectKey, boolean copyMetadata) {
         FSPaths src = getBucketPaths(callContext, srcBucket, srcObjectKey);
         FSPaths dest = getBucketPaths(callContext, destBucket, destObjectKey);
         if (!Files.exists(src.objectData))
