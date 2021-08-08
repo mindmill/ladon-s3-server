@@ -14,7 +14,10 @@ import com.amazonaws.services.s3.model.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -25,8 +28,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Example Integration Test
@@ -114,10 +116,17 @@ public class S3ServerApplicationTests {
     public void testGetObject() throws IOException {
         AmazonS3Client client = getClient();
         InputStream in = client.getObject("test", "test1.txt").getObjectContent();
-        String bucketName =  client.listObjects("test", "test1.txt").getObjectSummaries().get(0).getBucketName();
+        String bucketName = client.listObjects("test", "test1.txt").getObjectSummaries().get(0).getBucketName();
 
         assertEquals("test1", Streams.asString(in));
         assertEquals("test", bucketName);
+    }
+
+    @Test
+    public void testPutFolder() throws IOException {
+        AmazonS3Client client = getClient();
+        client.putObject("test", "testfolder/", "");
+        assertFalse(client.listObjects("test").getCommonPrefixes().isEmpty());
     }
 
     @Test

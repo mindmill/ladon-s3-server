@@ -203,57 +203,66 @@ public class FSRepository implements S3Repository {
         if (!Files.exists(dataBucket))
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
         Path obj = dataBucket.resolve(objectKey);
-        Path meta = metaBucket.resolve(objectKey + META_XML_EXTENSION);
-
-        Long contentLength = callContext.getHeader().getContentLength();
-        String md5 = callContext.getHeader().getContentMD5();
-        boolean isChunked = isChunked(callContext);
-
-        lock(metaBucket, objectKey, FSLock.LockType.write, callContext);
-        try (InputStream in = callContext.getContent()) {
-            if (!Files.exists(obj)) {
-                Files.createDirectories(obj.getParent());
-                Files.createFile(obj);
+        boolean isFolder = objectKey.endsWith("/");
+        if (isFolder) {
+            try {
+                Files.createDirectories(obj);
+            } catch (IOException e) {
+                logger.error("could not create directory " + obj, e);
             }
-            DigestInputStream din;
-            if (isChunked) {
-                din = new DigestInputStream(new S3ChunkedInputStream(in), MessageDigest.getInstance("MD5"));
-            } else {
-                din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
-            }
+        } else {
+            Path meta = metaBucket.resolve(objectKey + META_XML_EXTENSION);
 
-            try (OutputStream out = fileEncryptor.getEncryptedOutputStream(obj)) {
-                long bytesCopied = StreamUtils.copy(din, out);
-                byte[] md5bytes = din.getMessageDigest().digest();
-                String storageMd5base64 = BaseEncoding.base64().encode(md5bytes);
-                String storageMd5base16 = Encoding.toHex(md5bytes);
+            Long contentLength = callContext.getHeader().getContentLength();
+            String md5 = callContext.getHeader().getContentMD5();
+            boolean isChunked = isChunked(callContext);
 
-                if (!isChunked && contentLength != null && contentLength != bytesCopied
-                        || md5 != null && !md5.equals(storageMd5base64)) {
-                    Files.delete(obj);
-                    Files.deleteIfExists(meta);
-                    throw new InvalidDigestException(objectKey, callContext.getRequestId());
+            lock(metaBucket, objectKey, FSLock.LockType.write, callContext);
+            try (InputStream in = callContext.getContent()) {
+                if (!Files.exists(obj)) {
+                    Files.createDirectories(obj.getParent());
+                    Files.createFile(obj);
+                }
+                DigestInputStream din;
+                if (isChunked) {
+                    din = new DigestInputStream(new S3ChunkedInputStream(in), MessageDigest.getInstance("MD5"));
+                } else {
+                    din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
                 }
 
-                S3ResponseHeader header = new S3ResponseHeaderImpl();
-                header.setEtag(inQuotes(storageMd5base16));
-                header.setDate(new Date(Files.getLastModifiedTime(obj).toMillis()));
-                callContext.setResponseHeader(header);
+                try (OutputStream out = fileEncryptor.getEncryptedOutputStream(obj)) {
+                    long bytesCopied = StreamUtils.copy(din, out);
+                    byte[] md5bytes = din.getMessageDigest().digest();
+                    String storageMd5base64 = BaseEncoding.base64().encode(md5bytes);
+                    String storageMd5base16 = Encoding.toHex(md5bytes);
 
-                Files.createDirectories(meta.getParent());
-                writeMetaFile(meta, callContext, S3Constants.ETAG, inQuotes(storageMd5base16));
+                    if (!isChunked && contentLength != null && contentLength != bytesCopied
+                            || md5 != null && !md5.equals(storageMd5base64)) {
+                        Files.delete(obj);
+                        Files.deleteIfExists(meta);
+                        throw new InvalidDigestException(objectKey, callContext.getRequestId());
+                    }
+
+                    S3ResponseHeader header = new S3ResponseHeaderImpl();
+                    header.setEtag(inQuotes(storageMd5base16));
+                    header.setDate(new Date(Files.getLastModifiedTime(obj).toMillis()));
+                    callContext.setResponseHeader(header);
+
+                    Files.createDirectories(meta.getParent());
+                    writeMetaFile(meta, callContext, S3Constants.ETAG, inQuotes(storageMd5base16));
+                }
+
+            } catch (IOException | NoSuchAlgorithmException | JAXBException e) {
+                logger.error("internal error", e);
+                throw new InternalErrorException(objectKey, callContext.getRequestId());
+            } catch (InterruptedException e) {
+                logger.error("interrupted thread", e);
+                throw new InternalErrorException(objectKey, callContext.getRequestId());
+            } finally {
+                unlock(metaBucket, objectKey, callContext);
             }
-
-
-        } catch (IOException | NoSuchAlgorithmException | JAXBException e) {
-            logger.error("internal error", e);
-            throw new InternalErrorException(objectKey, callContext.getRequestId());
-        } catch (InterruptedException e) {
-            logger.error("interrupted thread", e);
-            throw new InternalErrorException(objectKey, callContext.getRequestId());
-        } finally {
-            unlock(metaBucket, objectKey, callContext);
         }
+
     }
 
     private boolean isChunked(S3CallContext callContext) {
@@ -319,25 +328,32 @@ public class FSRepository implements S3Repository {
 
         try {
             Long count = getPathStream(bucketName, prefix, bucket, marker).limit(maxKeys + 1).count();
-            Stream<S3Object> listing = getPathStream(bucketName, prefix, bucket, marker)
-                    .limit(maxKeys)
+            List<String> emptyFolders = new ArrayList<>();
+            Stream<S3ObjectImpl> listing = getPathStream(bucketName, prefix, bucket, marker)
                     .map(path -> {
                                 String key = bucket.relativize(path).toString();
-                                Path objectMeta = bucketMeta.resolve(key + META_XML_EXTENSION);
-                                S3Metadata meta = loadMetaFile(objectMeta);
+                                if (Files.isDirectory(path)) {
+                                    emptyFolders.add(key);
+                                    return null;
+                                } else {
+                                    Path objectMeta = bucketMeta.resolve(key + META_XML_EXTENSION);
+                                    S3Metadata meta = loadMetaFile(objectMeta);
 
-                                return new S3ObjectImpl(key,
-                                        new Date(path.toFile().lastModified()),
-                                        bucketName, path.toFile().length(),
-                                        new S3UserImpl(),
-                                        meta,
-                                        null, meta.get(S3Constants.CONTENT_TYPE),
-                                        meta.get(S3Constants.ETAG), meta.get(S3Constants.VERSION_ID), false, true);
+                                    return new S3ObjectImpl(key,
+                                            new Date(path.toFile().lastModified()),
+                                            bucketName, path.toFile().length(),
+                                            new S3UserImpl(),
+                                            meta,
+                                            null, meta.get(S3Constants.CONTENT_TYPE),
+                                            meta.get(S3Constants.ETAG), meta.get(S3Constants.VERSION_ID), false, true);
+                                }
                             }
-                    );
+                    )
+                    .filter(Objects::nonNull)
+                    .limit(maxKeys);
 
             if (delimiter == null) {
-                return new S3ListBucketResultImpl(listing.collect(Collectors.toList()), null, count > maxKeys, bucketName, null, null);
+                return new S3ListBucketResultImpl(listing.collect(Collectors.toList()), emptyFolders, count > maxKeys, bucketName, null, null);
             } else {
                 if (!delimiter.equals("/")) throw new InvalidTokenException(delimiter, callContext.getRequestId());
                 Set<String> prefixes = new HashSet<>();
@@ -350,8 +366,11 @@ public class FSRepository implements S3Repository {
                         objects.add(obj);
                     }
                 });
+                List<String> emptyFoldersInPath = emptyFolders.stream()
+                        .map(s -> DelimiterUtil.getCommonPrefix(s + "/", prefix, "/"))
+                        .filter(Objects::nonNull).collect(Collectors.toList());
+                prefixes.addAll(emptyFoldersInPath);
                 List<String> prefList = new ArrayList<>(prefixes);
-                //Collections.sort(prefList);
                 return new S3ListBucketResultImpl(objects, prefList, objects.size() > maxKeys, bucketName, null, null);
             }
 
@@ -369,7 +388,7 @@ public class FSRepository implements S3Repository {
                     if (!markerFound[0]) {
                         markerFound[0] = relpath.equals(marker);
                     }
-                    return Files.isRegularFile(p)
+                    return (Files.isRegularFile(p) ||Files.isDirectory(p) && p.toFile().list().length == 0)
                             && relpath.startsWith(prefix)
                             && include;
                 });
@@ -514,7 +533,7 @@ public class FSRepository implements S3Repository {
             FSStorageMeta metaData = (FSStorageMeta) jaxbContext.createUnmarshaller().unmarshal(in);
             return new S3MetadataImpl(metaData.getMeta());
         } catch (IOException | JAXBException e) {
-            logger.warn("error reading meta file at " + meta.toString(), e);
+            logger.warn("error reading meta file at " + meta, e);
         }
         return new S3MetadataImpl();
     }
