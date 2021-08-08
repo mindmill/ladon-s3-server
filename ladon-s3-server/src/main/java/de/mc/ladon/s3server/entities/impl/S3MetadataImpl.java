@@ -21,7 +21,8 @@ public class S3MetadataImpl extends HashMap<String, String> implements S3Metadat
 
     public S3MetadataImpl(Map<String, String> metadata) {
         metadata.entrySet().stream()
-                .filter(e -> e.getKey().startsWith(S3Constants.X_AMZ_META_PREFIX))
+                .filter(e -> e.getKey().startsWith(S3Constants.X_AMZ_META_PREFIX)
+                        || e.getKey().equals(S3Constants.X_AMZ_DECODED_CONTENT_LENGTH))
                 .forEach(e -> put(e.getKey(), e.getValue()));
         String etag = metadata.get(S3Constants.ETAG);
         if (etag != null) put(S3Constants.ETAG, etag);
