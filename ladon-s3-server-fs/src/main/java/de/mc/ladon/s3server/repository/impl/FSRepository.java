@@ -47,7 +47,7 @@ public class FSRepository implements S3Repository {
     private Logger logger = LoggerFactory.getLogger(FSRepository.class);
     private static final String DATA_FOLDER = "data";
     private static final String META_FOLDER = "meta";
-    private final String fsrepoBaseUrl;
+    protected String fsrepoBaseUrl;
     private ConcurrentMap<String, S3User> userMap;
     private final FileEncryptor fileEncryptor;
 
