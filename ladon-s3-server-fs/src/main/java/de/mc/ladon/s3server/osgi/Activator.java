@@ -4,6 +4,7 @@
 
 package de.mc.ladon.s3server.osgi;
 
+import de.mc.ladon.s3server.enc.AESFileEncryptor;
 import de.mc.ladon.s3server.repository.api.S3Repository;
 import de.mc.ladon.s3server.repository.impl.FSRepository;
 import org.osgi.framework.BundleActivator;
@@ -22,7 +23,8 @@ public class Activator implements BundleActivator {
 
         Dictionary<String, String> props = new Hashtable<>();
         String home = System.getProperty("user.home");
-        context.registerService(S3Repository.class, new FSRepository(home + "/.s3server" , "4aWji2M7heiCuPsJu9UQ78UE"), props);
+        context.registerService(S3Repository.class, new FSRepository(home + "/.s3server" ,
+                new AESFileEncryptor("4aWji2M7heiCuPsJu9UQ78UE".getBytes())), props);
 
     }
 
