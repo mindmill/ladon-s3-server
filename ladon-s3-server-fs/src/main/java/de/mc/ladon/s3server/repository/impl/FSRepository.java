@@ -303,7 +303,6 @@ public class FSRepository implements S3Repository {
 
         try {
             S3ResponseHeader header = new S3ResponseHeaderImpl();
-            //header.setContentLength(Files.size(object));
             header.setContentType(getMimeType(object));
             callContext.setResponseHeader(header);
             if (!head)
@@ -348,14 +347,25 @@ public class FSRepository implements S3Repository {
                                 } else {
                                     Path objectMeta = bucketMeta.resolve(key + META_XML_EXTENSION);
                                     S3Metadata meta = loadMetaFile(objectMeta);
-
+                                    String contentLength = meta.get(S3Constants.X_AMZ_DECODED_CONTENT_LENGTH);
+                                    long size;
+                                    if (contentLength != null){
+                                        size = Long.parseLong(contentLength);
+                                    } else{
+                                        size = path.toFile().length();
+                                    }
                                     return new S3ObjectImpl(fixS3Path(key),
                                             new Date(path.toFile().lastModified()),
-                                            bucketName, path.toFile().length(),
+                                            bucketName,
+                                            size,
                                             new S3UserImpl(),
                                             meta,
-                                            null, meta.get(S3Constants.CONTENT_TYPE),
-                                            meta.get(S3Constants.ETAG), meta.get(S3Constants.VERSION_ID), false, true);
+                                            null,
+                                            meta.get(S3Constants.CONTENT_TYPE),
+                                            meta.get(S3Constants.ETAG),
+                                            meta.get(S3Constants.VERSION_ID),
+                                            false,
+                                            true);
                                 }
                             }
                     )
