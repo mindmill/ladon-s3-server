@@ -200,7 +200,7 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public void createObject(S3CallContext callContext, String bucketName, String objectKey ) {
+    public void createObject(S3CallContext callContext, String bucketName, String objectKey) {
         String osObjectKey = fixOSPath(objectKey);
         Path dataBucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
         Path metaBucket = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
@@ -218,6 +218,8 @@ public class FSRepository implements S3Repository {
             Path meta = metaBucket.resolve(osObjectKey + META_XML_EXTENSION);
 
             Long contentLength = callContext.getHeader().getContentLength();
+            String decodedContentLength = callContext.getHeader()
+                    .getFullHeader().get(S3Constants.X_AMZ_DECODED_CONTENT_LENGTH);
             String md5 = callContext.getHeader().getContentMD5();
             boolean isChunked = isChunked(callContext);
 
@@ -240,7 +242,8 @@ public class FSRepository implements S3Repository {
                     String storageMd5base64 = BaseEncoding.base64().encode(md5bytes);
                     String storageMd5base16 = Encoding.toHex(md5bytes);
 
-                    if (!isChunked && contentLength != null && contentLength != bytesCopied
+                    if (isChunked && decodedContentLength != null && !decodedContentLength.equals(Long.toString(bytesCopied))
+                            || !isChunked && contentLength != null && contentLength != bytesCopied
                             || md5 != null && !md5.equals(storageMd5base64)) {
                         Files.delete(obj);
                         Files.deleteIfExists(meta);
@@ -253,7 +256,9 @@ public class FSRepository implements S3Repository {
                     callContext.setResponseHeader(header);
 
                     Files.createDirectories(meta.getParent());
-                    writeMetaFile(meta, callContext, S3Constants.ETAG, inQuotes(storageMd5base16));
+                    writeMetaFile(meta, callContext,
+                            S3Constants.ETAG, inQuotes(storageMd5base16),
+                            S3Constants.X_AMZ_DECODED_CONTENT_LENGTH, Long.toString(bytesCopied));
                 }
 
             } catch (IOException | NoSuchAlgorithmException | JAXBException e) {
@@ -535,6 +540,10 @@ public class FSRepository implements S3Repository {
     private void loadMetaFileIntoHeader(Path meta, S3CallContext callContext) {
         S3Metadata userMetadata = loadMetaFile(meta);
         S3ResponseHeader header = new S3ResponseHeaderImpl(userMetadata);
+        String contentLength = userMetadata.get(S3Constants.X_AMZ_DECODED_CONTENT_LENGTH);
+        if (contentLength != null) {
+            header.setContentLength(Long.parseLong(contentLength));
+        }
         callContext.setResponseHeader(header);
     }
 
