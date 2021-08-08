@@ -52,9 +52,9 @@ public class FSRepository implements S3Repository {
     private final FileEncryptor fileEncryptor;
 
 
-    public FSRepository(String fsrepoBaseUrl, String encSecret) {
+    public FSRepository(String fsrepoBaseUrl, FileEncryptor encryptor) {
         this.fsrepoBaseUrl = toOsPath(fsrepoBaseUrl);
-        fileEncryptor = new FileEncryptor(encSecret.getBytes());
+        fileEncryptor = encryptor;
         try {
             jaxbContext = JAXBContext.newInstance(FSStorageMeta.class, FSUserData.class);
         } catch (JAXBException e) {
@@ -66,7 +66,8 @@ public class FSRepository implements S3Repository {
     /**
      * This is the path of the meta data file for a given bucket.
      * Will be deleted when {@link #deleteBucket(S3CallContext, String)}  is called.
-     * @param bucketName  name of the bucket
+     *
+     * @param bucketName name of the bucket
      * @return filesystem path of the bucket folder
      */
     protected Path getBucketMetaFile(String bucketName) {
@@ -78,6 +79,7 @@ public class FSRepository implements S3Repository {
      * By default, this is located under the bucket base folder {@link #getBucketBaseFolder(String)}
      * and gets cleaned up with it when {@link #deleteBucket(S3CallContext, String)}  is called.
      * If not you have to take care of it by yourself.
+     *
      * @param bucketName name of the bucket
      * @return filesystem path for the meta data files
      */
@@ -90,6 +92,7 @@ public class FSRepository implements S3Repository {
      * By default, this is located under the bucket base folder {@link #getBucketBaseFolder(String)}
      * and gets cleaned up with it when {@link #deleteBucket(S3CallContext, String)}  is called.
      * If not you have to take care of it by yourself.
+     *
      * @param bucketName name of the bucket
      * @return filesystem path for the binary data files
      */
@@ -102,7 +105,8 @@ public class FSRepository implements S3Repository {
      * When delete bucket is called, all files under this folder are deleted as well.
      * (and also the bucket meta file)
      * Can be overridden to create your own structure
-     * @param bucketName  name of the bucket
+     *
+     * @param bucketName name of the bucket
      * @return filesystem path of the bucket folder
      */
     protected Path getBucketBaseFolder(String bucketName) {
@@ -111,10 +115,11 @@ public class FSRepository implements S3Repository {
 
     /**
      * Suffix to append to the s3 key to identify meta data and to prevent collisions
+     *
      * @return suffix to be appended. Should end with a normal file extension.
      * Default is _meta.xml
      */
-    protected String metaFileSuffix(){
+    protected String metaFileSuffix() {
         return META_XML_EXTENSION;
     }
 
@@ -394,9 +399,9 @@ public class FSRepository implements S3Repository {
                                     S3Metadata meta = loadMetaFile(objectMeta);
                                     String contentLength = meta.get(S3Constants.X_AMZ_DECODED_CONTENT_LENGTH);
                                     long size;
-                                    if (contentLength != null){
+                                    if (contentLength != null) {
                                         size = Long.parseLong(contentLength);
-                                    } else{
+                                    } else {
                                         size = path.toFile().length();
                                     }
                                     return new S3ObjectImpl(toS3Path(key),
@@ -526,7 +531,7 @@ public class FSRepository implements S3Repository {
 
 
     private S3User loadUser(S3CallContext callContext, String accessKey) {
-        if (userMap == null){
+        if (userMap == null) {
             userMap = new ConcurrentHashMap<>(loadUserFile());
         }
         S3User user = userMap.get(accessKey);
@@ -577,7 +582,7 @@ public class FSRepository implements S3Repository {
 
 
     /**
-     *  Writes the meta data as xml using jaxb. Override to implement your own format.
+     * Writes the meta data as xml using jaxb. Override to implement your own format.
      */
     protected void writeMetaFile(Path meta, S3CallContext callContext, String... additional) throws IOException, JAXBException {
         Map<String, String> header = callContext.getHeader().getFullHeader();
@@ -605,7 +610,7 @@ public class FSRepository implements S3Repository {
     }
 
     /**
-     *  Reads the meta data xml file using jaxb. Override to implement your own format.
+     * Reads the meta data xml file using jaxb. Override to implement your own format.
      */
     protected S3Metadata loadMetaFile(Path meta) {
         try (InputStream in = Files.newInputStream(meta)) {

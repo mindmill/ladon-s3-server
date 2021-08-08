@@ -4,6 +4,7 @@
 
 package de.mc.ladon.s3server.config;
 
+import de.mc.ladon.s3server.enc.AESFileEncryptor;
 import de.mc.ladon.s3server.logging.LoggingRepository;
 import de.mc.ladon.s3server.logging.PerformanceLoggingFilter;
 import de.mc.ladon.s3server.repository.api.S3Repository;
@@ -16,6 +17,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * Configuration of beans for the s3server
@@ -33,7 +36,7 @@ public class BeanConfig {
     @ConditionalOnMissingBean
     @Bean
     S3Repository s3Repository() {
-        return new FSRepository(fsRepoRoot, encSecret);
+        return new FSRepository(fsRepoRoot, new AESFileEncryptor(encSecret.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Bean
