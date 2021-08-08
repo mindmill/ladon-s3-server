@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -53,7 +54,7 @@ public class FSRepository implements S3Repository {
 
 
     public FSRepository(String fsrepoBaseUrl, String encSecret) {
-        this.fsrepoBaseUrl = fsrepoBaseUrl;
+        this.fsrepoBaseUrl = fixOSPath(fsrepoBaseUrl);
         fileEncryptor = new FileEncryptor(encSecret.getBytes());
         try {
             jaxbContext = JAXBContext.newInstance(FSStorageMeta.class, FSUserData.class);
@@ -128,27 +129,29 @@ public class FSRepository implements S3Repository {
 
     @Override
     public S3Object copyObject(S3CallContext callContext, String srcBucket, String srcObjectKey, String destBucket, String destObjectKey, boolean copyMetadata) {
+        String osSrcObjectKey = fixOSPath(srcObjectKey);
+        String osDestObjectKey = fixOSPath(destObjectKey);
 
         Path srcBucketData = Paths.get(fsrepoBaseUrl, srcBucket, DATA_FOLDER);
         Path srcBucketMeta = Paths.get(fsrepoBaseUrl, srcBucket, META_FOLDER);
         if (!Files.exists(srcBucketData))
             throw new NoSuchBucketException(srcBucket, callContext.getRequestId());
-        Path srcObject = srcBucketData.resolve(srcObjectKey);
-        Path srcObjectMeta = srcBucketMeta.resolve(srcObjectKey + META_XML_EXTENSION);
+        Path srcObject = srcBucketData.resolve(osSrcObjectKey);
+        Path srcObjectMeta = srcBucketMeta.resolve(osSrcObjectKey + META_XML_EXTENSION);
 
         Path destBucketData = Paths.get(fsrepoBaseUrl, destBucket, DATA_FOLDER);
         Path destBucketMeta = Paths.get(fsrepoBaseUrl, destBucket, META_FOLDER);
         if (!Files.exists(destBucketData))
             throw new NoSuchBucketException(destBucket, callContext.getRequestId());
-        Path destObject = destBucketData.resolve(destObjectKey);
-        Path destObjectMeta = destBucketMeta.resolve(destObjectKey + META_XML_EXTENSION);
+        Path destObject = destBucketData.resolve(osDestObjectKey);
+        Path destObjectMeta = destBucketMeta.resolve(osDestObjectKey + META_XML_EXTENSION);
 
 
         if (!Files.exists(srcObject))
-            throw new NoSuchKeyException(srcObjectKey, callContext.getRequestId());
+            throw new NoSuchKeyException(osSrcObjectKey, callContext.getRequestId());
 
-        lock(srcBucketMeta, srcObjectKey, FSLock.LockType.read, callContext);
-        lock(destBucketMeta, destObjectKey, FSLock.LockType.write, callContext);
+        lock(srcBucketMeta, osSrcObjectKey, FSLock.LockType.read, callContext);
+        lock(destBucketMeta, osDestObjectKey, FSLock.LockType.write, callContext);
 
         S3Metadata srcMetadata = loadMetaFile(srcObjectMeta);
         try (InputStream in = Files.newInputStream(srcObject)) {
@@ -181,8 +184,8 @@ public class FSRepository implements S3Repository {
             logger.error("interrupted thread", e);
             throw new InternalErrorException(destObjectKey, callContext.getRequestId());
         } finally {
-            unlock(srcBucketMeta, srcObjectKey, callContext);
-            unlock(destBucketMeta, destObjectKey, callContext);
+            unlock(srcBucketMeta, osSrcObjectKey, callContext);
+            unlock(destBucketMeta, osDestObjectKey, callContext);
         }
 
     }
@@ -197,12 +200,13 @@ public class FSRepository implements S3Repository {
     }
 
     @Override
-    public void createObject(S3CallContext callContext, String bucketName, String objectKey) {
+    public void createObject(S3CallContext callContext, String bucketName, String objectKey ) {
+        String osObjectKey = fixOSPath(objectKey);
         Path dataBucket = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
         Path metaBucket = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
         if (!Files.exists(dataBucket))
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
-        Path obj = dataBucket.resolve(objectKey);
+        Path obj = dataBucket.resolve(osObjectKey);
         boolean isFolder = objectKey.endsWith("/");
         if (isFolder) {
             try {
@@ -211,13 +215,13 @@ public class FSRepository implements S3Repository {
                 logger.error("could not create directory " + obj, e);
             }
         } else {
-            Path meta = metaBucket.resolve(objectKey + META_XML_EXTENSION);
+            Path meta = metaBucket.resolve(osObjectKey + META_XML_EXTENSION);
 
             Long contentLength = callContext.getHeader().getContentLength();
             String md5 = callContext.getHeader().getContentMD5();
             boolean isChunked = isChunked(callContext);
 
-            lock(metaBucket, objectKey, FSLock.LockType.write, callContext);
+            lock(metaBucket, osObjectKey, FSLock.LockType.write, callContext);
             try (InputStream in = callContext.getContent()) {
                 if (!Files.exists(obj)) {
                     Files.createDirectories(obj.getParent());
@@ -259,7 +263,7 @@ public class FSRepository implements S3Repository {
                 logger.error("interrupted thread", e);
                 throw new InternalErrorException(objectKey, callContext.getRequestId());
             } finally {
-                unlock(metaBucket, objectKey, callContext);
+                unlock(metaBucket, osObjectKey, callContext);
             }
         }
 
@@ -276,17 +280,18 @@ public class FSRepository implements S3Repository {
 
     @Override
     public void getObject(S3CallContext callContext, String bucketName, String objectKey, boolean head) {
+        String osObjectKey = fixOSPath(objectKey);
         Path bucketData = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
         Path bucketMeta = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
         if (!Files.exists(bucketData))
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
-        Path object = bucketData.resolve(objectKey);
-        Path objectMeta = bucketMeta.resolve(objectKey + META_XML_EXTENSION);
+        Path object = bucketData.resolve(osObjectKey);
+        Path objectMeta = bucketMeta.resolve(osObjectKey + META_XML_EXTENSION);
 
         if (!Files.exists(object))
             throw new NoSuchKeyException(objectKey, callContext.getRequestId());
 
-        lock(bucketMeta, objectKey, FSLock.LockType.read, callContext);
+        lock(bucketMeta, osObjectKey, FSLock.LockType.read, callContext);
         if (Files.exists(objectMeta)) {
             loadMetaFileIntoHeader(objectMeta, callContext);
         }
@@ -302,7 +307,7 @@ public class FSRepository implements S3Repository {
             logger.error("internal error", e);
             throw new InternalErrorException(objectKey, callContext.getRequestId());
         } finally {
-            unlock(bucketMeta, objectKey, callContext);
+            unlock(bucketMeta, osObjectKey, callContext);
         }
     }
 
@@ -333,13 +338,13 @@ public class FSRepository implements S3Repository {
                     .map(path -> {
                                 String key = bucket.relativize(path).toString();
                                 if (Files.isDirectory(path)) {
-                                    emptyFolders.add(key);
+                                    emptyFolders.add(fixS3Path(key));
                                     return null;
                                 } else {
                                     Path objectMeta = bucketMeta.resolve(key + META_XML_EXTENSION);
                                     S3Metadata meta = loadMetaFile(objectMeta);
 
-                                    return new S3ObjectImpl(key,
+                                    return new S3ObjectImpl(fixS3Path(key),
                                             new Date(path.toFile().lastModified()),
                                             bucketName, path.toFile().length(),
                                             new S3UserImpl(),
@@ -383,12 +388,12 @@ public class FSRepository implements S3Repository {
         final Boolean[] markerFound = new Boolean[]{marker == null};
         return Files.walk(Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER)).sorted()
                 .filter(p -> {
-                    String relpath = bucket.relativize(p).toString();
+                    String relpath = fixS3Path(bucket.relativize(p).toString());
                     boolean include = markerFound[0];
                     if (!markerFound[0]) {
                         markerFound[0] = relpath.equals(marker);
                     }
-                    return (Files.isRegularFile(p) ||Files.isDirectory(p) && p.toFile().list().length == 0)
+                    return (Files.isRegularFile(p) || Files.isDirectory(p) && p.toFile().list().length == 0)
                             && relpath.startsWith(prefix)
                             && include;
                 });
@@ -402,24 +407,25 @@ public class FSRepository implements S3Repository {
 
     @Override
     public void deleteObject(S3CallContext callContext, String bucketName, String objectKey) {
+        String osObjectKey = fixOSPath(objectKey);
         Path bucketData = Paths.get(fsrepoBaseUrl, bucketName, DATA_FOLDER);
         Path bucketMeta = Paths.get(fsrepoBaseUrl, bucketName, META_FOLDER);
         if (!Files.exists(bucketData))
             throw new NoSuchBucketException(bucketName, callContext.getRequestId());
-        Path objectData = bucketData.resolve(objectKey);
-        Path objectMeta = bucketMeta.resolve(objectKey + META_XML_EXTENSION);
+        Path objectData = bucketData.resolve(osObjectKey);
+        Path objectMeta = bucketMeta.resolve(osObjectKey + META_XML_EXTENSION);
         if (!Files.exists(objectData))
             throw new NoSuchKeyException(objectKey, callContext.getRequestId());
 
-        lock(bucketMeta, objectKey, FSLock.LockType.write, callContext);
+        lock(bucketMeta, osObjectKey, FSLock.LockType.write, callContext);
         try {
             Files.delete(objectData);
             Files.delete(objectMeta);
         } catch (IOException e) {
             logger.error("internal error", e);
-            throw new InternalErrorException(objectKey, callContext.getRequestId());
+            throw new InternalErrorException(osObjectKey, callContext.getRequestId());
         } finally {
-            unlock(bucketMeta, objectKey, callContext);
+            unlock(bucketMeta, osObjectKey, callContext);
         }
     }
 
@@ -538,4 +544,11 @@ public class FSRepository implements S3Repository {
         return new S3MetadataImpl();
     }
 
+    private String fixOSPath(String unixStyle) {
+        return unixStyle.replace("/", File.separator);
+    }
+
+    private String fixS3Path(String osStyle) {
+        return osStyle.replace(File.separator, "/");
+    }
 }
