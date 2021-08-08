@@ -312,6 +312,9 @@ public interface S3Constants {
     String X_AMZ_META_PREFIX = "x-amz-meta-";
 
 
+    String X_AMZ_DECODED_CONTENT_LENGTH = "x-amz-decoded-content-length";
+
+
     /**
      * Prefix for general Amazon headers: x-amz-
      */
