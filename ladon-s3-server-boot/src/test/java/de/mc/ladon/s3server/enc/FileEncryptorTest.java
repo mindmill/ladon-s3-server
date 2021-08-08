@@ -14,7 +14,7 @@ class FileEncryptorTest {
 
     @Test
     void getEncryptedOutputStream() throws IOException {
-        FileEncryptor enc = new FileEncryptor("test".getBytes());
+        AESFileEncryptor enc = new AESFileEncryptor("test".getBytes());
         File testfile = org.assertj.core.util.Files.newTemporaryFile();
         System.out.println(testfile.getAbsolutePath());
         byte[] testContent = "this is a test".getBytes();
