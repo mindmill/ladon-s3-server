@@ -11,6 +11,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.*;
+import de.mc.ladon.s3server.common.StreamUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
@@ -179,13 +180,28 @@ public class S3ServerApplicationTests {
     }
 
     @Test
-    public void testCopyObject() {
+    public void testCopyObject() throws IOException {
         AmazonS3Client client = getClient();
         Bucket b = client.createBucket(UUID.randomUUID().toString());
         ObjectMetadata meta = new ObjectMetadata();
         client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
         client.copyObject(b.getName(), "test.txt", b.getName(), "test2.txt");
+        byte[] content = new byte[4];
+        try(InputStream in =  client.getObject(b.getName(), "test.txt").getObjectContent()) {
+            StreamUtils.readByteArray(in, content);
+        }
+        assertEquals("test", new String(content));
+    }
 
+    @Test
+    public void testContentLengthHeader() {
+        AmazonS3Client client = getClient();
+        Bucket b = client.createBucket(UUID.randomUUID().toString());
+        ObjectMetadata meta = new ObjectMetadata();
+        client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
+        ObjectMetadata s3meta = client.getObjectMetadata(b.getName(), "test.txt");
+        long contentLength = s3meta.getContentLength();
+        assertEquals(4,contentLength);
     }
 
     @Test
