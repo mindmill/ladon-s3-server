@@ -522,6 +522,9 @@ public class FSRepository implements S3Repository {
     }
 
     private S3User loadUser(S3CallContext callContext, String accessKey) {
+        if (accessKey == null){
+             throw new InvalidAccessKeyIdException("", callContext.getRequestId());
+        }
         if (userMap == null) {
             userMap = new ConcurrentHashMap<>(loadUserFile());
         }
