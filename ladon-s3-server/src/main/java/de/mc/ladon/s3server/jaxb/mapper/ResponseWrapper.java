@@ -29,7 +29,8 @@ public class ResponseWrapper {
                 list.getObjects().stream().map(o -> new Contents(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
                         getEncoded(callContext, o.getKey()), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass()))
                         .collect(Collectors.toList()),
-                list.getCommonPrefixes() != null ? new CommonPrefixes(list.getCommonPrefixes()) : null,
+                list.getCommonPrefixes() != null ? list.getCommonPrefixes().stream()
+                        .map(CommonPrefixes::new).collect(Collectors.toList())  : null,
                 list.isTruncated());
     }
 
@@ -47,7 +48,8 @@ public class ResponseWrapper {
                         return new Version(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
                                 getEncoded(callContext, o.getKey()), o.getVersionId(), o.isLatest(), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass());
                     }
-                }).collect(Collectors.toList()), list.getCommonPrefixes() != null ? new CommonPrefixes(list.getCommonPrefixes()) : null, list.isTruncated(),
+                }).collect(Collectors.toList()), list.getCommonPrefixes() != null ?  list.getCommonPrefixes().stream()
+                .map(CommonPrefixes::new).collect(Collectors.toList())  : null, list.isTruncated(),
                 getEncoded(callContext, list.nextKeyMarker()),
                 getEncoded(callContext, list.nextVersionIdMarker()));
     }

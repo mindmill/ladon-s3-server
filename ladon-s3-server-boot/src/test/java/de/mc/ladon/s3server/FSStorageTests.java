@@ -109,6 +109,8 @@ public class FSStorageTests {
 
         System.out.println(count);
 
+        client.putObject("test", "peter/", "");
+        System.out.println(client.listObjects("test").getCommonPrefixes());
     }
 
     private static void printListing(ObjectListing listing) {

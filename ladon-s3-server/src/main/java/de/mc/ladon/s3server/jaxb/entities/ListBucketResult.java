@@ -25,7 +25,7 @@ public class ListBucketResult {
     private String delimiter;
     private Boolean isTruncated;
     private List<Contents> contentsList;
-    private CommonPrefixes commonPrefixes;
+    private List<CommonPrefixes> commonPrefixes;
 
     public ListBucketResult() {
     }
@@ -33,13 +33,13 @@ public class ListBucketResult {
     public ListBucketResult(S3CallContext callContext,
                             String bucketName,
                             List<Contents> contentsList,
-                            CommonPrefixes commonPrefixes,
+                            List<CommonPrefixes> commonPrefixes,
                             boolean isTruncated) {
         this.bucketName = bucketName;
-        this.prefix = getEncoded(callContext,callContext.getParams().getPrefix());
-        this.marker = getEncoded(callContext,callContext.getParams().getMarker());
+        this.prefix = getEncoded(callContext, callContext.getParams().getPrefix());
+        this.marker = getEncoded(callContext, callContext.getParams().getMarker());
         this.maxKeys = callContext.getParams().getMaxKeys();
-        this.delimiter = getEncoded(callContext,callContext.getParams().getDelimiter());
+        this.delimiter = getEncoded(callContext, callContext.getParams().getDelimiter());
         this.isTruncated = isTruncated;
         this.contentsList = contentsList;
         this.commonPrefixes = commonPrefixes;
@@ -89,6 +89,7 @@ public class ListBucketResult {
     public void setDelimiter(String delimiter) {
         this.delimiter = delimiter;
     }
+
     @XmlElement(name = "IsTruncated")
     public Boolean getIsTruncated() {
         return isTruncated;
@@ -109,11 +110,11 @@ public class ListBucketResult {
 
 
     @XmlElement(name = "CommonPrefixes")
-    public CommonPrefixes getCommonPrefixes() {
+    public List<CommonPrefixes> getCommonPrefixes() {
         return commonPrefixes;
     }
 
-    public void setCommonPrefixesList(CommonPrefixes commonPrefixes) {
+    public void setCommonPrefixesList(List<CommonPrefixes> commonPrefixes) {
         this.commonPrefixes = commonPrefixes;
     }
 }
