@@ -14,22 +14,22 @@ import java.util.List;
 @XmlRootElement(name = "CommonPrefixes")
 public class CommonPrefixes {
 
-    private List<String> prefix;
+    private String prefix;
 
 
     public CommonPrefixes() {
     }
 
-    public CommonPrefixes(List<String> prefix) {
+    public CommonPrefixes(String prefix) {
         this.prefix = prefix;
     }
 
     @XmlElement(name = "Prefix")
-    public List<String> getPrefix() {
+    public String getPrefix() {
         return prefix;
     }
 
-    public void setPrefix(List<String> prefix) {
+    public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
 }

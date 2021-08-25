@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
-import static de.mc.ladon.s3server.common.EncodingUtil.*;
+import static de.mc.ladon.s3server.common.EncodingUtil.getEncoded;
 
 /**
  * @author Ralf Ulrich on 17.02.16.
@@ -28,7 +28,7 @@ public class ListVersionsResult {
     private String delimiter;
     private Boolean isTruncated;
     private List<AbstractVersionElement> versions;
-    private CommonPrefixes commonPrefixes;
+    private List<CommonPrefixes> commonPrefixes;
 
     public ListVersionsResult() {
     }
@@ -36,7 +36,7 @@ public class ListVersionsResult {
     public ListVersionsResult(S3CallContext callContext,
                               String bucketName,
                               List<AbstractVersionElement> versions,
-                              CommonPrefixes commonPrefixes,
+                              List<CommonPrefixes> commonPrefixes,
                               boolean isTruncated,
                               String nextKeyMarker,
                               String nextVersionIdMarker) {
@@ -44,7 +44,7 @@ public class ListVersionsResult {
         this.prefix = getEncoded(callContext, callContext.getParams().getPrefix());
         this.keyMarker = callContext.getParams().getKeyMarker();
         this.maxKeys = callContext.getParams().getMaxKeys();
-        this.delimiter = getEncoded(callContext,callContext.getParams().getDelimiter());
+        this.delimiter = getEncoded(callContext, callContext.getParams().getDelimiter());
         this.isTruncated = isTruncated;
         this.versions = versions;
         this.nextKeyMarker = nextKeyMarker;
@@ -126,11 +126,11 @@ public class ListVersionsResult {
     }
 
     @XmlElement(name = "CommonPrefixes")
-    public CommonPrefixes getCommonPrefixes() {
+    public List<CommonPrefixes> getCommonPrefixes() {
         return commonPrefixes;
     }
 
-    public void setCommonPrefixesList(CommonPrefixes commonPrefixes) {
+    public void setCommonPrefixesList(List<CommonPrefixes> commonPrefixes) {
         this.commonPrefixes = commonPrefixes;
     }
 }

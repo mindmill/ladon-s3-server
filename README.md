@@ -9,17 +9,17 @@ The Ladon S3 Server is built using Java 8-13 and Maven
 If you prefer to run it with Jetty have a look at the [Jetty example](./ladon-s3-server-jetty/src/main/java/de/mc/ladon/s3server/jetty/S3JettyServer.java )
 
 ```bash
-    mvn package && java -jar ladon-s3-server-jetty/target/ladon-s3-server-jetty-2.3.0.jar
+    mvn package && java -jar ladon-s3-server-jetty/target/ladon-s3-server-jetty-2.3.1.jar
 ```
 
 ### Spring Boot:
 
 ```bash
-    mvn package && java -jar ladon-s3-server-boot/target/ladon-s3-server-boot-2.3.0.jar
+    mvn package && java -jar ladon-s3-server-boot/target/ladon-s3-server-boot-2.3.1.jar
 ```
 Or run Docker:
 ```bash
-mvn package &&  docker run -i --network=host  mindconsulting/ladon:2.3.0
+mvn package &&  docker run -i --network=host  mindconsulting/ladon:2.3.1
 ```
 
 ### Example credentials
