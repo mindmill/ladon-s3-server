@@ -37,7 +37,7 @@ public class S3RequestHeaderImpl implements S3RequestHeader {
         return result;
     }
 
-    private String getHeader(String key) {
+    public String getHeader(String key) {
         return request.getHeader(key);
     }
 
