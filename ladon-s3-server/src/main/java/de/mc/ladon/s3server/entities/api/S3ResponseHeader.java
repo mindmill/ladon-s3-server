@@ -13,6 +13,7 @@ import java.util.Date;
  */
 public interface S3ResponseHeader {
 
+    S3Metadata getMetadata();
     /**
      * The length in bytes of the body in the response.
      * Default: None
@@ -20,6 +21,7 @@ public interface S3ResponseHeader {
      * @param contentLength The length in bytes of the body in the response.
      */
     void setContentLength(Long contentLength);
+    Long getContentLength();
 
     /**
      * The MIME type of the content. For example, Content-Type: text/html; charset=utf-8
@@ -28,6 +30,7 @@ public interface S3ResponseHeader {
      * @param contentType The MIME type of the content. For example, Content-Type: text/html; charset=utf-8
      */
     void setContentType(String contentType);
+    String getContentType();
 
 
     /**
@@ -37,6 +40,7 @@ public interface S3ResponseHeader {
      * @param connection specifies whether the connection to the server is open or closed.
      */
     void setConnection(S3Constants.Connection connection);
+    S3Constants.Connection getConnection();
 
 
     /**
@@ -46,6 +50,7 @@ public interface S3ResponseHeader {
      * @param date The date and time Amazon S3 responded, for example, Wed, 01 Mar 2006 12:00:00 GMT.
      */
     void setDate(Date date);
+    Date getDate();
 
 
     /**
@@ -54,6 +59,7 @@ public interface S3ResponseHeader {
      * @param expires the wanted cache duration in seconds, null if no cache
      */
     void setExpires(Long expires);
+    Long getExpires();
 
     /**
      * Used to set the Last-Modified header of the response
@@ -61,6 +67,7 @@ public interface S3ResponseHeader {
      * @param lastModified date of the last modification
      */
     void setLastModified(Date lastModified);
+    Date getLastModified();
 
     /**
      * The entity tag is a hash of the object. The ETag reflects changes only to the
@@ -81,6 +88,7 @@ public interface S3ResponseHeader {
      * @param etag a hash of the objects content
      */
     void setEtag(String etag);
+    String getEtag();
 
 
     /**
@@ -90,6 +98,7 @@ public interface S3ResponseHeader {
      * @param server The name of the server that created the response.
      */
     void setServer(String server);
+    String getServer();
 
 
     /**
@@ -99,6 +108,7 @@ public interface S3ResponseHeader {
      * @param deleteMarker Specifies whether the object returned was (true) or was not (false) a delete marker.
      */
     void setXamzDeleteMarker(Boolean deleteMarker);
+    Boolean getXamzDeleteMarker();
 
 
     /**
@@ -110,6 +120,7 @@ public interface S3ResponseHeader {
      * @param requestId unique request id
      */
     void setXamzRequestId(String requestId);
+    String getXamzRequestId();
 
 
     /**
@@ -122,6 +133,7 @@ public interface S3ResponseHeader {
      * @param versionId null | any URL-ready, UTF-8 encoded string
      */
     void setXamzVersionId(String versionId);
+    String getXamzVersionId();
 
 
     /**
@@ -133,5 +145,6 @@ public interface S3ResponseHeader {
      * @param expiration String with expiry-date and rule-id
      */
     void setXamzExpiration(String expiration);
+    String getXamzExpiration();
 
 }

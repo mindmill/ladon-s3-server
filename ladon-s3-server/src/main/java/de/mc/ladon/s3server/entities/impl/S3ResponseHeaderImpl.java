@@ -38,8 +38,18 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
         this.meta = meta;
     }
 
+    @Override
+    public S3Metadata getMetadata() {
+        return meta;
+    }
+
     public void setContentLength(Long contentLength) {
         this.contentLength = contentLength;
+    }
+
+    @Override
+    public Long getContentLength() {
+        return contentLength;
     }
 
     @Override
@@ -48,8 +58,18 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
     }
 
     @Override
+    public String getContentType() {
+        return contentType;
+    }
+
+    @Override
     public void setConnection(Connection connection) {
         this.connection = connection;
+    }
+
+    @Override
+    public Connection getConnection() {
+        return connection;
     }
 
     @Override
@@ -58,8 +78,18 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
     }
 
     @Override
+    public Date getDate() {
+        return date;
+    }
+
+    @Override
     public void setExpires(Long expires) {
         this.expires = expires;
+    }
+
+    @Override
+    public Long getExpires() {
+        return expires;
     }
 
     @Override
@@ -68,8 +98,18 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
     }
 
     @Override
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    @Override
     public void setEtag(String etag) {
         this.etag = etag;
+    }
+
+    @Override
+    public String getEtag() {
+        return etag;
     }
 
     @Override
@@ -78,8 +118,18 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
     }
 
     @Override
+    public String getServer() {
+        return server;
+    }
+
+    @Override
     public void setXamzDeleteMarker(Boolean xamzDeleteMarker) {
         this.xamzDeleteMarker = xamzDeleteMarker;
+    }
+
+    @Override
+    public Boolean getXamzDeleteMarker() {
+        return xamzDeleteMarker;
     }
 
     @Override
@@ -88,13 +138,28 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
     }
 
     @Override
+    public String getXamzRequestId() {
+        return xamzRequestId;
+    }
+
+    @Override
     public void setXamzVersionId(String xamzVersionId) {
         this.xamzVersionId = xamzVersionId;
     }
 
     @Override
+    public String getXamzVersionId() {
+        return xamzVersionId;
+    }
+
+    @Override
     public void setXamzExpiration(String expiration) {
         this.xamzExpiration = expiration;
+    }
+
+    @Override
+    public String getXamzExpiration() {
+        return xamzExpiration;
     }
 
     public static void appendHeaderToResponse(HttpServletResponse response, S3ResponseHeaderImpl header) {
