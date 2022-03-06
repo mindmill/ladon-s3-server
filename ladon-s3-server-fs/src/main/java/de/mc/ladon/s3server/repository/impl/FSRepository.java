@@ -284,7 +284,10 @@ public class FSRepository implements S3Repository {
                         throw new InvalidDigestException(objectKey, callContext.getRequestId());
                     }
 
-                    S3ResponseHeader header = new S3ResponseHeaderImpl();
+                    S3ResponseHeader header = new S3ResponseHeaderImpl(
+                            new S3MetadataImpl(
+                                    callContext.getHeader()
+                                    .getFullHeader()));
                     header.setEtag(inQuotes(storageMd5base16));
                     header.setDate(new Date(Files.getLastModifiedTime(p.objectData).toMillis()));
                     callContext.setResponseHeader(header);
@@ -450,7 +453,7 @@ public class FSRepository implements S3Repository {
         lock(p.bucketMeta, p.osKey, FSLock.LockType.write, callContext);
         try {
             Files.delete(p.objectData);
-            Files.delete(p.objectMeta);
+            Files.deleteIfExists(p.objectMeta);
         } catch (IOException e) {
             logger.error("internal error", e);
             throw new InternalErrorException(objectKey, callContext.getRequestId());
