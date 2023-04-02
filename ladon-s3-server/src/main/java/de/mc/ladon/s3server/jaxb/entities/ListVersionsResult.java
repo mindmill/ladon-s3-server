@@ -6,9 +6,9 @@ package de.mc.ladon.s3server.jaxb.entities;
 
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElements;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 import static de.mc.ladon.s3server.common.EncodingUtil.getEncoded;

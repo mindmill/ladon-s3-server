@@ -66,7 +66,7 @@ public class FSStorageTests {
         service.shutdown();
         service.awaitTermination(1, TimeUnit.MINUTES);
         S3Object object1 = getClient().getObject(b.getName(), "test1.txt");
-        String content = Streams.asString(object1.getObjectContent());
+        String content = new String(object1.getObjectContent().readAllBytes());
         String meta = object1.getObjectMetadata().getUserMetadata().get("test");
 
         assertEquals(1, content.chars().distinct().count());
@@ -86,7 +86,7 @@ public class FSStorageTests {
                 }
                 try {
                     if (i > 0)
-                        assertEquals(10, Streams.asString(c.getObject(b.getName(), "test" + finalJ + ".txt").getObjectContent()).chars().count());
+                        assertEquals(10,new String(c.getObject(b.getName(), "test" + finalJ + ".txt").getObjectContent().readAllBytes()).chars().count());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

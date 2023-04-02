@@ -119,7 +119,7 @@ public class S3ServerApplicationTests {
         InputStream in = client.getObject("test", "test1.txt").getObjectContent();
         String bucketName = client.listObjects("test", "test1.txt").getObjectSummaries().get(0).getBucketName();
 
-        assertEquals("test1", Streams.asString(in));
+        assertEquals("test1", new String(in.readAllBytes()));
         assertEquals("test", bucketName);
     }
 
@@ -259,7 +259,7 @@ public class S3ServerApplicationTests {
         meta.addUserMetadata("peter", "Lustig");
         client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
         InputStream in = client.getObject(b.getName(), "test.txt").getObjectContent();
-        assertEquals("test", Streams.asString(in));
+        assertEquals("test", new String(in.readAllBytes()));
         assertEquals("Lustig", client.getObject(b.getName(), "test.txt").getObjectMetadata().getUserMetadata().get("peter"));
     }
 

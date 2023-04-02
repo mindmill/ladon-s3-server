@@ -7,7 +7,7 @@ package de.mc.ladon.s3server.entities.impl;
 import de.mc.ladon.s3server.entities.api.S3Metadata;
 import de.mc.ladon.s3server.entities.api.S3ResponseHeader;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 import static de.mc.ladon.s3server.common.S3Constants.*;

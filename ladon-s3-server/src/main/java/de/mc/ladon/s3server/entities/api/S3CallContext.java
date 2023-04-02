@@ -4,7 +4,7 @@
 
 package de.mc.ladon.s3server.entities.api;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 

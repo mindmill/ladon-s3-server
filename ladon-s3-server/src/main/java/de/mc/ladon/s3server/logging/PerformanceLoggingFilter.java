@@ -4,11 +4,11 @@
 
 package de.mc.ladon.s3server.logging;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.*;
 import java.io.IOException;
 import java.util.Enumeration;
 
