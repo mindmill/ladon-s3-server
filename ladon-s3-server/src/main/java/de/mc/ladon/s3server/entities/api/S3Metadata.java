@@ -4,7 +4,7 @@
 
 package de.mc.ladon.s3server.entities.api;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * @author Ralf Ulrich on 17.02.16.

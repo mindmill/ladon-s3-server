@@ -4,7 +4,7 @@
 
 package de.mc.ladon.s3server.jaxb;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 

@@ -6,8 +6,8 @@ package de.mc.ladon.s3server.jaxb.entities;
 
 import de.mc.ladon.s3server.exceptions.S3ServerException;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * Simple error response

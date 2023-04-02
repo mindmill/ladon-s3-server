@@ -1,6 +1,6 @@
 package de.mc.ladon.s3server.jaxb.entities;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 
 /**
