@@ -4,6 +4,8 @@
 Build your own S3 Server and keep your data safe!
 
 The Ladon S3 Server is built using Java 8-13 and Maven
+
+For > Java 17 look at the java17 branch.
 ### Jetty Example
 
 If you prefer to run it with Jetty have a look at the [Jetty example](./ladon-s3-server-jetty/src/main/java/de/mc/ladon/s3server/jetty/S3JettyServer.java )
