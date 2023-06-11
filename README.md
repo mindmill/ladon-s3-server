@@ -1,16 +1,33 @@
 [![Build Status](https://travis-ci.org/mindmill/ladon-s3-server.svg?branch=master)](https://travis-ci.org/mindmill/ladon-s3-server)
 
 # Ladon S3 Server
-Build your own S3 Server and keep your data safe! 
+Build your own S3 Server and keep your data safe!
 
-### Installation:
 The Ladon S3 Server is built using Java 8-13 and Maven
+### Jetty Example
+
+If you prefer to run it with Jetty have a look at the [Jetty example](./ladon-s3-server-jetty/src/main/java/de/mc/ladon/s3server/jetty/S3JettyServer.java )
+
 ```bash
-    mvn package && java -jar ladon-s3-server-boot/target/ladon-s3-server-boot-2.1.2.jar
+    mvn package && java -jar ladon-s3-server-jetty/target/ladon-s3-server-jetty-2.3.2.jar
+```
+
+### Spring Boot:
+
+```bash
+    mvn package && java -jar ladon-s3-server-boot/target/ladon-s3-server-boot-2.3.2.jar
 ```
 Or run Docker:
 ```bash
-mvn package &&  docker run -i --network=host  mindconsulting/ladon:2.1.2
+mvn package &&  docker run -i --network=host  mindconsulting/ladon:2.3.2
+```
+
+### Example credentials
+
+```java
+  AWSCredentials credentials = new BasicAWSCredentials(
+                "rHUYeAk58Ilhg6iUEFtr",
+                "IVimdW7BIQLq9PLyVpXzZUq8zS4nLfrsoiZSJanu");
 ```
 ### Customize:
 The core functions of S3 are mapped to a class called S3Repository.
@@ -39,9 +56,10 @@ s3server.fsrepo.root=${user.home}/.s3server
 ```
 For other configuration options have a look at the [application.properties](./ladon-s3-server-boot/src/main/resources/application.properties ) 
 
+
 Supported so far is only access via REST API, no ACL, no policies, no torrent ....
 
-To see what you can build with it have a look at  [Ladon Data Center Edition](https://github.com/mindmill/ladon-data-center-edition) where you can see a full Ladon application. 
+To see what you can build with it have a look at  [Ladon Data Center Edition](https://ladon.org)  
 ### License
 Copyright (C) 2021 Mind Consulting
 
