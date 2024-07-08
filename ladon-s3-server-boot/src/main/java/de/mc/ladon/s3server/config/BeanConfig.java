@@ -30,7 +30,7 @@ public class BeanConfig {
 
     @Value("${s3server.fsrepo.root}")
     String fsRepoRoot;
-    @Value("${s3server.fsrepo.secret")
+    @Value("${s3server.fsrepo.secret}")
     String encSecret;
 
     @ConditionalOnMissingBean
