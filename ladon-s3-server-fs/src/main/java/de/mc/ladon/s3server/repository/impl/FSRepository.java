@@ -434,14 +434,15 @@ public class FSRepository implements S3Repository {
 
     private Stream<Path> getPathStream(String bucketName, String prefix, Path bucket, String marker) throws IOException {
         final Boolean[] markerFound = new Boolean[]{marker == null};
-        return Files.walk(getBucketDataFolder(bucketName)).sorted()
+        Path bucketDataFolder = getBucketDataFolder(bucketName);
+        return Files.walk(bucketDataFolder).sorted()
                 .filter(p -> {
                     String relpath = toS3Path(bucket.relativize(p).toString());
                     boolean include = markerFound[0];
                     if (!markerFound[0]) {
                         markerFound[0] = relpath.equals(marker);
                     }
-                    return (Files.isRegularFile(p) || Files.isDirectory(p) && p.toFile().list().length == 0)
+                    return (Files.isRegularFile(p) || Files.isDirectory(p) && p != bucketDataFolder && p.toFile().list().length == 0)
                             && relpath.startsWith(prefix)
                             && include;
                 });
