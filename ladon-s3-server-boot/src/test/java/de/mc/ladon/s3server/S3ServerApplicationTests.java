@@ -14,7 +14,6 @@ import com.amazonaws.services.s3.model.*;
 import de.mc.ladon.s3server.common.StreamUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -45,6 +44,7 @@ public class S3ServerApplicationTests {
     public void setUp() {
         AmazonS3Client client = getClient();
         client.createBucket("test");
+        client.listObjects("test").getObjectSummaries().forEach(s -> client.deleteObject("test", s.getKey()));
         if (client.listObjects("test").getObjectSummaries().size() == 0) {
             for (int i = 0; i < 50; i++) {
                 client.putObject("test", "test" + i + ".txt", new ByteArrayInputStream(("test" + i).getBytes()), new ObjectMetadata());

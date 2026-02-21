@@ -14,16 +14,16 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.5</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>4.0.2</version>
+        <relativePath/>
     </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <s3-server.version>${project.version}</s3-server.version>
         <dockerfile-maven-version>1.4.12</dockerfile-maven-version>
-        <spring.boot.version>3.0.5</spring.boot.version>
+        <spring.boot.version>4.0.2</spring.boot.version>
     </properties>
 
     <dependencies>
@@ -74,29 +74,8 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>3.0.5</version>
+                <version>4.0.2</version>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>com.spotify</groupId>-->
-<!--                <artifactId>dockerfile-maven-plugin</artifactId>-->
-<!--                <version>${dockerfile-maven-version}</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>default</id>-->
-<!--                        <goals>-->
-<!--                            <goal>build</goal>-->
-<!--                            <goal>push</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <configuration>-->
-<!--                    <repository>mindconsulting/ladon</repository>-->
-<!--                    <tag>${project.version}</tag>-->
-<!--                    <buildArgs>-->
-<!--                        <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>-->
-<!--                    </buildArgs>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
         </plugins>
     </build>
     <distributionManagement>

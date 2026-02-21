@@ -10,8 +10,6 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.*;
-import org.apache.tomcat.util.http.fileupload.util.Streams;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,9 +55,9 @@ public class FSStorageTests {
 
         for (int j = 0; j < 10; j++) {
             final int finalJ = j;
-            executeOnBucket(meta1, b, finalJ, "1111111111");
-            executeOnBucket(meta1, b, finalJ, "2222222222");
-            executeOnBucket(meta1, b, finalJ, "3333333333");
+            executeOnBucket(meta1, b, finalJ, "1111111111", false);
+            executeOnBucket(meta1, b, finalJ, "2222222222", false);
+            executeOnBucket(meta1, b, finalJ, "3333333333", false);
         }
 
 
@@ -73,10 +71,15 @@ public class FSStorageTests {
         assertEquals(1, meta.chars().distinct().count());
     }
 
-    private void executeOnBucket(ObjectMetadata meta1, Bucket b, int finalJ, String content) {
+    private void executeOnBucket(ObjectMetadata meta1, Bucket b, int finalJ, String content, boolean delete) {
         service.execute(() -> {
             AmazonS3Client c = getClient();
             Random random = new Random(System.currentTimeMillis());
+            if (delete){
+                ObjectListing objectListing = c.listObjects(b.getName());
+                objectListing.getObjectSummaries().forEach(s -> c.deleteObject(b.getName(), s.getKey()));
+            }
+
             for (int i = 0; i < 10; i++) {
                 c.putObject(b.getName(), "test" + finalJ + ".txt", new ByteArrayInputStream(content.getBytes()), meta1);
                 try {
