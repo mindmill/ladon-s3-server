@@ -39,7 +39,21 @@
         <developerConnection>scm:git:git@github.com:mindmill/ladon-s3-server.git</developerConnection>
         <url>git@github.com:mindmill/ladon-s3-server.git</url>
     </scm>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.amashchenko.maven.plugin</groupId>
+                <artifactId>gitflow-maven-plugin</artifactId>
+                <version>1.14.0</version>
+                <configuration>
+                    <gitFlowConfig>
+                        <productionBranch>master</productionBranch>
+                        <developmentBranch>develop</developmentBranch>
+                    </gitFlowConfig>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <distributionManagement>
         <repository>
@@ -48,4 +62,5 @@
             <url>${repo.internal.url}</url>
         </repository>
     </distributionManagement>
+
 </project>
