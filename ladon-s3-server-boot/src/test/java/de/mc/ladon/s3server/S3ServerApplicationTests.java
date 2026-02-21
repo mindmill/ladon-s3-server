@@ -14,10 +14,7 @@ import com.amazonaws.services.s3.model.*;
 import de.mc.ladon.s3server.common.StreamUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -25,6 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.*;
         webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class S3ServerApplicationTests {
 
+    private static List<AmazonS3Client> clients = new ArrayList<>();
+
     @BeforeEach
     public void setUp() {
         AmazonS3Client client = getClient();
@@ -52,12 +52,19 @@ public class S3ServerApplicationTests {
         }
     }
 
+    @AfterEach
+    public void tearDown() {
+        clients.forEach(AmazonS3Client::shutdown);
+        clients.clear();
+    }
+
     public AmazonS3Client getClient() {
         AWSCredentials credentials = new BasicAWSCredentials("rHUYeAk58Ilhg6iUEFtr", "IVimdW7BIQLq9PLyVpXzZUq8zS4nLfrsoiZSJanu");
         AmazonS3Client newClient = new AmazonS3Client(credentials,
                 new ClientConfiguration());
         newClient.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
         newClient.setEndpoint("http://localhost:8080/api/s3");
+        clients.add(newClient);
         return newClient;
     }
 

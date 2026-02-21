@@ -33,11 +33,14 @@ public class HashBasedExecutor {
      * @throws InterruptedException
      */
     public void shutdown(int timeout) throws InterruptedException {
+        System.out.println("Shutting down executor with timeout: " + timeout + " seconds");
         for (ExecutorService executorService : executorServices) {
             executorService.shutdown();
         }
         for (ExecutorService executorService : executorServices) {
-            executorService.awaitTermination(timeout, TimeUnit.SECONDS);
+            if (!executorService.awaitTermination(timeout, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
         }
     }
 

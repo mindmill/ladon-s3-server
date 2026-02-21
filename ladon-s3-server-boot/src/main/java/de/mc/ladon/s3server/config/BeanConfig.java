@@ -39,32 +39,34 @@ public class BeanConfig {
         return new FSRepository(fsRepoRoot, new AESFileEncryptor(encSecret.getBytes(StandardCharsets.UTF_8)));
     }
 
+    @Bean(destroyMethod = "destroy")
+    S3Servlet s3Servlet(S3ServletConfiguration config, S3Repository repository) {
+        S3Servlet servlet = new S3Servlet(config.getThreadPoolSize());
+        if (config.isLoggingEnabled()) {
+            servlet.setRepository(new LoggingRepository(repository));
+        } else {
+            servlet.setRepository(repository);
+        }
+        servlet.setSecurityEnabled(config.isSecurityEnabled());
+        return servlet;
+    }
+
     @Bean
-    ServletRegistrationBean s3Registration(S3ServletConfiguration config, S3Repository repository) {
-        ServletRegistrationBean bean = new ServletRegistrationBean();
+    ServletRegistrationBean<S3Servlet> s3Registration(S3ServletConfiguration config, S3Servlet s3Servlet) {
+        ServletRegistrationBean<S3Servlet> bean = new ServletRegistrationBean<>(s3Servlet);
         bean.setName("s3servlet");
         bean.setAsyncSupported(true);
         bean.addUrlMappings(config.getBaseUrl() + "/*");
-        S3Servlet s3Servlet = new S3Servlet(config.getThreadPoolSize());
-        if (config.isLoggingEnabled()) {
-            s3Servlet.setRepository(new LoggingRepository(repository));
-        } else {
-            s3Servlet.setRepository(repository);
-        }
-        s3Servlet.setSecurityEnabled(config.isSecurityEnabled());
-        bean.setServlet(s3Servlet);
         return bean;
     }
 
     @Bean
     @ConditionalOnProperty(value = "s3server.loggingEnabled", havingValue = "true")
-    FilterRegistrationBean filterRegistrationBean() {
-        FilterRegistrationBean filterBean = new FilterRegistrationBean();
+    FilterRegistrationBean<PerformanceLoggingFilter> filterRegistrationBean() {
+        FilterRegistrationBean<PerformanceLoggingFilter> filterBean = new FilterRegistrationBean<>();
         filterBean.setFilter(new PerformanceLoggingFilter());
         filterBean.addServletNames("s3servlet");
         filterBean.setAsyncSupported(true);
         return filterBean;
     }
-
-
 }

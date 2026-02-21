@@ -10,6 +10,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -38,12 +41,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FSStorageTests {
 
     private ExecutorService service;
+    private static List<AmazonS3Client> clients = new ArrayList<>();
 
     @BeforeEach
     public void setUp() {
         service = Executors.newFixedThreadPool(3);
     }
 
+    @AfterEach
+    public void tearDown() {
+        clients.forEach(AmazonS3Client::shutdown);
+        clients.clear();
+        service.shutdown();
+    }
 
     @Test
     public void testFSLockConcurrentAccess() throws IOException, InterruptedException {
@@ -130,6 +140,7 @@ public class FSStorageTests {
                 new ClientConfiguration());
         newClient.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
         newClient.setEndpoint("http://localhost:8080/api/s3");
+        clients.add(newClient);
         return newClient;
     }
 
