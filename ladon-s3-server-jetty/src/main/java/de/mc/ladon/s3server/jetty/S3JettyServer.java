@@ -4,9 +4,9 @@ import de.mc.ladon.s3server.enc.AESFileEncryptor;
 import de.mc.ladon.s3server.logging.LoggingRepository;
 import de.mc.ladon.s3server.repository.impl.FSRepository;
 import de.mc.ladon.s3server.servlet.S3Servlet;
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +27,17 @@ public class S3JettyServer {
         String defaultS3DataDir = System.getProperty("user.home") + File.separator + ".s3server";
         String s3Data = System.getProperty("s3server.fsrepo.root", defaultS3DataDir);
         logger.info("Storing data in " + s3Data);
-        ServletHandler handler = new ServletHandler();
-        server.setHandler(handler);
+
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+        context.setContextPath("/");
+        server.setHandler(context);
+
         S3Servlet s3Servlet = new S3Servlet(10);
         s3Servlet.setRepository(new LoggingRepository(new FSRepository(s3Data,
                 new AESFileEncryptor("4aWji2M7heiCuPsJu9UQ78UE".getBytes(StandardCharsets.UTF_8)))));
         ServletHolder servletHolder = new ServletHolder("s3servlet", s3Servlet);
-        handler.addServletWithMapping(servletHolder, "/*");
+        context.addServlet(servletHolder, "/*");
+
         server.start();
         server.join();
     }

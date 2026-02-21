@@ -5,7 +5,7 @@
 
     <groupId>de.mindconsulting</groupId>
     <artifactId>s3-server</artifactId>
-    <version>2.3.2</version>
+    <version>2.5.0</version>
     <packaging>pom</packaging>
 
     <name>s3-server-boot</name>
@@ -22,7 +22,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
+        <java.version>21</java.version>
     </properties>
     
     <developers>
@@ -42,8 +42,15 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>com.amashchenko.maven.plugin</groupId>
+                <artifactId>gitflow-maven-plugin</artifactId>
+                <version>1.14.0</version>
+                <configuration>
+                    <gitFlowConfig>
+                        <productionBranch>master</productionBranch>
+                        <developmentBranch>develop</developmentBranch>
+                    </gitFlowConfig>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -55,4 +62,5 @@
             <url>${repo.internal.url}</url>
         </repository>
     </distributionManagement>
+
 </project>

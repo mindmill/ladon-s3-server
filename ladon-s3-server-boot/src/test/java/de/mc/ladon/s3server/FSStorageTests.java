@@ -10,8 +10,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.*;
-import org.apache.tomcat.util.http.fileupload.util.Streams;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +19,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -40,12 +41,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FSStorageTests {
 
     private ExecutorService service;
+    private static List<AmazonS3Client> clients = new ArrayList<>();
 
     @BeforeEach
     public void setUp() {
         service = Executors.newFixedThreadPool(3);
     }
 
+    @AfterEach
+    public void tearDown() {
+        clients.forEach(AmazonS3Client::shutdown);
+        clients.clear();
+        service.shutdown();
+    }
 
     @Test
     public void testFSLockConcurrentAccess() throws IOException, InterruptedException {
@@ -57,26 +65,31 @@ public class FSStorageTests {
 
         for (int j = 0; j < 10; j++) {
             final int finalJ = j;
-            executeOnBucket(meta1, b, finalJ, "1111111111");
-            executeOnBucket(meta1, b, finalJ, "2222222222");
-            executeOnBucket(meta1, b, finalJ, "3333333333");
+            executeOnBucket(meta1, b, finalJ, "1111111111", false);
+            executeOnBucket(meta1, b, finalJ, "2222222222", false);
+            executeOnBucket(meta1, b, finalJ, "3333333333", false);
         }
 
 
         service.shutdown();
         service.awaitTermination(1, TimeUnit.MINUTES);
         S3Object object1 = getClient().getObject(b.getName(), "test1.txt");
-        String content = Streams.asString(object1.getObjectContent());
+        String content = new String(object1.getObjectContent().readAllBytes());
         String meta = object1.getObjectMetadata().getUserMetadata().get("test");
 
         assertEquals(1, content.chars().distinct().count());
         assertEquals(1, meta.chars().distinct().count());
     }
 
-    private void executeOnBucket(ObjectMetadata meta1, Bucket b, int finalJ, String content) {
+    private void executeOnBucket(ObjectMetadata meta1, Bucket b, int finalJ, String content, boolean delete) {
         service.execute(() -> {
             AmazonS3Client c = getClient();
             Random random = new Random(System.currentTimeMillis());
+            if (delete){
+                ObjectListing objectListing = c.listObjects(b.getName());
+                objectListing.getObjectSummaries().forEach(s -> c.deleteObject(b.getName(), s.getKey()));
+            }
+
             for (int i = 0; i < 10; i++) {
                 c.putObject(b.getName(), "test" + finalJ + ".txt", new ByteArrayInputStream(content.getBytes()), meta1);
                 try {
@@ -86,7 +99,7 @@ public class FSStorageTests {
                 }
                 try {
                     if (i > 0)
-                        assertEquals(10, Streams.asString(c.getObject(b.getName(), "test" + finalJ + ".txt").getObjectContent()).chars().count());
+                        assertEquals(10,new String(c.getObject(b.getName(), "test" + finalJ + ".txt").getObjectContent().readAllBytes()).chars().count());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -127,6 +140,7 @@ public class FSStorageTests {
                 new ClientConfiguration());
         newClient.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
         newClient.setEndpoint("http://localhost:8080/api/s3");
+        clients.add(newClient);
         return newClient;
     }
 

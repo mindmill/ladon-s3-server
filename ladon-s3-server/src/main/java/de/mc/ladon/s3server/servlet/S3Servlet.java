@@ -16,18 +16,18 @@ import de.mc.ladon.s3server.executor.HashBasedExecutor;
 import de.mc.ladon.s3server.jaxb.entities.*;
 import de.mc.ladon.s3server.jaxb.entities.Error;
 import de.mc.ladon.s3server.repository.api.S3Repository;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -110,101 +110,107 @@ public class S3Servlet extends HttpServlet {
         S3RequestId requestId = context.getRequestId();
         AsyncContext asyncContext = req.startAsync(req, resp);
         asyncContext.setTimeout(requestTimeout);
-        executor.execute(bucketName + objectkey, () -> {
-            try {
+        try {
+            executor.execute(bucketName + objectkey, () -> {
                 try {
-                    if (bucketName != null && !Validator.isValidBucketName(bucketName)) {
-                        throw new InvalidBucketName(bucketName, context.getRequestId());
-                    }
-                    if (securityEnabled) {
-                        Authorization.checkAuthHeader(context, repository);
-                    }
-                    logger.debug("Executing {}", call);
-                    switch (call) {
-                        case listmybuckets:
-                            writeXmlResponse(listAllMyBucketsResult(context.getUser(),
-                                    repository.listAllBuckets(context)),
-                                    resp,
-                                    HttpServletResponse.SC_OK);
-                            break;
-                        case listbucket:
-                            if (context.getParams().listVersions()) {
-                                writeXmlResponse(listVersionsResult(context, repository.listBucket(context, bucketName)),
+                    try {
+                        if (bucketName != null && !Validator.isValidBucketName(bucketName)) {
+                            throw new InvalidBucketName(bucketName, context.getRequestId());
+                        }
+                        if (securityEnabled) {
+                            Authorization.checkAuthHeader(context, repository);
+                        }
+                        logger.debug("Executing {}", call);
+                        switch (call) {
+                            case listmybuckets:
+                                writeXmlResponse(listAllMyBucketsResult(context.getUser(),
+                                                repository.listAllBuckets(context)),
                                         resp,
                                         HttpServletResponse.SC_OK);
-                            } else {
-                                writeXmlResponse(listBucketResult(context, repository.listBucket(context, bucketName)),
-                                        resp,
-                                        HttpServletResponse.SC_OK);
-                            }
-                            break;
-                        case putbucket:
-                            CreateBucketConfiguration config;
-                            try (InputStream in = req.getInputStream()) {
-                                config = (CreateBucketConfiguration) getUnmarshaller().unmarshal(in);
-                            } catch (JAXBException e) {
-                                config = new CreateBucketConfiguration("STANDARD");
-                            }
-                            repository.createBucket(context, bucketName, config.getLocationConstraint());
-                            break;
-                        case putobject:
-                            String[] copySource = context.getHeader().getCopySource();
-                            if (copySource != null) {
-                                S3Object result = repository.copyObject(context, copySource[0], copySource[1], bucketName, objectkey,
-                                        context.getHeader().copyMetadata());
-                                writeXmlResponse(copyObjectResult(result), resp, HttpServletResponse.SC_OK);
-                            } else {
-                                repository.createObject(context, bucketName, objectkey);
-                            }
-                            break;
-                        case postbucket:
-                            throw new NotImplementedException(bucketName, requestId);
-                        case postobject:
-                            throw new NotImplementedException(bucketName, requestId);
-                        case getobject:
-                            repository.getObject(context, bucketName, objectkey, false);
-                            break;
-                        case headobject:
-                            repository.getObject(context, bucketName, objectkey, true);
-                            break;
-                        case headbucket:
-                            repository.getBucket(context, bucketName);
-                            break;
-                        case deletebucket:
-                            repository.deleteBucket(context, bucketName);
-                            resp.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
-                            break;
-                        case deleteobject:
-                            repository.deleteObject(context, bucketName, objectkey);
-                            resp.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
-                            break;
+                                break;
+                            case listbucket:
+                                if (context.getParams().listVersions()) {
+                                    writeXmlResponse(listVersionsResult(context, repository.listBucket(context, bucketName)),
+                                            resp,
+                                            HttpServletResponse.SC_OK);
+                                } else {
+                                    writeXmlResponse(listBucketResult(context, repository.listBucket(context, bucketName)),
+                                            resp,
+                                            HttpServletResponse.SC_OK);
+                                }
+                                break;
+                            case putbucket:
+                                CreateBucketConfiguration config;
+                                try (InputStream in = req.getInputStream()) {
+                                    config = (CreateBucketConfiguration) getUnmarshaller().unmarshal(in);
+                                } catch (JAXBException e) {
+                                    config = new CreateBucketConfiguration("STANDARD");
+                                }
+                                repository.createBucket(context, bucketName, config.getLocationConstraint());
+                                break;
+                            case putobject:
+                                String[] copySource = context.getHeader().getCopySource();
+                                if (copySource != null) {
+                                    S3Object result = repository.copyObject(context, copySource[0], copySource[1], bucketName, objectkey,
+                                            context.getHeader().copyMetadata());
+                                    writeXmlResponse(copyObjectResult(result), resp, HttpServletResponse.SC_OK);
+                                } else {
+                                    repository.createObject(context, bucketName, objectkey);
+                                }
+                                break;
+                            case postbucket:
+                                throw new NotImplementedException(bucketName, requestId);
+                            case postobject:
+                                throw new NotImplementedException(bucketName, requestId);
+                            case getobject:
+                                repository.getObject(context, bucketName, objectkey, false);
+                                break;
+                            case headobject:
+                                repository.getObject(context, bucketName, objectkey, true);
+                                break;
+                            case headbucket:
+                                repository.getBucket(context, bucketName);
+                                break;
+                            case deletebucket:
+                                repository.deleteBucket(context, bucketName);
+                                resp.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
+                                break;
+                            case deleteobject:
+                                repository.deleteObject(context, bucketName, objectkey);
+                                resp.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
+                                break;
+                        }
+                    } catch (JAXBException e) {
+                        logger.error("error processing xml " + requestId.get(), e);
+                        throw new MalformedXMLException(objectkey, requestId);
+                    } catch (IOException e) {
+                        logger.error("error processing stream " + requestId.get(), e);
+                        throw new InternalErrorException(objectkey, requestId);
                     }
-                } catch (JAXBException e) {
-                    logger.error("error processing xml " + requestId.get(), e);
-                    throw new MalformedXMLException(objectkey, requestId);
-                } catch (IOException e) {
-                    logger.error("error processing stream " + requestId.get(), e);
-                    throw new InternalErrorException(objectkey, requestId);
+                } catch (S3ServerException e) {
+                    try {
+                        logger.warn("request failed", e);
+                        writeXmlResponse(new Error(e), resp, e.getResponseStatus());
+                    } catch (Exception e1) {
+                        logger.error("Error writing error response " + requestId.get(), e1);
+                    }
+                } finally {
+                    asyncContext.complete();
                 }
-            } catch (S3ServerException e) {
-                try {
-                    logger.warn("request failed", e);
-                    writeXmlResponse(new Error(e), resp, e.getResponseStatus());
-                } catch (Exception e1) {
-                    logger.error("Error writing error response " + requestId.get(), e1);
-                }
-            } finally {
-                asyncContext.complete();
-            }
-        });
+            });
 
+        } catch (Exception e) {
+            logger.error("error processing request " + requestId.get(), e);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            asyncContext.complete();
+        }
     }
 
 
     private void writeXmlResponse(Object content, HttpServletResponse resp, int status) throws JAXBException, IOException {
         resp.setContentType("application/xml");
         resp.setStatus(status);
-      //  resp.setDateHeader("Expires", System.currentTimeMillis() + 60000);
+        //  resp.setDateHeader("Expires", System.currentTimeMillis() + 60000);
         resp.setCharacterEncoding(Charsets.UTF_8.displayName());
         getMarshaller().marshal(content, resp.getOutputStream());
         resp.flushBuffer();

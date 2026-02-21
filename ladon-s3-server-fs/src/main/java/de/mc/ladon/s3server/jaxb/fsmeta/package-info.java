@@ -5,6 +5,6 @@
 /**
  * @author Ralf Ulrich on 17.02.16.
  */
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://s3.mind-consulting.de/", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED, xmlns = { @javax.xml.bind.annotation.XmlNs(namespaceURI = "http://s3.mind-consulting.de/", prefix = "") })
+@jakarta.xml.bind.annotation.XmlSchema(namespace = "http://s3.mind-consulting.de/", elementFormDefault = jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED, xmlns = { @jakarta.xml.bind.annotation.XmlNs(namespaceURI = "http://s3.mind-consulting.de/", prefix = "") })
 package de.mc.ladon.s3server.jaxb.fsmeta;
 

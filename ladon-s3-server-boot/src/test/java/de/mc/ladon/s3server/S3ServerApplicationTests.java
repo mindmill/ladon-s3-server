@@ -14,11 +14,7 @@ import com.amazonaws.services.s3.model.*;
 import de.mc.ladon.s3server.common.StreamUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.tomcat.util.http.fileupload.util.Streams;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -26,6 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,15 +38,24 @@ import static org.junit.jupiter.api.Assertions.*;
         webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class S3ServerApplicationTests {
 
+    private static List<AmazonS3Client> clients = new ArrayList<>();
+
     @BeforeEach
     public void setUp() {
         AmazonS3Client client = getClient();
         client.createBucket("test");
+        client.listObjects("test").getObjectSummaries().forEach(s -> client.deleteObject("test", s.getKey()));
         if (client.listObjects("test").getObjectSummaries().size() == 0) {
             for (int i = 0; i < 50; i++) {
                 client.putObject("test", "test" + i + ".txt", new ByteArrayInputStream(("test" + i).getBytes()), new ObjectMetadata());
             }
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        clients.forEach(AmazonS3Client::shutdown);
+        clients.clear();
     }
 
     public AmazonS3Client getClient() {
@@ -58,6 +64,7 @@ public class S3ServerApplicationTests {
                 new ClientConfiguration());
         newClient.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
         newClient.setEndpoint("http://localhost:8080/api/s3");
+        clients.add(newClient);
         return newClient;
     }
 
@@ -119,7 +126,7 @@ public class S3ServerApplicationTests {
         InputStream in = client.getObject("test", "test1.txt").getObjectContent();
         String bucketName = client.listObjects("test", "test1.txt").getObjectSummaries().get(0).getBucketName();
 
-        assertEquals("test1", Streams.asString(in));
+        assertEquals("test1", new String(in.readAllBytes()));
         assertEquals("test", bucketName);
     }
 
@@ -259,7 +266,7 @@ public class S3ServerApplicationTests {
         meta.addUserMetadata("peter", "Lustig");
         client.putObject(b.getName(), "test.txt", new ByteArrayInputStream("test".getBytes()), meta);
         InputStream in = client.getObject(b.getName(), "test.txt").getObjectContent();
-        assertEquals("test", Streams.asString(in));
+        assertEquals("test", new String(in.readAllBytes()));
         assertEquals("Lustig", client.getObject(b.getName(), "test.txt").getObjectMetadata().getUserMetadata().get("peter"));
     }
 

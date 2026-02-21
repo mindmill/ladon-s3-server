@@ -7,7 +7,7 @@ package de.mc.ladon.s3server.entities.impl;
 import de.mc.ladon.s3server.entities.api.S3ACL;
 import de.mc.ladon.s3server.entities.api.S3RequestHeader;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
