@@ -3,23 +3,21 @@
 # Ladon S3 Server
 Build your own S3 Server and keep your data safe!
 
-The Ladon S3 Server is built using Java 8-13 and Maven
+The Ladon S3 Server is built using Java 21 and Maven
+
+Also OSGI is supported.
 ### Jetty Example
 
 If you prefer to run it with Jetty have a look at the [Jetty example](./ladon-s3-server-jetty/src/main/java/de/mc/ladon/s3server/jetty/S3JettyServer.java )
 
 ```bash
-    mvn package && java -jar ladon-s3-server-jetty/target/ladon-s3-server-jetty-2.3.2.jar
+    mvn package && java -jar ladon-s3-server-jetty/target/ladon-s3-server-jetty-{version}.jar
 ```
 
 ### Spring Boot:
 
 ```bash
-    mvn package && java -jar ladon-s3-server-boot/target/ladon-s3-server-boot-2.3.2.jar
-```
-Or run Docker:
-```bash
-mvn package &&  docker run -i --network=host  mindconsulting/ladon:2.3.2
+    mvn package && java -jar ladon-s3-server-boot/target/ladon-s3-server-boot-{version}.jar
 ```
 
 ### Example credentials
@@ -61,7 +59,7 @@ Supported so far is only access via REST API, no ACL, no policies, no torrent ..
 
 To see what you can build with it have a look at  [Ladon Data Center Edition](https://ladon.org)  
 ### License
-Copyright (C) 2021 Mind Consulting
+Copyright (C) 2026 Mind Consulting
 
 Free for private use, easy commercial licensing available [here](https://elopage.com/s/mind/ladon-s3-server/payment?locale=en)
 
