@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -79,6 +80,23 @@ public class FSStorageTests {
 
         assertEquals(1, content.chars().distinct().count());
         assertEquals(1, meta.chars().distinct().count());
+    }
+
+    @Test
+    public void testListRootShowsNestedFolderWithoutFiles() {
+        AmazonS3Client client = getClient();
+        Bucket bucket = client.createBucket(UUID.randomUUID().toString());
+
+        client.putObject(bucket.getName(), "outer/inner/", "");
+
+        ListObjectsRequest request = new ListObjectsRequest()
+                .withBucketName(bucket.getName())
+                .withDelimiter("/");
+
+        ObjectListing listing = client.listObjects(request);
+
+        assertTrue(listing.getObjectSummaries().isEmpty());
+        assertTrue(listing.getCommonPrefixes().contains("outer"));
     }
 
     private void executeOnBucket(ObjectMetadata meta1, Bucket b, int finalJ, String content, boolean delete) {

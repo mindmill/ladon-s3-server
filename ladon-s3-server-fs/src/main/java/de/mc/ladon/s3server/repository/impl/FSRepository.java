@@ -9,12 +9,12 @@ import de.mc.ladon.s3server.exceptions.*;
 import de.mc.ladon.s3server.jaxb.fsmeta.FSStorageMeta;
 import de.mc.ladon.s3server.jaxb.fsmeta.FSUserData;
 import de.mc.ladon.s3server.repository.api.S3Repository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -419,10 +419,13 @@ public class FSRepository implements S3Repository {
                         objects.add(obj);
                     }
                 });
-                List<String> emptyFoldersInPath = emptyFolders.stream()
-                        .map(s -> DelimiterUtil.getCommonPrefix(s + "/", prefix, "/"))
-                        .filter(Objects::nonNull).collect(Collectors.toList());
-                prefixes.addAll(emptyFoldersInPath);
+
+                getDirectoryStream(bucketName, prefix, marker)
+                        .map(path -> toS3Path(bucket.relativize(path).toString()) + "/")
+                        .map(path -> DelimiterUtil.getCommonPrefix(path, prefix, "/"))
+                        .filter(Objects::nonNull)
+                        .forEach(prefixes::add);
+
                 List<String> prefList = new ArrayList<>(prefixes);
                 return new S3ListBucketResultImpl(objects, prefList, objects.size() > maxKeys, bucketName, null, null);
             }
@@ -445,6 +448,23 @@ public class FSRepository implements S3Repository {
                     return (Files.isRegularFile(p) || Files.isDirectory(p) && p != bucketDataFolder && p.toFile().list().length == 0)
                             && relpath.startsWith(prefix)
                             && include;
+                });
+    }
+
+    private Stream<Path> getDirectoryStream(String bucketName, String prefix, String marker) throws IOException {
+        final Boolean[] markerFound = new Boolean[]{marker == null};
+        Path bucketDataFolder = getBucketDataFolder(bucketName);
+        return Files.walk(bucketDataFolder).sorted()
+                .filter(p -> {
+                    if (!Files.isDirectory(p) || p.equals(bucketDataFolder)) {
+                        return false;
+                    }
+                    String relpath = toS3Path(bucketDataFolder.relativize(p).toString());
+                    boolean include = markerFound[0];
+                    if (!markerFound[0]) {
+                        markerFound[0] = relpath.equals(marker);
+                    }
+                    return relpath.startsWith(prefix) && include;
                 });
     }
 
