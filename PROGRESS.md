@@ -83,6 +83,8 @@
 ## Next Steps
 - P9 (T40–T42): Full-Build (`mvn clean verify`, alle 7 Module, jetty 12.1.14) ✅,
   `REPORT.md` (Bericht), Commits + Push nach origin.
+- P10 (T44): **Spring Boot 4.0.2 → 4.1.2** (Dependabot/spring-web CVE-2026-41854) ✅ —
+  Boot-Modul `clean verify` mit 4.1.2 (24 Tests, 0 Fehler); Commit + Push.
 
 ## Blockers / Offene Punkte
 - **OSGi-Laufzeit: funktional verifiziert** (T43, oben) — kein Blocker mehr.

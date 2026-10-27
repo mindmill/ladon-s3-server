@@ -54,7 +54,7 @@ Legende: Status: `Entschieden` (ausgeführt) · `Offen` (ausstehend) · `Zurück
 
 ## D6 — Testumgebung: JUnit 5 + Surefire-Pin
 - **Entschieden**: Core-Modul auf JUnit 5 (junit-jupiter 5.10+), `maven-surefire-plugin` ≥3.2.5
-  (gepinnt im Root-POM). Boot-Modul bleibt bei JUnit 5/5.10 (Spring-Boot-Parent 4.0.2).
+  (gepinnt im Root-POM). Boot-Modul bleibt bei JUnit 5/5.10 (Spring-Boot-Parent 4.1.2, s. D23).
 - **Rationale**: JUnit 4 ist legacy, Surefire 2.x kann JUnit 5 nicht zuverlässig ausführen.
 
 ## D7 — Jetty-Modul-Fix
@@ -263,3 +263,17 @@ Legende: Status: `Entschieden` (ausgeführt) · `Offen` (ausstehend) · `Zurück
 - **Rationale**: Die Produktion muss mit realen AWS-SDK-kompatibel sein; die FSRepository setzt
   dieselbe Regel (keine Content-Length auf PUT-Antworten), und der Bootstrap-Test beweist es:
   ohne diesen Fix bricht der SDK-Client nach 50 s ab (Socket-Timeout auf dem Read).
+
+## D23 — Spring Boot 4.0.2 → 4.1.2 (Sicherheits-Hygiene, Dependabot)
+- **Entschlossen**: Das Boot-Modul (Parent, `spring.boot.version`-Property, `spring-boot-maven-plugin`)
+  wird **4.0.2 → 4.1.2** gezogen (aktuellste 4.1.x auf Maven Central).
+- **Auslöser**: Dependabot-Alerts auf dem Default-Branch. Analyse (OSV × Versions-Diff) zeigte,
+  dass `spring-boot 4.0.2` → `spring-web 7.0.3` von **CVE-2026-41854** (Moderate, SSRF, Fix in
+  7.0.8) betroffen ist; `spring-boot 4.1.2` bindet **spring-web 7.0.10** (> 7.0.8) → CVE beseitigt.
+- **Abgrenzung**: Guava war im Branch bereits entfernt; `jetty 12.1.0 → 12.1.14` deckt alle
+  bekannten 2026er Jetty-CVEs ab (Fix ≤ 12.1.10 < 12.1.14); `aws-java-sdk-s3 1.12.261` enthält
+  den Fix für CVE-2022-31159. Die JAXB-`bind-api 4.0.2` ist eine *andere* 4.0.2 und bleibt unverändert.
+- **Verifikation**: Boot-Modul `clean verify` mit 4.1.2 (**24 Tests, 0 Fehler** — AWS-SDK-v1
+  Integrationstests auf Port 8080/8081 grün).
+- **Rationale**: Gleiche Major-Linie (Boot 4.x), source-kompatibler Minor-Bump; schließt die
+  letzte offene spring-web-CVE und rückt auf die aktuelle 4.1.x.

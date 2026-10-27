@@ -15,7 +15,8 @@
 - **Chunked Upload (SigV4 streaming)**: End-to-End verifiziert (Signatur-Kette, 0-Chunk-EOF,
   MD5/Content-Length-Kontrolle) — in `FSRepository` und neuen `VFSRepository`.
 - **Abhängigkeiten reduziert**: Guava komplett entfernt, JAXB auf `glassfish:jaxb-runtime`
-  (bind-api 4.0.2), JUnit 5 + Surefire 3.2.5, slf4j 2.0.16.
+  (bind-api 4.0.2), JUnit 5 + Surefire 3.2.5, slf4j 2.0.16; Spring Boot **4.0.2 → 4.1.2**
+  (schließt spring-web **CVE-2026-41854**, s. D23).
 - **API-Ergänzung (additiv)**: Bulk-Delete `POST ?delete`, ListObjectsV2 (`list-type=2`,
   `continuation-token`, `key-count`), `response-*`-Overrides (Content-Type, Disposition,
   Encoding, Language, Cache-Control, Expires).
