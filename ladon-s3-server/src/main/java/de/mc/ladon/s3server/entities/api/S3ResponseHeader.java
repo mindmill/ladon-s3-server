@@ -147,4 +147,37 @@ public interface S3ResponseHeader {
     void setXamzExpiration(String expiration);
     String getXamzExpiration();
 
+    /**
+     * Optional, applied only when the request carries the signed query parameter
+     * {@code response-content-disposition} (S3 response header overrides, typically with
+     * presigned URLs). Default implementation does nothing.
+     *
+     * @param contentDisposition value for the Content-Disposition response header
+     */
+    default void setContentDisposition(String contentDisposition) {}
+
+    /**
+     * Optional, applied only when the request carries the signed query parameter
+     * {@code response-content-encoding}. Default implementation does nothing.
+     *
+     * @param contentEncoding value for the Content-Encoding response header
+     */
+    default void setContentEncoding(String contentEncoding) {}
+
+    /**
+     * Optional, applied only when the request carries the signed query parameter
+     * {@code response-content-language}. Default implementation does nothing.
+     *
+     * @param contentLanguage value for the Content-Language response header
+     */
+    default void setContentLanguage(String contentLanguage) {}
+
+    /**
+     * Optional, applied only when the request carries the signed query parameter
+     * {@code response-cache-control}. Default implementation does nothing.
+     *
+     * @param cacheControl value for the Cache-Control response header
+     */
+    default void setCacheControl(String cacheControl) {}
+
 }

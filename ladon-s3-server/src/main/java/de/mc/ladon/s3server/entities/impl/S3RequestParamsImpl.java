@@ -19,24 +19,37 @@ import static de.mc.ladon.s3server.common.S3Constants.*;
  */
 public class S3RequestParamsImpl implements S3RequestParams {
 
+    private static final String CONTINUATION_TOKEN = "continuation-token";
+    private static final String LIST_TYPE = "list-type";
+
     private String delimiter;
     private String encodingType;
     private String marker;
+    private String continuationToken;
+    private String listType;
     private Integer maxKeys;
     private String keyMarker;
     private String versionIdMarker;
     private String prefix;
     private Map<String, String> allParams;
+    private final Map<String, java.util.List<String>> allParamsMulti;
 
     public S3RequestParamsImpl(Map<String, String[]> requestParams) {
         allParams = new TreeMap<>(Comparator.naturalOrder());
+        allParamsMulti = new TreeMap<>(Comparator.naturalOrder());
         for (String p : requestParams.keySet()) {
-            allParams.put(p, requestParams.get(p)[0]);
+            String[] values = requestParams.get(p) == null ? new String[0] : requestParams.get(p);
+            allParamsMulti.put(p, java.util.List.of(values));
+            if (values.length > 0) {
+                allParams.put(p, values[0]);
+            }
         }
 
         this.delimiter = getFirstOrNull(DELIMITER, requestParams);
         this.encodingType = getFirstOrNull(ENCODING_TYPE, requestParams);
         this.marker = getFirstOrNull(MARKER, requestParams);
+        this.continuationToken = getFirstOrNull(CONTINUATION_TOKEN, requestParams);
+        this.listType = getFirstOrNull(LIST_TYPE, requestParams);
         this.keyMarker = getFirstOrNull(KEY_MARKER, requestParams);
         this.versionIdMarker = getFirstOrNull(VERSION_ID_MARKER, requestParams);
         try {
@@ -77,7 +90,18 @@ public class S3RequestParamsImpl implements S3RequestParams {
 
     @Override
     public String getMarker() {
-        return marker;
+        // A continuation token (ListObjectsV2) is the successor of the marker.
+        return marker != null ? marker : continuationToken;
+    }
+
+    @Override
+    public String getContinuationToken() {
+        return continuationToken;
+    }
+
+    @Override
+    public boolean isListObjectsV2() {
+        return "2".equals(listType);
     }
 
     @Override
@@ -102,6 +126,11 @@ public class S3RequestParamsImpl implements S3RequestParams {
 
     public Map<String, String> getAllParams() {
         return allParams;
+    }
+
+    @Override
+    public Map<String, java.util.List<String>> getAllParamsMulti() {
+        return allParamsMulti;
     }
 
     @Override

@@ -3,10 +3,9 @@
  */
 package de.mc.ladon.s3server.auth;
 
-import com.google.common.io.BaseEncoding;
-
 import javax.crypto.KeyGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 /**
  * Generates a new KeyPair
@@ -24,10 +23,10 @@ public class AuthKeyGen {
             KeyGenerator generator = KeyGenerator.getInstance(AwsSignatureVersion2.HMAC_SHA_1);
             generator.init(120);
             byte[] awsAccessKeyId = generator.generateKey().getEncoded();
-            accessKey = BaseEncoding.base64Url().encode(awsAccessKeyId);
+            accessKey = Base64.getUrlEncoder().encodeToString(awsAccessKeyId);
             generator.init(240);
             byte[] awsSecretAccessKey = generator.generateKey().getEncoded();
-            secretKey = BaseEncoding.base64Url().encode(awsSecretAccessKey);
+            secretKey = Base64.getUrlEncoder().encodeToString(awsSecretAccessKey);
         }
         return new AwsKeyPair(secretKey, accessKey);
 

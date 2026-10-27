@@ -1,10 +1,10 @@
 package de.mc.ladon.s3server.auth;
 
 import de.mc.ladon.s3server.common.DelimiterUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class DelimiterUtilTest {
 
@@ -17,12 +17,7 @@ public class DelimiterUtilTest {
         assertEquals("zwei", DelimiterUtil.getCommonPrefix("eins/zwei/drei", "eins/", "/"));
         assertEquals("zwei", DelimiterUtil.getCommonPrefix("eins/zwei/drei", "eins/zwei", "/"));
 
-
-
-
-        assertNull( DelimiterUtil.getCommonPrefix("test/hier", "test/", "/"));
-        assertNull( DelimiterUtil.getCommonPrefix("/test/hier", "test/", "/"));
-
-
+        assertNull(DelimiterUtil.getCommonPrefix("test/hier", "test/", "/"));
+        assertNull(DelimiterUtil.getCommonPrefix("/test/hier", "test/", "/"));
     }
 }

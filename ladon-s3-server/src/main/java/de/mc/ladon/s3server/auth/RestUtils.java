@@ -1,120 +1,192 @@
 package de.mc.ladon.s3server.auth;
 
-import com.google.common.base.Strings;
 import de.mc.ladon.s3server.common.S3Constants;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
 
-import java.util.*;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
- * Utilities useful for REST/HTTP S3Service implementations.
+ * Utilities for the AWS Signature Version 2 canonical string (StringToSign), built strictly
+ * following the S3 SigV2 specification:
+ *
+ * <pre>
+ * StringToSign = HTTP-Verb + "\n"
+ *              + Content-MD5 + "\n"
+ *              + Content-Type + "\n"
+ *              + Date + "\n"
+ *              + CanonicalizedACLHeaders
+ *              + CanonicalizedResource
+ * </pre>
+ *
+ * where the {@code x-amz-*} headers are sorted by name, and the canonical resource is the
+ * request path followed by the signed sub-resources sorted by name.
  */
 public class RestUtils {
-    /**
-     * The set of request parameters which must be included in the canonical
-     * string to sign.
-     */
-    private static final List<String> SIGNED_PARAMETERS = Arrays.asList("acl", "torrent", "logging", "location", "policy", "requestPayment", "versioning",
-            "versions", "versionId", "notification", "uploadId", "uploads", "partNumber", "website",
-            "delete", "lifecycle", "tagging", "cors", "restore",
-            ResponseHeaderOverrides.RESPONSE_HEADER_CACHE_CONTROL,
-            ResponseHeaderOverrides.RESPONSE_HEADER_CONTENT_DISPOSITION,
-            ResponseHeaderOverrides.RESPONSE_HEADER_CONTENT_ENCODING,
-            ResponseHeaderOverrides.RESPONSE_HEADER_CONTENT_LANGUAGE,
-            ResponseHeaderOverrides.RESPONSE_HEADER_CONTENT_TYPE,
-            ResponseHeaderOverrides.RESPONSE_HEADER_EXPIRES);
 
     /**
-     * Calculate the canonical string for a REST/HTTP request to S3.
-     * <p>
-     * When expires is non-null, it will be used instead of the Date header.
+     * The set of sub-resources which are part of the canonical StringToSign (signed
+     * sub-resources). Parameters outside of this set are not signed.
+     *
+     * <p>Keys are the lowercased parameter names, values are the <em>canonical</em>
+     * sub-resource names exactly as they appear in the AWS SigV2 sub-resource list
+     * (e.g. {@code partNumber}, {@code uploadId}) — the canonical names are what is
+     * signed in the StringToSign.</p>
      */
-    public static String makeS3CanonicalString(S3CallContext context, String expires) {
-        StringBuilder buf = new StringBuilder();
-        buf.append(context.getMethod()).append("\n");
+    private static final Map<String, String> SIGNED_PARAMETERS = Map.ofEntries(
+            Map.entry("acl", "acl"),
+            Map.entry("torrent", "torrent"),
+            Map.entry("logging", "logging"),
+            Map.entry("location", "location"),
+            Map.entry("policy", "policy"),
+            Map.entry("requestpayment", "requestPayment"),
+            Map.entry("versioning", "versioning"),
+            Map.entry("versions", "versions"),
+            Map.entry("versionid", "versionId"),
+            Map.entry("notification", "notification"),
+            Map.entry("uploadid", "uploadId"),
+            Map.entry("uploads", "uploads"),
+            Map.entry("partnumber", "partNumber"),
+            Map.entry("website", "website"),
+            Map.entry("delete", "delete"),
+            Map.entry("lifecycle", "lifecycle"),
+            Map.entry("tagging", "tagging"),
+            Map.entry("cors", "cors"),
+            Map.entry("restore", "restore"),
+            Map.entry("replication", "replication"),
+            Map.entry("object-lock", "object-lock"),
+            Map.entry("retention", "retention"),
+            Map.entry("legal-hold", "legal-hold"),
+            Map.entry("x-amz-security-token", "x-amz-security-token"),
+            Map.entry("x-id", "x-id"),
+            Map.entry("seal", "seal"),
+            Map.entry("response-content-type", "response-content-type"),
+            Map.entry("response-content-language", "response-content-language"),
+            Map.entry("response-expires", "response-expires"),
+            Map.entry("response-cache-control", "response-cache-control"),
+            Map.entry("response-content-disposition", "response-content-disposition"),
+            Map.entry("response-content-encoding", "response-content-encoding"),
+            Map.entry("security", "security"));
 
-        // Add all interesting headers to a list, then sort them.  "Interesting"
-        // is defined as Content-MD5, Content-Type, Date, and x-amz-
-        Map<String, String> headersMap = context.getHeader().getFullHeader();
-        SortedMap<String, String> interestingHeaders = new TreeMap<>();
-        if (headersMap != null && headersMap.size() > 0) {
-            for (Map.Entry<String, String> entry : headersMap.entrySet()) {
-                String key = entry.getKey();
-                String value = entry.getValue();
-
-                if (key == null) continue;
-                String lk = key.toLowerCase(Locale.getDefault());
-
-                // Ignore any headers that are not particularly interesting.
-                if (lk.equals("content-type") || lk.equals("content-md5") || lk.equals("date") ||
-                        lk.startsWith(S3Constants.X_AMZ_PREFIX)) {
-                    interestingHeaders.put(lk, value);
-                }
-            }
-        }
-
-        // Remove default date timestamp if "x-amz-date" is set.
-        if (interestingHeaders.containsKey(S3Constants.X_AMZ_DATE)) {
-            interestingHeaders.put("date", "");
-        }
-
-        // Use the expires value as the timestamp if it is available. This trumps both the default
-        // "date" timestamp, and the "x-amz-date" header.
-        if (expires != null) {
-            interestingHeaders.put("date", expires);
-        }
-
-        // These headers require that we still put a new line in after them,
-        // even if they don't exist.
-        if (!interestingHeaders.containsKey("content-type")) {
-            interestingHeaders.put("content-type", "");
-        }
-        if (!interestingHeaders.containsKey("content-md5")) {
-            interestingHeaders.put("content-md5", "");
-        }
-
-        // Any parameters that are prefixed with "x-amz-" need to be included
-        // in the headers section of the canonical string to sign
-        context.getParams().getAllParams().entrySet().stream().filter(parameter -> parameter.getKey().startsWith("x-amz-"))
-                .forEach(parameter -> interestingHeaders.put(parameter.getKey(), parameter.getValue()));
-
-        // Add all the interesting headers (i.e.: all that startwith x-amz- ;-))
-        for (Map.Entry<String, String> entry : interestingHeaders.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            if (key.startsWith(S3Constants.X_AMZ_PREFIX)) {
-                buf.append(key).append(':');
-                if (value != null) {
-                    buf.append(value);
-                }
-            } else if (value != null) {
-                buf.append(value);
-            }
-            buf.append("\n");
-        }
-
-        // Add all the interesting parameters
-        buf.append(context.getUri());
-        String[] parameterNames = context.getParams().getAllParams().keySet().toArray(
-                new String[context.getParams().getAllParams().size()]);
-        Arrays.sort(parameterNames);
-        char separator = '?';
-        for (String parameterName : parameterNames) {
-            // Skip any parameters that aren't part of the canonical signed string
-            if (!SIGNED_PARAMETERS.contains(parameterName)) continue;
-
-            buf.append(separator);
-            buf.append(parameterName);
-            String parameterValue = context.getParams().getAllParams().get(parameterName);
-            if (!Strings.isNullOrEmpty(parameterValue)) {
-                buf.append("=").append(parameterValue);
-            }
-
-            separator = '&';
-        }
-
-        return buf.toString();
+    private RestUtils() {
     }
 
+    /**
+     * Normalizes a value used in a SigV2 canonical StringToSign. According to the AWS SigV2
+     * spec the header name is lowercased, values of headers with the same name are joined
+     * with commas "without any spaces between values", and the surrounding whitespace of
+     * each value is trimmed — but consecutive whitespace <em>inside</em> a value is left
+     * intact (unlike SigV4).
+     */
+    private static String canonicalSigV2Value(String value) {
+        if (value == null) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder(value.length());
+        boolean first = true;
+        for (String part : value.split(",")) {
+            if (!first) {
+                result.append(',');
+            }
+            first = false;
+            result.append(part.trim());
+        }
+        return result.toString();
+    }
+
+    public static String makeS3CanonicalString(S3CallContext context, String expires) {
+        Map<String, String> fullHeader = context.getHeader().getFullHeader();
+
+        String contentMd5 = SigV4.headerIgnoreCase(fullHeader, "content-md5");
+        String contentType = SigV4.headerIgnoreCase(fullHeader, "content-type");
+
+        // Date line, per the AWS SigV2 spec:
+        //  - for presigned URLs the Expires parameter replaces the date (the Date and
+        //    x-amz-date headers are not used at all),
+        //  - for header-based requests the x-amz-date header takes precedence over the
+        //    Date header when both are present (its value is signed literally in the
+        //    date line and the header is <em>not</em> repeated in CanonicalizedAmzHeaders).
+        String dateLine;
+        if (expires != null && !expires.isEmpty()) {
+            dateLine = expires;
+        } else {
+            String xamzDate = SigV4.headerIgnoreCase(fullHeader, "x-amz-date");
+            if (xamzDate == null) {
+                xamzDate = SigV4.headerIgnoreCase(fullHeader, "date");
+            }
+            dateLine = xamzDate == null ? "" : xamzDate.trim();
+        }
+
+        // Positional StringToSign lines are signed as sent — only surrounding whitespace
+        // is trimmed; the internal whitespace of the date value must be preserved
+        // (the AWS sigV2 spec examples sign "Tue, 27 Mar 2007 19:36:42 +0000" literally).
+        StringBuilder buf = new StringBuilder(context.getMethod().length() + 128);
+        buf.append(context.getMethod()).append("\n");
+        buf.append(contentMd5 == null ? "" : contentMd5.trim()).append("\n");
+        buf.append(contentType == null ? "" : contentType.trim()).append("\n");
+        buf.append(dateLine).append("\n");
+
+        // CanonicalizedAmzHeaders: all x-amz-* headers (request headers and query
+        // parameters) sorted by name — except x-amz-date, which is a positional date
+        // element (see above).
+        Map<String, String> amzHeaders = new TreeMap<>();
+        if (fullHeader != null) {
+            for (Map.Entry<String, String> entry : fullHeader.entrySet()) {
+                if (entry.getKey() == null || entry.getValue() == null) {
+                    continue;
+                }
+                String lower = entry.getKey().toLowerCase(Locale.ROOT);
+                if (lower.startsWith(S3Constants.X_AMZ_PREFIX) && !"x-amz-date".equals(lower)) {
+                    amzHeaders.put(lower, entry.getValue());
+                }
+            }
+        }
+        for (Map.Entry<String, String> entry : context.getParams().getAllParams().entrySet()) {
+            if (entry.getKey() == null || entry.getValue() == null) {
+                continue;
+            }
+            String lower = entry.getKey().toLowerCase(Locale.ROOT);
+            if (lower.startsWith(S3Constants.X_AMZ_PREFIX) && !"x-amz-date".equals(lower)) {
+                amzHeaders.put(lower, entry.getValue());
+            }
+        }
+        for (Map.Entry<String, String> entry : amzHeaders.entrySet()) {
+            buf.append(entry.getKey()).append(':').append(canonicalSigV2Value(entry.getValue())).append("\n");
+        }
+
+        // CanonicalizedResource: the request path and the signed sub-resources, sorted by name.
+        // Sub-resource names are signed in their canonical (camelCase) form, e.g. partNumber
+        // and uploadId (AWS SigV2 spec: "subresources must be lexicographically sorted by
+        // subresource name", names taken from the sub-resource list).
+        buf.append(context.getUri());
+        TreeMap<String, String> signedParams = new TreeMap<>();
+        for (Map.Entry<String, String> entry : context.getParams().getAllParams().entrySet()) {
+            if (entry.getKey() == null) {
+                continue;
+            }
+            String canonical = SIGNED_PARAMETERS.get(entry.getKey());
+            if (canonical == null) {
+                canonical = SIGNED_PARAMETERS.get(entry.getKey().toLowerCase(Locale.ROOT));
+            }
+            if (canonical != null && !signedParams.containsKey(canonical)) {
+                signedParams.put(canonical, entry.getValue());
+            }
+        }
+        if (!signedParams.isEmpty()) {
+            buf.append("?");
+            boolean first = true;
+            for (Map.Entry<String, String> entry : signedParams.entrySet()) {
+                if (!first) {
+                    buf.append("&");
+                }
+                first = false;
+                buf.append(entry.getKey());
+                if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                    buf.append("=").append(entry.getValue());
+                }
+            }
+        }
+        return buf.toString();
+    }
 }

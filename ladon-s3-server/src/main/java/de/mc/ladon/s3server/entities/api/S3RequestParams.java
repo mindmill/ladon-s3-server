@@ -110,4 +110,39 @@ public interface S3RequestParams {
      * @return Map with all param keys and the first param value
      */
     Map<String, String> getAllParams();
+
+    /**
+     * All request parameters including every value per key (duplicated parameters as
+     * reported by the servlet container). The {@link #getAllParams()} view de-duplicates
+     * them; consumers needing the full set (canonical query signing) use this one.
+     *
+     * @return map of parameter name to its (decoded) values in the delivered order
+     */
+    default Map<String, java.util.List<String>> getAllParamsMulti() {
+        Map<String, java.util.List<String>> result = new java.util.TreeMap<>();
+        for (Map.Entry<String, String> entry : getAllParams().entrySet()) {
+            result.put(entry.getKey(),
+                    entry.getValue() == null ? java.util.List.of() : java.util.List.of(entry.getValue()));
+        }
+        return result;
+    }
+
+    /**
+     * The value of the {@code continuation-token} request parameter (ListObjectsV2).
+     * Semantically equivalent to a marker.
+     *
+     * @return the continuation token or null
+     */
+    default String getContinuationToken() {
+        return null;
+    }
+
+    /**
+     * True if this is a ListObjectsV2 request ({@code list-type=2}).
+     *
+     * @return true if list-type is 2
+     */
+    default boolean isListObjectsV2() {
+        return false;
+    }
 }

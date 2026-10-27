@@ -131,7 +131,7 @@ public class S3RequestHeaderImpl implements S3RequestHeader {
 
     @Override
     public String getExpect() {
-        return getHeader(AUTHORIZAZION);
+        return getHeader(EXPECT);
     }
 
     @Override

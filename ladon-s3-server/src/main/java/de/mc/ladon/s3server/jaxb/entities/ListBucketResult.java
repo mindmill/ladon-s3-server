@@ -24,6 +24,10 @@ public class ListBucketResult {
     private Integer maxKeys;
     private String delimiter;
     private Boolean isTruncated;
+    private Integer keyCount;
+    private String keyMarker;
+    private String continuationToken;
+    private String nextContinuationToken;
     private List<Contents> contentsList;
     private List<CommonPrefixes> commonPrefixes;
 
@@ -35,12 +39,35 @@ public class ListBucketResult {
                             List<Contents> contentsList,
                             List<CommonPrefixes> commonPrefixes,
                             boolean isTruncated) {
+        this(callContext, bucketName, contentsList, commonPrefixes, isTruncated, contentsList.size(), null, null);
+    }
+
+    public ListBucketResult(S3CallContext callContext,
+                            String bucketName,
+                            List<Contents> contentsList,
+                            List<CommonPrefixes> commonPrefixes,
+                            boolean isTruncated,
+                            Integer keyCount) {
+        this(callContext, bucketName, contentsList, commonPrefixes, isTruncated, keyCount, null, null);
+    }
+
+    public ListBucketResult(S3CallContext callContext,
+                            String bucketName,
+                            List<Contents> contentsList,
+                            List<CommonPrefixes> commonPrefixes,
+                            boolean isTruncated,
+                            Integer keyCount,
+                            String continuationToken,
+                            String nextContinuationToken) {
         this.bucketName = bucketName;
         this.prefix = getEncoded(callContext, callContext.getParams().getPrefix());
         this.marker = getEncoded(callContext, callContext.getParams().getMarker());
         this.maxKeys = callContext.getParams().getMaxKeys();
         this.delimiter = getEncoded(callContext, callContext.getParams().getDelimiter());
         this.isTruncated = isTruncated;
+        this.keyCount = keyCount;
+        this.continuationToken = continuationToken;
+        this.nextContinuationToken = nextContinuationToken;
         this.contentsList = contentsList;
         this.commonPrefixes = commonPrefixes;
     }
@@ -97,6 +124,42 @@ public class ListBucketResult {
 
     public void setIsTruncated(Boolean isTruncated) {
         this.isTruncated = isTruncated;
+    }
+
+    @XmlElement(name = "KeyCount")
+    public Integer getKeyCount() {
+        return keyCount;
+    }
+
+    public void setKeyCount(Integer keyCount) {
+        this.keyCount = keyCount;
+    }
+
+    @XmlElement(name = "KeyMarker", required = false)
+    public String getKeyMarker() {
+        return keyMarker;
+    }
+
+    public void setKeyMarker(String keyMarker) {
+        this.keyMarker = keyMarker;
+    }
+
+    @XmlElement(name = "ContinuationToken", required = false)
+    public String getContinuationToken() {
+        return continuationToken;
+    }
+
+    public void setContinuationToken(String continuationToken) {
+        this.continuationToken = continuationToken;
+    }
+
+    @XmlElement(name = "NextContinuationToken", required = false)
+    public String getNextContinuationToken() {
+        return nextContinuationToken;
+    }
+
+    public void setNextContinuationToken(String nextContinuationToken) {
+        this.nextContinuationToken = nextContinuationToken;
     }
 
     @XmlElement(name = "Contents")

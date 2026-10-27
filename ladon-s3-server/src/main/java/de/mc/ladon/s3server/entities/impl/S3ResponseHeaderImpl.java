@@ -30,6 +30,10 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
     private String xamzVersionId;
     private String xamzExpiration;
     private S3Metadata meta;
+    private String contentDisposition;
+    private String contentEncoding;
+    private String contentLanguage;
+    private String cacheControl;
 
     public S3ResponseHeaderImpl() {
     }
@@ -162,6 +166,38 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
         return xamzExpiration;
     }
 
+    public void setContentDisposition(String contentDisposition) {
+        this.contentDisposition = contentDisposition;
+    }
+
+    public String getContentDisposition() {
+        return contentDisposition;
+    }
+
+    public void setContentEncoding(String contentEncoding) {
+        this.contentEncoding = contentEncoding;
+    }
+
+    public String getContentEncoding() {
+        return contentEncoding;
+    }
+
+    public void setContentLanguage(String contentLanguage) {
+        this.contentLanguage = contentLanguage;
+    }
+
+    public String getContentLanguage() {
+        return contentLanguage;
+    }
+
+    public void setCacheControl(String cacheControl) {
+        this.cacheControl = cacheControl;
+    }
+
+    public String getCacheControl() {
+        return cacheControl;
+    }
+
     public static void appendHeaderToResponse(HttpServletResponse response, S3ResponseHeaderImpl header) {
         if (header.meta != null)
             header.meta.putInResponse(response);
@@ -197,5 +233,13 @@ public class S3ResponseHeaderImpl implements S3ResponseHeader {
             response.setHeader(X_AMZ_VERSION_ID, header.xamzVersionId);
         if (header.xamzExpiration != null)
             response.setHeader(X_AMZ_EXPIRATION, header.xamzExpiration);
+        if (header.contentDisposition != null)
+            response.setHeader("Content-Disposition", header.contentDisposition);
+        if (header.contentEncoding != null)
+            response.setHeader("Content-Encoding", header.contentEncoding);
+        if (header.contentLanguage != null)
+            response.setHeader("Content-Language", header.contentLanguage);
+        if (header.cacheControl != null)
+            response.setHeader("Cache-Control", header.cacheControl);
     }
 }
