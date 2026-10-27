@@ -1,6 +1,8 @@
 package de.mc.ladon.s3server.repository.impl;
 
-import com.google.common.collect.ImmutableMap;
+import de.mc.ladon.s3server.auth.AwsSignatureVersion4;
+import de.mc.ladon.s3server.auth.SigV4;
+import de.mc.ladon.s3server.auth.SigV4ChunkVerifier;
 import de.mc.ladon.s3server.common.*;
 import de.mc.ladon.s3server.enc.FileEncryptor;
 import de.mc.ladon.s3server.entities.api.*;
@@ -28,10 +30,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.Base64;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.google.common.io.BaseEncoding.base64;
 
 /**
  * Simple FileSystem Repository
@@ -255,7 +256,7 @@ public class FSRepository implements S3Repository {
             String decodedContentLength = callContext.getHeader()
                     .getFullHeader().get(S3Constants.X_AMZ_DECODED_CONTENT_LENGTH);
             String md5 = callContext.getHeader().getContentMD5();
-            boolean isChunked = isChunked(callContext);
+            boolean isChunked = SigV4.isStreamingPayload(callContext.getHeader().getXamzContentSha256());
 
             lock(p.bucketMeta, p.osKey, FSLock.LockType.write, callContext);
             try (InputStream in = callContext.getContent()) {
@@ -265,7 +266,8 @@ public class FSRepository implements S3Repository {
                 }
                 DigestInputStream din;
                 if (isChunked) {
-                    din = new DigestInputStream(new S3ChunkedInputStream(in), MessageDigest.getInstance("MD5"));
+                    din = new DigestInputStream(new S3ChunkedInputStream(in, chunkSeedSignature(callContext),
+                            buildChunkVerifier(callContext)), MessageDigest.getInstance("MD5"));
                 } else {
                     din = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
                 }
@@ -273,7 +275,7 @@ public class FSRepository implements S3Repository {
                 try (OutputStream out = fileEncryptor.getEncryptedOutputStream(p.objectData)) {
                     long bytesCopied = StreamUtils.copy(din, out);
                     byte[] md5bytes = din.getMessageDigest().digest();
-                    String storageMd5base64 = base64().encode(md5bytes);
+                    String storageMd5base64 = java.util.Base64.getEncoder().encodeToString(md5bytes);
                     String storageMd5base16 = Encoding.toHex(md5bytes);
 
                     if (isChunked && decodedContentLength != null && !decodedContentLength.equals(Long.toString(bytesCopied))
@@ -298,6 +300,11 @@ public class FSRepository implements S3Repository {
                             S3Constants.X_AMZ_DECODED_CONTENT_LENGTH, Long.toString(bytesCopied));
                 }
 
+            } catch (S3ServerException e) {
+                // A verification failure (chunk signature, invalid digest, ...) is a client error.
+                // Remove any partially written object before rethrowing.
+                cleanupObject(p);
+                throw e;
             } catch (IOException | NoSuchAlgorithmException | JAXBException e) {
                 logger.error("internal error", e);
                 throw new InternalErrorException(objectKey, callContext.getRequestId());
@@ -311,16 +318,64 @@ public class FSRepository implements S3Repository {
 
     }
 
-    private boolean isChunked(S3CallContext callContext) {
+    private void cleanupObject(FSPaths p) {
         try {
-            return callContext.getHeader().getAuthorization().startsWith("AWS4");
-        } catch (NullPointerException e){
-            return false;
+            Files.deleteIfExists(p.objectData);
+            Files.deleteIfExists(p.objectMeta);
+        } catch (IOException e) {
+            logger.warn("could not clean up object data", e);
         }
+    }
+
+    /**
+     * The signature of the request itself (seed of the chunk signature chain).
+     * The request signature has been verified before this method is reached.
+     */
+    private static String chunkSeedSignature(S3CallContext callContext) {
+        return new AwsSignatureVersion4().getSignature(callContext);
+    }
+
+    private static SigV4ChunkVerifier buildChunkVerifier(S3CallContext callContext) {
+        AwsSignatureVersion4 sig = new AwsSignatureVersion4();
+        String date = sig.getDate(callContext);
+        String region = sig.getRegion(callContext);
+        String xamzDate = callContext.getHeader().getXamzDate();
+        byte[] signingKey = SigV4.signingKey(callContext.getUser().getSecretKey(), date, region, "s3");
+        String scope = date + "/" + region + "/s3/aws4_request";
+        return new SigV4ChunkVerifier(xamzDate, scope, signingKey, callContext.getUri(), callContext.getRequestId());
     }
 
     private String inQuotes(String etag) {
         return "\"" + etag + "\"";
+    }
+
+    /**
+     * Applies the S3 response header overrides, i.e. the signed query parameters
+     * {@code response-content-type}, {@code response-content-disposition},
+     * {@code response-content-encoding}, {@code response-content-language},
+     * {@code response-cache-control} and {@code response-expires} (typical together
+     * with presigned URLs).
+     */
+    private static void applyResponseOverrides(S3ResponseHeaderImpl header, S3CallContext callContext) {
+        Map<String, String> params = callContext.getParams().getAllParams();
+        String v;
+        if ((v = SigV4.headerIgnoreCase(params, "response-content-type")) != null)
+            header.setContentType(v);
+        if ((v = SigV4.headerIgnoreCase(params, "response-content-disposition")) != null)
+            header.setContentDisposition(v);
+        if ((v = SigV4.headerIgnoreCase(params, "response-content-encoding")) != null)
+            header.setContentEncoding(v);
+        if ((v = SigV4.headerIgnoreCase(params, "response-content-language")) != null)
+            header.setContentLanguage(v);
+        if ((v = SigV4.headerIgnoreCase(params, "response-cache-control")) != null)
+            header.setCacheControl(v);
+        if ((v = SigV4.headerIgnoreCase(params, "response-expires")) != null) {
+            try {
+                header.setExpires(Long.parseLong(v.trim()));
+            } catch (NumberFormatException e) {
+                // ignore invalid value, keep the server-default
+            }
+        }
     }
 
 
@@ -337,8 +392,9 @@ public class FSRepository implements S3Repository {
         }
 
         try {
-            S3ResponseHeader header = new S3ResponseHeaderImpl();
+            S3ResponseHeaderImpl header = new S3ResponseHeaderImpl();
             header.setContentType(getMimeType(p.objectData));
+            applyResponseOverrides(header, callContext);
             callContext.setResponseHeader(header);
             if (!head)
                 callContext.setContent(fileEncryptor.getDecryptedInputStream(p.objectData));
@@ -588,7 +644,7 @@ public class FSRepository implements S3Repository {
         try (OutputStream out = Files.newOutputStream(userFile)) {
             Marshaller m = jaxbContext.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            m.marshal(new FSUserData(ImmutableMap.of("rHUYeAk58Ilhg6iUEFtr",
+            m.marshal(new FSUserData(Map.of("rHUYeAk58Ilhg6iUEFtr",
                     new FSUser(SYSTEM_DEFAULT_USER,
                             SYSTEM_DEFAULT_USER,
                             "rHUYeAk58Ilhg6iUEFtr",

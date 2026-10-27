@@ -4,9 +4,9 @@
 
 package de.mc.ladon.s3server.entities.impl;
 
-import com.google.common.base.Splitter;
 import de.mc.ladon.s3server.entities.api.S3ACLGrantee;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +26,13 @@ public class S3ACLGranteeImpl implements S3ACLGrantee {
 
     public S3ACLGranteeImpl(String headerString) {
         if (headerString != null) {
-            List<String> elements = Splitter.on(",").omitEmptyStrings().trimResults().splitToList(headerString);
+            List<String> elements = new ArrayList<>();
+            for (String element : headerString.split(",")) {
+                String trimmed = element.trim();
+                if (!trimmed.isEmpty()) {
+                    elements.add(trimmed);
+                }
+            }
             email = elements.stream()
                     .filter(e -> e.startsWith(ADDRESS_PREFIX))
                     .map(f -> f.substring(ADDRESS_PREFIX.length() + EQUAL_GAP)).collect(Collectors.toList());

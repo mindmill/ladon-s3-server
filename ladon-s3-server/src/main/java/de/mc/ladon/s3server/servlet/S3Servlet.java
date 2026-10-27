@@ -4,7 +4,6 @@
 
 package de.mc.ladon.s3server.servlet;
 
-import com.google.common.base.Charsets;
 import de.mc.ladon.s3server.auth.Authorization;
 import de.mc.ladon.s3server.common.Validator;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
@@ -31,6 +30,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Objects;
 
 import static de.mc.ladon.s3server.jaxb.mapper.ResponseWrapper.*;
 
@@ -63,7 +65,8 @@ public class S3Servlet extends HttpServlet {
         headobject,
         headbucket,
         deletebucket,
-        deleteobject
+        deleteobject,
+        deleteobjects
     }
 
 
@@ -74,6 +77,8 @@ public class S3Servlet extends HttpServlet {
                     Bucket.class,
                     Contents.class,
                     DeleteMarker.class,
+                    Delete.class,
+                    DeleteResult.class,
                     AbstractVersionElement.class,
                     Version.class,
                     CreateBucketConfiguration.class,
@@ -179,6 +184,9 @@ public class S3Servlet extends HttpServlet {
                                 repository.deleteObject(context, bucketName, objectkey);
                                 resp.setStatus(HttpURLConnection.HTTP_NO_CONTENT);
                                 break;
+                            case deleteobjects:
+                                writeXmlResponse(deleteObjects(req, context, bucketName), resp, HttpServletResponse.SC_OK);
+                                break;
                         }
                     } catch (JAXBException e) {
                         logger.error("error processing xml " + requestId.get(), e);
@@ -211,9 +219,44 @@ public class S3Servlet extends HttpServlet {
         resp.setContentType("application/xml");
         resp.setStatus(status);
         //  resp.setDateHeader("Expires", System.currentTimeMillis() + 60000);
-        resp.setCharacterEncoding(Charsets.UTF_8.displayName());
+        resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
         getMarshaller().marshal(content, resp.getOutputStream());
         resp.flushBuffer();
+    }
+
+    /**
+     * Bulk delete of objects ({@code POST /bucket?delete}). Each key is deleted individually;
+     * per-key failures are reported in the {@code DeleteResult} (like S3 with HTTP 200).
+     */
+    private DeleteResult deleteObjects(HttpServletRequest req, S3CallContext context, String bucketName) throws IOException {
+        List<String> keys;
+        try (InputStream in = req.getInputStream()) {
+            Delete delete = (Delete) getUnmarshaller().unmarshal(in);
+            if (delete == null || delete.getObjects() == null || delete.getObjects().isEmpty()) {
+                throw new InvalidArgumentException(bucketName, context.getRequestId());
+            }
+            keys = delete.getObjects().stream()
+                    .map(Delete.DeleteObject::getKey)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .toList();
+            if (keys.isEmpty()) {
+                throw new InvalidArgumentException(bucketName, context.getRequestId());
+            }
+        } catch (JAXBException e) {
+            throw new MalformedXMLException(bucketName, context.getRequestId());
+        }
+
+        DeleteResult result = new DeleteResult();
+        for (String key : keys) {
+            try {
+                repository.deleteObject(context, bucketName, key);
+                result.getDeleted().add(new DeleteResult.Deleted(key));
+            } catch (S3ServerException e) {
+                result.getErrors().add(new DeleteResult.DeleteError(key, e.getCode(), e.getMessage()));
+            }
+        }
+        return result;
     }
 
 
@@ -271,7 +314,11 @@ public class S3Servlet extends HttpServlet {
         String bucket = getBucketName(req);
         String objectKey = getObjectKey(req);
         if (bucket != null) {
-            dispatch(S3Call.postobject, req, resp, bucket, objectKey);
+            if (req.getParameter("delete") != null) {
+                dispatch(S3Call.deleteobjects, req, resp, bucket, null);
+            } else {
+                dispatch(S3Call.postobject, req, resp, bucket, objectKey);
+            }
         }
 
     }

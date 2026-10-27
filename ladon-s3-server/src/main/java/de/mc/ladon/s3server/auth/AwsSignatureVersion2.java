@@ -4,25 +4,25 @@
 
 package de.mc.ladon.s3server.auth;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.BaseEncoding;
 import de.mc.ladon.s3server.entities.api.S3CallContext;
-import de.mc.ladon.s3server.exceptions.InternalErrorException;
 import de.mc.ladon.s3server.exceptions.InvalidSecurityException;
-import de.mc.ladon.s3server.exceptions.S3ServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Helper class for aws signature v2
+ * Helper class for AWS Signature Version 2.
+ *
+ * <p>SigV2 is a legacy scheme (deprecated by AWS) but is still accepted by this server for
+ * backwards compatibility with older clients. See "Signature calculations for the
+ * Authorization header (AWS Signature Version 2)" in the Amazon S3 Developer Guide for the
+ * StringToSign format used here (see {@link RestUtils#makeS3CanonicalString}).</p>
  */
 public class AwsSignatureVersion2 {
 
@@ -30,27 +30,23 @@ public class AwsSignatureVersion2 {
     public static final String HMAC_SHA_1 = "HmacSHA1";
     public static final Pattern AWS_AUTH_PATTERN = Pattern.compile("AWS ([^:]+):(.*)");
 
-    public String computeV2(S3CallContext callContext, String pathPrefix) throws S3ServerException {
-
-        String canonicalString = RestUtils.makeS3CanonicalString(callContext, null);
-        SecretKeySpec keySpec = new SecretKeySpec(callContext.getUser().getSecretKey().getBytes(), HMAC_SHA_1);
-
+    /**
+     * Computes the SigV2 signature (base64 HMAC-SHA1) for the given request.
+     *
+     * @param expires when non-null, used instead of the Date header (presigned URL)
+     */
+    public static String computeV2(S3CallContext callContext, String expires) {
+        String canonicalString = RestUtils.makeS3CanonicalString(callContext, expires);
+        byte[] key = callContext.getUser().getSecretKey().getBytes(StandardCharsets.UTF_8);
         try {
             Mac mac = Mac.getInstance(HMAC_SHA_1);
-            mac.init(keySpec);
-            byte[] result = mac.doFinal(canonicalString.getBytes(Charsets.UTF_8.name()));
-            return BaseEncoding.base64().encode(result);
-        } catch (UnsupportedEncodingException e) {
-            // UTF8 should be supported
-            logger.error("utf-8 not supported", e);
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("sha1 not found", e);
-        } catch (InvalidKeyException e) {
-            logger.error("invalid key", e);
+            mac.init(new SecretKeySpec(key, HMAC_SHA_1));
+            return Base64.getEncoder().encodeToString(mac.doFinal(canonicalString.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception e) {
+            logger.error("sigv2 not available", e);
         }
-        throw new InvalidSecurityException(pathPrefix, callContext.getRequestId());
+        throw new InvalidSecurityException(callContext.getUri(), callContext.getRequestId());
     }
-
 
     public String getSignature(S3CallContext callContext) {
         Matcher m = AWS_AUTH_PATTERN.matcher(callContext.getHeader().getAuthorization());

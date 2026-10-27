@@ -25,13 +25,20 @@ public class ResponseWrapper {
     }
 
     public static ListBucketResult listBucketResult(S3CallContext callContext, S3ListBucketResult list) {
-        return new ListBucketResult(callContext, list.getBucketName(),
-                list.getObjects().stream().map(o -> new Contents(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
+        List<Contents> contentsList = list.getObjects().stream().map(o -> new Contents(new Owner(o.getOwner().getUserId(), o.getOwner().getUserName()),
                         getEncoded(callContext, o.getKey()), o.getLastModified(), o.getETag(), o.getSize(), o.getStorageClass()))
-                        .collect(Collectors.toList()),
+                .collect(Collectors.toList());
+        String continuationToken = callContext.getParams().getContinuationToken();
+        // ListObjectsV2 (list-type=2) carries pagination via continuation tokens.
+        String nextContinuationToken = callContext.getParams().isListObjectsV2() && list.isTruncated()
+                ? list.nextKeyMarker() : null;
+        return new ListBucketResult(callContext, list.getBucketName(), contentsList,
                 list.getCommonPrefixes() != null ? list.getCommonPrefixes().stream()
                         .map(CommonPrefixes::new).collect(Collectors.toList())  : null,
-                list.isTruncated());
+                list.isTruncated(),
+                contentsList.size(),
+                continuationToken,
+                nextContinuationToken);
     }
 
     public static CopyObjectResult copyObjectResult(S3Object copiedObject) {
