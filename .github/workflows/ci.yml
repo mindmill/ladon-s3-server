@@ -1,0 +1,28 @@
+# Build and test the whole Ladon S3 build on every push and pull request.
+#
+# The reactor covers all modules (core, fs, boot, osgi-starter, jetty) including
+# the OSGi functional test (real Apache Felix framework) which runs as a normal
+# Maven test in the `ladon-s3-server-osgi-starter` module.
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and test with Maven
+        run: mvn -B -ntp clean verify
