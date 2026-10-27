@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>de.mindconsulting</groupId>
+    <artifactId>ladon-s3-server-vfs</artifactId>
+    <version>2.6.0</version>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>5.1.2</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>de.mc.ladon.s3server.repository.vfs</Export-Package>
+                        <Bundle-Name>Mind Consulting :: Ladon S3 Server :: Virtual File System Repository</Bundle-Name>
+                        <Bundle-Description>${project.description}</Bundle-Description>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-Vendor>Mind Consulting UG</Bundle-Vendor>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+        </plugins>
+    </build>
+    <packaging>bundle</packaging>
+
+    <name>ladon-s3-server-vfs</name>
+    <description>virtual file system implementation with content addressing, versioning, deduplication and garbage collection</description>
+
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>de.mindconsulting</groupId>
+            <artifactId>ladon-s3-server</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+            <version>8.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>mind</id>
+            <name>Mind</name>
+            <url>${repo.internal.url}</url>
+        </repository>
+    </distributionManagement>
+
+</project>
