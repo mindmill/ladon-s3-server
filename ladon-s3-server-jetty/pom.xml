@@ -17,8 +17,7 @@
     <description>Ladon S3 Jetty Example</description>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <java.version>17</java.version>
         <jetty.version>12.1.14</jetty.version>
     </properties>
     <dependencies>

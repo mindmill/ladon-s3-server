@@ -14,15 +14,14 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.2</version>
+        <version>4.1.2</version>
         <relativePath/>
     </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <s3-server.version>${project.version}</s3-server.version>
-        <dockerfile-maven-version>1.4.12</dockerfile-maven-version>
         <spring.boot.version>4.0.2</spring.boot.version>
     </properties>
 
